@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Workspace>
+  <ConfigDictionary>
+    
+  <CurrentConfigs><Project>game/Debug</Project></CurrentConfigs></ConfigDictionary>
+  <Desktop>
+    <Static>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>363</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
+      </Workspace>
+    <Build><ColumnWidth0>16</ColumnWidth0><ColumnWidth1>1152</ColumnWidth1><ColumnWidth2>307</ColumnWidth2><ColumnWidth3>76</ColumnWidth3></Build><TerminalIO/><Debug-Log><ColumnWidth0>16</ColumnWidth0><ColumnWidth1>1646</ColumnWidth1></Debug-Log></Static>
+    <Windows>
+      
+    <Wnd2>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-2071-9080</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>game</ExpandedNode><ExpandedNode>game/CMSIS</ExpandedNode><ExpandedNode>game/QP-Debug</ExpandedNode><ExpandedNode>game/Source</ExpandedNode><ExpandedNode>game/TexasInstruments</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd2><Wnd3><Tabs><Tab><Identity>TabID-18340-9185</Identity><TabName>Build</TabName><Factory>Build</Factory><Session/></Tab><Tab><Identity>TabID-7479-21949</Identity><TabName>Debug Log</TabName><Factory>Debug-Log</Factory><Session/></Tab></Tabs><SelectedTab>0</SelectedTab></Wnd3></Windows>
+    <Editor>
+      
+      
+      
+      
+    <Pane/><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-012501e0><key>iaridepm.enu1</key></Toolbar-012501e0></Sizes></Row0></Top><Left><Row0><Sizes><Wnd2><Rect><Top>-2</Top><Left>-2</Left><Bottom>563</Bottom><Right>437</Right><x>-2</x><y>-2</y><xscreen>208</xscreen><yscreen>156</yscreen><sizeHorzCX>124476</sizeHorzCX><sizeHorzCY>176471</sizeHorzCY><sizeVertCX>262717</sizeVertCX><sizeVertCY>639140</sizeVertCY></Rect></Wnd2></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd3><Rect><Top>-2</Top><Left>-2</Left><Bottom>276</Bottom><Right>1673</Right><x>-2</x><y>-2</y><xscreen>1675</xscreen><yscreen>278</yscreen><sizeHorzCX>1002394</sizeHorzCX><sizeHorzCY>314480</sizeHorzCY><sizeVertCX>124476</sizeVertCX><sizeVertCY>176471</sizeVertCY></Rect></Wnd3></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Workspace>
+
+
