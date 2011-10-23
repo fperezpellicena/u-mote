@@ -1,0 +1,140 @@
+
+--- Module:   ..\..\qs\source\qs.c (C)
+                         _
+uint8_t QS_glbFilter_[32];                              /* global QS filter */
+..\..\qs\source\qs.c  38  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                 _
+uint8_t *QS_ring_;               /* pointer to the start of the ring buffer */
+..\..\qs\source\qs.c  41  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+             _
+QSCtr QS_end_;                      /* offset of the end of the ring buffer */
+..\..\qs\source\qs.c  42  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+              _
+QSCtr QS_head_;               /* offset to where next byte will be inserted */
+..\..\qs\source\qs.c  43  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+              _
+QSCtr QS_tail_;              /* offset of where next byte will be extracted */
+..\..\qs\source\qs.c  44  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+              _
+QSCtr QS_used_;             /* number of bytes currently in the ring buffer */
+..\..\qs\source\qs.c  45  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+               _
+uint8_t QS_seq_;                              /* the record sequence number */
+..\..\qs\source\qs.c  46  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                  _
+uint8_t QS_chksum_;                   /* the checksum of the current record */
+..\..\qs\source\qs.c  47  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                _
+uint8_t QS_full_;                    /* the ring buffer is temporarily full */
+..\..\qs\source\qs.c  48  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                                                 _
+char const Q_ROM * Q_ROM_VAR QS_getVersion(void) {
+..\..\qs\source\qs.c  52  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                                          _
+        (char)(((QP_VERSION >>  4U) & 0xFU) + (uint8_t)'0'),
+..\..\qs\source\qs.c  58  Info 778: Constant expression evaluates to 0 in
+    operation '&'
+                                                 _
+void QS_initBuf(uint8_t sto[], uint32_t stoSize) {
+..\..\qs\source\qs.c  65  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                              _
+void QS_filterOn(uint8_t rec) {
+..\..\qs\source\qs.c  70  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                               _
+void QS_filterOff(uint8_t rec) {
+..\..\qs\source\qs.c  82  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+                           _
+void QS_begin(uint8_t rec) {
+..\..\qs\source\qs.c  94  Info 793: ANSI/ISO limit of 6 'significant characters
+    in an external identifier' exceeded -- processing is unaffected
+
+--- Module:   ..\..\qs\source\qs_.c (C)
+                     _
+void const *QS_smObj_;                    /* local state machine QEP filter */
+..\..\qs\source\qs_.c  37  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                     _
+void const *QS_aoObj_;                     /* local active object QF filter */
+..\..\qs\source\qs_.c  38  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                     _
+void const *QS_mpObj_;                        /* local event pool QF filter */
+..\..\qs\source\qs_.c  39  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                     _
+void const *QS_eqObj_;                         /* local raw queue QF filter */
+..\..\qs\source\qs_.c  40  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                     _
+void const *QS_teObj_;                        /* local time event QF filter */
+..\..\qs\source\qs_.c  41  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                     _
+void const *QS_apObj_;                   /* local object Application filter */
+..\..\qs\source\qs_.c  42  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                              _
+QSTimeCtr volatile QS_tickCtr_;   /* tick counter for the QS_QF_TICK record */
+..\..\qs\source\qs_.c  44  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                         _
+void QS_u16_(uint16_t d) {
+..\..\qs\source\qs_.c  51  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                         _
+void QS_u32_(uint32_t d) {
+..\..\qs\source\qs_.c  57  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                            _
+void QS_str_(char const *s) {
+..\..\qs\source\qs_.c  68  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+                                                 _
+void QS_str_ROM_(char const Q_ROM * Q_ROM_VAR s) {
+..\..\qs\source\qs_.c  79  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+
+--- Module:   ..\..\qs\source\qs_blk.c (C)
+                                              _
+uint8_t const *QS_getBlock(uint16_t *pNbytes) {
+..\..\qs\source\qs_blk.c  38  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+
+--- Module:   ..\..\qs\source\qs_byte.c (C)
+                          _
+uint16_t QS_getByte(void) {
+..\..\qs\source\qs_byte.c  37  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+
+--- Module:   ..\..\qs\source\qs_f32.c (C)
+
+--- Module:   ..\..\qs\source\qs_f64.c (C)
+
+--- Module:   ..\..\qs\source\qs_mem.c (C)
+
+--- Module:   ..\..\qs\source\qs_str.c (C)
+                                                _
+void QS_str_ROM(char const Q_ROM * Q_ROM_VAR s) {
+..\..\qs\source\qs_str.c  50  Info 793: ANSI/ISO limit of 6 'significant
+    characters in an external identifier' exceeded -- processing is unaffected
+
+--- Module:   ..\..\qs\source\qs_u64.c (C)
+
+--- Global Wrap-up
+
+Note 974: Worst case function for stack usage: 'QS_f64' is finite, requires 24
+    bytes total stack in calling 'no function'. See +stack for a full report.
+    [MISRA 2004 Rule 16.2, required]

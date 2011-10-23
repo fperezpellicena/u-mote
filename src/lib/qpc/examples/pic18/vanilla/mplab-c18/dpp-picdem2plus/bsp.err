@@ -1,0 +1,2 @@
+Warning[2060] C:\software\qpc\examples\pic18\vanilla\mplab-c18\dpp-picdem2plus\bsp.c 36 : shift expression has no effect
+Message[3002] C:\software\qpc\examples\pic18\vanilla\mplab-c18\dpp-picdem2plus\bsp.c 61 : comparison of a signed integer to an unsigned integer detected
