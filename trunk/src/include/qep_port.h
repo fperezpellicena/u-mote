@@ -42,6 +42,14 @@ typedef unsigned char   uint8_t;
 typedef unsigned int    uint16_t;
 typedef unsigned long   uint32_t;
 
+/* Custom typedef to fit 64 bit variables */
+typedef struct uint64_t uint64_t;
+
+struct uint64_t {
+    uint32_t low;
+    uint32_t high;
+};
+
 
 #include "qep.h"               /* QEP platform-independent public interface */
 
