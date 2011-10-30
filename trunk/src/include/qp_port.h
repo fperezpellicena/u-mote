@@ -31,4 +31,6 @@
 #include "qf_port.h"          /* includes qep_port.h and qk_port.h, if used */
 #include "qassert.h"
 
+#define BAUD_RATE          9600U
+
 #endif                                                         /* qp_port_h */
