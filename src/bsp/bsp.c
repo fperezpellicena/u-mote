@@ -1,67 +1,68 @@
 /*****************************************************************************
-* BSP for PICDEM 2 PLUS with PIC18F452
-* Last Updated for Version: 4.0.01
-* Date of the Last Update:  Aug 13, 2008
-*
-*                    Q u a n t u m     L e a P s
-*                    ---------------------------
-*                    innovating embedded systems
-*
-* Copyright (C) 2002-2008 Quantum Leaps, LLC. All rights reserved.
-*
-* This software may be distributed and modified under the terms of the GNU
-* General Public License version 2 (GPL) as published by the Free Software
-* Foundation and appearing in the file GPL.TXT included in the packaging of
-* this file. Please note that GPL Section 2[b] requires that all works based
-* on this software must also be made publicly available under the terms of
-* the GPL ("Copyleft").
-*
-* Alternatively, this software may be distributed and modified under the
-* terms of Quantum Leaps commercial licenses, which expressly supersede
-* the GPL and are specifically designed for licensees interested in
-* retaining the proprietary status of their code.
-*
-* Contact information:
-* Quantum Leaps Web site:  http://www.quantum-leaps.com
-* e-mail:                  info@quantum-leaps.com
-*****************************************************************************/
+ * BSP for PICDEM PIC18 with PIC18F46J50 PIM
+ * Last Updated for Version: 4.0.01
+ * Date of the Last Update:  Aug 13, 2008
+ *
+ *                    Q u a n t u m     L e a P s
+ *                    ---------------------------
+ *                    innovating embedded systems
+ *
+ * Copyright (C) 2002-2008 Quantum Leaps, LLC. All rights reserved.
+ *
+ * This software may be distributed and modified under the terms of the GNU
+ * General Public License version 2 (GPL) as published by the Free Software
+ * Foundation and appearing in the file GPL.TXT included in the packaging of
+ * this file. Please note that GPL Section 2[b] requires that all works based
+ * on this software must also be made publicly available under the terms of
+ * the GPL ("Copyleft").
+ *
+ * Alternatively, this software may be distributed and modified under the
+ * terms of Quantum Leaps commercial licenses, which expressly supersede
+ * the GPL and are specifically designed for licensees interested in
+ * retaining the proprietary status of their code.
+ *
+ * Contact information:
+ * Quantum Leaps Web site:  http://www.quantum-leaps.com
+ * e-mail:                  info@quantum-leaps.com
+ *****************************************************************************/
 #include "qp_port.h"
-
 #include "bsp.h"
 
 Q_DEFINE_THIS_FILE
 
-/* Local objects -----------------------------------------------------------*/
-uint8_t const l_led[] = {
-    (1 << 0),                             /* LED RB0 on PICDEM 2 PLUS board */
-    (1 << 1),                             /* LED RB1 on PICDEM 2 PLUS board */
-    (1 << 2),                             /* LED RB2 on PICDEM 2 PLUS board */
-    (1 << 3),                             /* LED RB3 on PICDEM 2 PLUS board */
-    0                                                   /* non-existent LED */
-};
-
-#define LED_ON(n_)        (LATB |= l_led[n_])
-#define LED_OFF(n_)       (LATB &= ~l_led[n_])
-
-#ifdef Q_SPY
-
-    enum AppRecords {                 /* application-specific trace records */
-        PHILO_STAT = QS_USER
-    };
-
-#endif
-
 /*..........................................................................*/
 void BSP_init(void) {
-    TRISB = 0;                  /* data direction for Port B (LEDs): output */
-    LATB  = 0;                                       /* extinguish all LEDs */
-
-    RCONbits.IPEN = 1;                            /* enable priority levels */
+    TRISE = 0;					/* data direction for Port E (LEDs): output */
+    LATE = 0;
+	
+    RCONbits.IPEN = 1; 							/* enable priority levels */
 
     if (QS_INIT((void *)0) == 0) {    /* initialize the QS software tracing */
         Q_ERROR();
     }
 }
+
+/*..........................................................................*/
+void Interrupts_enable() {
+    INTCONbits.GIE = 1;
+}
+
+/*..........................................................................*/
+void Timer0_init() {
+    OpenTimer0(TIMER_INT_ON & T0_SOURCE_INT & T0_16BIT & T0_PS_1_32);
+}
+
+/*..........................................................................*/
+void Usart1_init() {
+    Open1USART(USART_TX_INT_OFF & USART_RX_INT_OFF & USART_ASYNCH_MODE &
+            USART_EIGHT_BIT & USART_CONT_RX, 25);
+}
+
+/*..........................................................................*/
+void Usart1_write(uint8_t byte) {
+    Write1USART(byte);
+}
+
 /*..........................................................................*/
 void QF_onStartup(void) {                 /* entered with interrupts locked */
     TMR1H = 0;
@@ -112,7 +113,6 @@ void Q_onAssert(char const Q_ROM * const Q_ROM_VAR file, int line) {
 #ifdef Q_SPY
 
 #define QS_BUF_SIZE        252U
-#define BAUD_RATE          19200U
 
 QSTimeCtr BSP_tickTime;
 

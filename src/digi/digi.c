@@ -12,23 +12,18 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "qp_port.h"
-#include "bsp.h"
+
 #include "digi.h"
 
-#pragma udata xbee_section
-XBee xbee;
-#pragma udata
 
-void main() {
-    BSP_init();
-    //Timer0_init();
-    //Usart1_init();
-    //Interrupts_enable();
-    QF_init();
-    QF_run();  
-    while (1);
+/* Default constructor */
+void createXBee(XBee* xbee) {
+
+}
+
+uint8_t getApiFormat(XBee* const xbee) {
+    return xbee->apiFormat;
 }

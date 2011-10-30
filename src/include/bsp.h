@@ -28,10 +28,12 @@
 #ifndef bsp_h
 #define bsp_h
 
-#include <p18f46j50.h>               /* SFR declarations for PIC18F452 device */
+#include <p18f46j50.h>           /* SFR declarations for PIC18F46J50 device */
+#include <usart.h>                                        	/* UART library */
+#include <timers.h>										/* Timers library */
 
                                                 /* The Oscillator frequency */
-#define BSP_FOSC_HZ          4000000UL
+#define BSP_FOSC_HZ          12000000UL
 
 /*--------------------------------------------------------------------------*/
                                                /* the system tick rate [Hz] */
@@ -39,11 +41,18 @@
 
 void BSP_init(void);
 
-#define BSP_busyDelay()      ((void)0)
-
 #ifdef Q_SPY
     extern QSTimeCtr BSP_tickTime;
 #endif
+
+void Interrupts_enable(void);
+
+void Timer0_init(void);
+
+void Usart1_init(void);
+
+void Usart1_write(uint8_t byte);
+
 
 #endif                                                             /* bsp_h */
 
