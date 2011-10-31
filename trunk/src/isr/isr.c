@@ -1,66 +1,28 @@
-/*****************************************************************************
- * Interrupts for PIC18
- * Last Updated for Version: 4.0.01
- * Date of the Last Update:  Aug 13, 2008
+/**
+ * This file is part of uMote.
  *
- *                    Q u a n t u m     L e a P s
- *                    ---------------------------
- *                    innovating embedded systems
+ *  uMote is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- * Copyright (C) 2002-2008 Quantum Leaps, LLC. All rights reserved.
+ *  uMote is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * This software may be distributed and modified under the terms of the GNU
- * General Public License version 2 (GPL) as published by the Free Software
- * Foundation and appearing in the file GPL.TXT included in the packaging of
- * this file. Please note that GPL Section 2[b] requires that all works based
- * on this software must also be made publicly available under the terms of
- * the GPL ("Copyleft").
- *
- * Alternatively, this software may be distributed and modified under the
- * terms of Quantum Leaps commercial licenses, which expressly supersede
- * the GPL and are specifically designed for licensees interested in
- * retaining the proprietary status of their code.
- *
- * Contact information:
- * Quantum Leaps Web site:  http://www.quantum-leaps.com
- * e-mail:                  info@quantum-leaps.com
- *****************************************************************************/
+ *  You should have received a copy of the GNU General Public License
+ *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "qp_port.h"
 #include "bsp.h"
-
-#define BSP_TMR1_HZ          32768UL
-#define SYSTEM_TICK_TOUT     (0x10000 - BSP_TMR1_HZ/BSP_TICKS_PER_SEC)
 
 /*..........................................................................*/
 #pragma interrupt ISR_hi
 
 void ISR_hi(void) {
-    if (PIR1bits.TMR1IF) {                               /* TMR1 interrupt? */
-        PIR1bits.TMR1IF = 0;                   /* clear TMR1 interrupt flag */
-
-                                          /* program TMR1 for the next tick */
-        TMR1H = (uint8_t)(SYSTEM_TICK_TOUT >> 8);
-        TMR1L = (uint8_t)(SYSTEM_TICK_TOUT);
-        // Usa el latch para registrar la salida
-        LATEbits.LATE1 = ~LATEbits.LATE1;
-        // Escribe un carácter por la UART1
-        Usart1_write('a');
-
-        QF_tick();                    /* handle all armed time events in QF */
-    }
-#ifdef Q_SPY
-    else if (INTCONbits.TMR0IF) {                       /* Timer0 overflow? */
-
-        INTCONbits.TMR0IF = 0;             /* clear the TMR0 interrupt flag */
-        BSP_tickTime += (QSTimeCtr)0x10000;    /* account for TMR0 overflow */
-
-    }
-#endif
-    /*
-    else if (...) {                          // handle other interrupt sources
-        . . .
-    }
-    */
+    
 }
 /*..........................................................................*/
 #pragma code intVector_hi = 0x08

@@ -18,17 +18,25 @@
 #include "qp_port.h"
 #include "bsp.h"
 #include "digi.h"
+#include "hw_serial.h"
+#include "digi_proxy.h"
 
-#pragma udata xbee_section
 XBee xbee;
-#pragma udata
+Serial serial;
+AtCommand atCommand;
 
 void main() {
     BSP_init();
-    //Timer0_init();
-    //Usart1_init();
-    //Interrupts_enable();
-    QF_init();
-    QF_run();  
+    Timer0_init();
+    Usart1_init();
+    Interrupts_enable();
+
+    XBee_create(&xbee);
+    Serial_create(&serial, XBEE_SERIAL, XBEE_BAUD_RATE);
+    Serial_init(&serial);
+   
+
+    XBeeProxy_sendAtCommand(&atCommand);
+
     while (1);
 }

@@ -33,4 +33,7 @@
 
 #define BAUD_RATE          9600U
 
+#define XBEE_BAUD_RATE     9600U                /* Serial port used by XBee */
+#define XBEE_SERIAL        1                    /* Serial port used by XBee */
+
 #endif                                                         /* qp_port_h */
