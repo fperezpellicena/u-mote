@@ -15,6 +15,9 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef digi_api_h
+#define digi_api_h
+
 #include "qep_port.h"
 
 /*..........................................................................*/
@@ -22,6 +25,7 @@
 /* CONSTANTS */
 /*..........................................................................*/
 #define START_DELIMITER                         0x7E
+#define MAC_ADDRESS_BYTES_LENGTH                0x08
 /*..........................................................................*/
 #define TRANSMIT_REQUEST_RESERVED_H             0xFF
 #define TRANSMIT_REQUEST_RESERVED_L             0xFE
@@ -72,8 +76,8 @@ typedef struct AtCommand AtCommand;
 
 struct AtCommand {
     uint8_t frameId; /* Frame id */
-    uint8_t atCommand[2]; /* AT Command */
-    uint8_t atCommandValue[97]; /* Command value(optional)*/
+    uint8_t command[2]; /* AT Command */
+    uint8_t value[97]; /* Command value(optional)*/
 };
 
 /*..........................................................................*/
@@ -118,7 +122,7 @@ struct RemoteAtCommand {
     uint8_t destinationAddress[8]; /* 64 bit destination address */
     uint8_t reserved[2];
     uint8_t options; /* Remote command options */
-    uint8_t atCommand[2]; /* AT command */
+    uint8_t command[2]; /* AT command */
     uint8_t parameter; /* Command parameter */
 };
 
@@ -129,9 +133,9 @@ typedef struct AtCommandResponse AtCommandResponse;
 
 struct AtCommandResponse {
     uint8_t frameId; /* Frame id */
-    uint8_t atCommand[2]; /* AT command */
+    uint8_t command[2]; /* AT command */
     uint8_t status; /* Command status */
-    uint8_t atCommandValue[97]; /* Command value(optional)*/
+    uint8_t value[97]; /* Command value(optional)*/
 };
 
 /*..........................................................................*/
@@ -176,7 +180,7 @@ typedef struct ExplicitRxIndicator ExplicitRxIndicator;
 
 struct ExplicitRxIndicator {
     uint8_t frameId; /* Frame id */
-    uint8_t destinationAddress[8]; /* 64 bit destination address */
+    uint8_t sourceAddress[8]; /* 64 bit source address */
     uint8_t reserved[2];
     uint8_t sourceEndpoint; /* Source endpoint for the transmission */
     uint8_t destinationEndpoint; /* Destination endpoint for the transmission */
@@ -195,9 +199,9 @@ struct RemoteCommandResponse {
     uint8_t frameId; /* Frame id */
     uint8_t sourceAddress[8]; /* 64 bit source(remote) address */
     uint8_t reserved[2];
-    uint8_t atCommand[2]; /* AT command */
+    uint8_t command[2]; /* AT command */
     uint8_t status; /* AT command status */
-    uint8_t atCommandValue[97]; /* Command data */
+    uint8_t value[97]; /* Command data */
 };
 
 /*..........................................................................*/
@@ -222,3 +226,25 @@ struct XBeePacket {
     uint16_t length; /* Number of bytes between the length and the checksum */
     uint8_t checksum; /* Checksum calculated as FF - sum(fields)*/
 };
+
+/*..........................................................................*/
+
+/* TX METHODS */
+
+void XBee_CreateATCommandPacket(XBeePacket* packet, uint8_t frameId,
+	uint8_t* command,uint8_t* params, uint8_t length);
+
+void XBee_CreateTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
+	uint8_t* destinationAddress, uint8_t radious, uint8_t options,
+	uint8_t* payload, uint8_t length);
+
+void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
+	uint8_t* destinationAddress, uint8_t sourceEndpoint,
+        uint8_t destinationEndpoint, uint8_t clusterId, uint8_t profileId,
+        uint8_t radious, uint8_t options,uint8_t* payload, uint8_t length);
+
+void XBee_CreateRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
+	uint8_t* command, uint8_t param, uint8_t* destinationAddress,
+        uint8_t options);
+
+#endif

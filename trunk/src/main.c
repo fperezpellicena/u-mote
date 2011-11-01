@@ -20,10 +20,14 @@
 #include "digi.h"
 #include "hw_serial.h"
 #include "digi_proxy.h"
+#include "digi_api.h"
+
 
 XBee xbee;
 Serial serial;
-AtCommand atCommand;
+#pragma udata packet
+XBeePacket packet;
+#pragma udata
 
 void main() {
     BSP_init();
@@ -36,7 +40,7 @@ void main() {
     Serial_init(&serial);
    
 
-    XBeeProxy_sendAtCommand(&atCommand);
+    XBee_CreateATCommandPacket(&packet, 0x01, "ND", "", 0x02);
 
     while (1);
 }
