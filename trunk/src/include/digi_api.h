@@ -63,6 +63,7 @@ enum XBeePacketFrameType {
     EXPLICIT_ADDRESSING = 0x11,
     REMOTE_AT_COMMAND = 0x17,
     AT_COMMAND_RESPONSE = 0x88,
+    MODEM_STATUS = 0x8A,
     TRANSMIT_STATUS = 0x8B,
     RECEIVE_PACKET = 0x90,
     EXPLICIT_RX_INDICATOR = 0x91,
@@ -246,5 +247,23 @@ void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 void XBee_CreateRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
 	uint8_t* command, uint8_t param, uint8_t* destinationAddress,
         uint8_t options);
+
+/*..........................................................................*/
+
+/* RX METHODS */
+boolean XBee_ReadAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
+		uint8_t** command, uint8_t* status, uint8_t* value);
+
+boolean XBee_ReadModemStatusPacket(XBeePacket* packet, uint8_t* status);
+
+boolean XBee_ReadTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
+        uint8_t* retryCount, uint8_t* deliveryStatus, uint8_t* discoveryStatus);
+
+boolean XBee_ReadReceivePacket(XBeePacket* packet, uint8_t* frameId,
+        uint8_t** sourceAddress, uint8_t* options, uint8_t** payload,
+        uint8_t* length);
+
+boolean XBee_ReadRemoteCommandResponsePacket(XBeePacket* packet,uint8_t* frameId,
+        uint8_t** sourceAddress,uint8_t** command, uint8_t* status, uint8_t* value);
 
 #endif
