@@ -50,6 +50,14 @@ struct uint64_t {
     uint32_t high;
 };
 
+/* Pseudo boolean */
+typedef uint8_t boolean;
+
+/* Boolean true */
+#define false   0x00
+/* Boolean false */
+#define true    0x01
+
 
 #include "qep.h"               /* QEP platform-independent public interface */
 
