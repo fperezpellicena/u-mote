@@ -106,8 +106,8 @@ struct ExplicitAddressing {
     uint8_t reserved[2];
     uint8_t sourceEndpoint; /* Source endpoint for the transmission */
     uint8_t destinationEndpoint; /* Destination endpoint for the transmission */
-    uint8_t clusterId; /* Cluster ID used in the transmission */
-    uint8_t profileId; /* Profile ID used in the transmission */
+    uint8_t clusterId[2]; /* Cluster ID used in the transmission */
+    uint8_t profileId[2]; /* Profile ID used in the transmission */
     uint8_t bcastRadious; /* Broadcast radious */
     uint8_t options; /* Transmit options */
     uint8_t payload[97]; /* Data sent to the destination device */
@@ -241,7 +241,7 @@ void XBee_CreateTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
 
 void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 	uint8_t* destinationAddress, uint8_t sourceEndpoint,
-        uint8_t destinationEndpoint, uint8_t clusterId, uint8_t profileId,
+        uint8_t destinationEndpoint, uint8_t* clusterId, uint8_t* profileId,
         uint8_t radious, uint8_t options,uint8_t* payload, uint8_t length);
 
 void XBee_CreateRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,

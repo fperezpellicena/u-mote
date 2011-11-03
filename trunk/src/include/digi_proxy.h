@@ -31,7 +31,13 @@
 //
 //void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
 
-void XBeeProxy_sendAtCommand(AtCommand* const atCommand);
+boolean XBeeProxy_sendAtCommand(XBeePacket* packet, uint8_t length);
+
+boolean XBeeProxy_sendTransmitRequest(XBeePacket* packet, uint8_t length);
+
+boolean XBeeProxy_sendExplicitAddressing(XBeePacket* packet, uint8_t length);
+
+boolean XBeeProxy_sendRemoteAtCommand(XBeePacket* packet, uint8_t length);
 
 
 #endif     /* digi_proxy_h*/

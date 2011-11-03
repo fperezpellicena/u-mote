@@ -17,7 +17,8 @@
 
 #include "digi_api.h"
 
-//FIXME Revisar las longitudes de los paquetes recibidos
+// FIXME Revisar las longitudes de los paquetes recibidos
+// FIXME Revisar los tipos pointer to pointer (**)
 /*..........................................................................*/
 
 /* TX METHODS */
@@ -62,7 +63,7 @@ void XBee_CreateTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
 
 void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* destinationAddress, uint8_t sourceEndpoint,
-		uint8_t destinationEndpoint, uint8_t clusterId, uint8_t profileId,
+		uint8_t destinationEndpoint, uint8_t* clusterId, uint8_t* profileId,
 		uint8_t radious, uint8_t options, uint8_t* payload, uint8_t length) {
 	uint8_t* p = packet->frame.explicitAddressing.destinationAddress;
 	uint8_t i = 0;
@@ -78,8 +79,12 @@ void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 	*p++ = TRANSMIT_REQUEST_RESERVED_L;
 	packet->frame.explicitAddressing.sourceEndpoint = sourceEndpoint;
 	packet->frame.explicitAddressing.destinationEndpoint = destinationEndpoint;
-	packet->frame.explicitAddressing.clusterId = clusterId;
-	packet->frame.explicitAddressing.profileId = profileId;
+	p = packet->frame.explicitAddressing.clusterId;
+	*p++ = *clusterId++;
+	*p++ = *clusterId++;
+	p = packet->frame.explicitAddressing.profileId;
+	*p++ = *profileId++;
+	*p++ = *profileId++;
 	packet->frame.explicitAddressing.bcastRadious = radious;
 	packet->frame.explicitAddressing.options = options;
 	packet->apiId = TRANSMIT_REQUEST;
