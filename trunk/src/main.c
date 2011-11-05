@@ -40,7 +40,7 @@ void main() {
     Serial_init(&serial);
    
 
-    XBee_CreateATCommandPacket(&packet, 0x01, "ND", "", 0x02);
+     XBee_CreateATCommandPacket(&packet, 0x01, "ND", "", 0x02);
 
     while (1);
 }

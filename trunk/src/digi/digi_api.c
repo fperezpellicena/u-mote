@@ -16,9 +16,34 @@
  */
 
 #include "digi_api.h"
+#include <string.h>
 
 // FIXME Revisar las longitudes de los paquetes recibidos
 // FIXME Revisar los tipos pointer to pointer (**)
+
+
+/*..........................................................................*/
+
+/* UTIL METHODS */
+
+void XBee_resetPacket(XBeePacket * const packet) {
+	packet->dataPtr = (uint8_t*) packet;
+	packet->checksum = 0;
+	packet->rxState = XBEE_PACKET_RX_START;
+	packet->length = 0;
+	packet->index = 0;
+	packet->apiId = 0;
+	memset(packet->frame.payload, 0, 100);
+}
+
+uint8_t XBee_escape(uint8_t value) {
+	if (value == START_DELIMITER || value == XON
+			|| value == XOFF || value == ESCAPE) {
+		return value ^ 0x20;
+	}
+	return value;
+}
+
 /*..........................................................................*/
 
 /* TX METHODS */

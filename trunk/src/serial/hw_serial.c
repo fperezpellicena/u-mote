@@ -16,12 +16,42 @@
  */
 
 #include "hw_serial.h"
+#include <usart.h>
 
 void Serial_create(Serial* const serial, uint8_t uart, uint8_t baudrate) {
+	serial->baudrate = baudrate;
+	serial->uart = uart;
 }
 
 void Serial_init(Serial* const serial) {
+	if(serial->uart == 1) {
+		Open1USART(serial->config, serial->baudrate);
+	} else {
+		Open2USART(serial->config, serial->baudrate);
+	}
 }
 
-void Serial_send(uint8_t value) {
+void Serial_send(Serial* const serial, uint8_t value) {
+	if(serial->uart == 1) {
+		Write1USART(value);
+	} else {
+		Write2USART(value);
+	}
+}
+
+uint8_t Serial_read(Serial* const serial) {
+	if(serial->uart == 1) {
+		return Read1USART();
+	} else {
+		return Read2USART();
+	}
+}
+
+boolean Serial_available(Serial* const serial) {
+	if(serial->uart == 1 && DataRdy1USART()) {
+		return true;
+	} else if(serial->uart == 2 && DataRdy2USART()){
+		return true;
+	}
+	return false;
 }

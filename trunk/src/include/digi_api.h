@@ -27,6 +27,12 @@
 #define START_DELIMITER                         0x7E
 #define MAC_ADDRESS_BYTES_LENGTH                0x08
 /*..........................................................................*/
+#define MAX_PACKET_SIZE                         0x64
+/*..........................................................................*/
+#define XON                                     0x11
+#define XOFF                                    0x13
+#define ESCAPE                                  0x7D
+/*..........................................................................*/
 #define TRANSMIT_REQUEST_RESERVED_H             0xFF
 #define TRANSMIT_REQUEST_RESERVED_L             0xFE
 /*..........................................................................*/
@@ -68,6 +74,15 @@ enum XBeePacketFrameType {
     RECEIVE_PACKET = 0x90,
     EXPLICIT_RX_INDICATOR = 0x91,
     REMOTE_COMMAND_RESPONSE = 0x97
+};
+
+/* RX STATES */
+enum XBeePacketRxState {
+    XBEE_PACKET_RX_START = 0,
+    XBEE_PACKET_RX_LENGTH_1 = 1,
+    XBEE_PACKET_RX_LENGTH_2 = 2,
+    XBEE_PACKET_RX_PAYLOAD = 3,
+    XBEE_PACKET_RX_CRC = 4
 };
 
 /*..........................................................................*/
@@ -213,6 +228,7 @@ typedef struct XBeePacket XBeePacket;
 struct XBeePacket {
     uint8_t apiId; /* Frame type identifier */
     union {
+        uint8_t payload[100];
         AtCommand atCommand;
         TransmitRequest transmitRequest;
 	ExplicitAddressing explicitAddressing;
@@ -226,7 +242,15 @@ struct XBeePacket {
     }frame;
     uint16_t length; /* Number of bytes between the length and the checksum */
     uint8_t checksum; /* Checksum calculated as FF - sum(fields)*/
+    uint8_t rxState; /* Reception state */
+    uint8_t *dataPtr; /* Ponter to structure itself */
+    uint8_t index;
 };
+
+/*..........................................................................*/
+/* UTIL METHODS */
+
+void XBeeProxy_resetPacket(XBeePacket * const packet);
 
 /*..........................................................................*/
 

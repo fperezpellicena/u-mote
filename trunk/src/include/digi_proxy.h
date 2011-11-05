@@ -22,22 +22,28 @@
 #include "digi_api.h"
 #include "hw_serial.h"
 
-//typedef struct XBeeProxy XBeeProxy;
-//
-//struct XBeeProxy {
-//    Serial* serial; /* Hardware physical interface */
-//    XBee* xbee; /* Xbee firmware configuration */
-//};
-//
-//void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
+typedef struct XBeeProxy XBeeProxy;
 
-boolean XBeeProxy_sendAtCommand(XBeePacket* packet, uint8_t length);
+struct XBeeProxy {
+    Serial* serial; /* Hardware physical interface */
+    XBee* xbee; /* Xbee firmware configuration */
+};
 
-boolean XBeeProxy_sendTransmitRequest(XBeePacket* packet, uint8_t length);
+void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
 
-boolean XBeeProxy_sendExplicitAddressing(XBeePacket* packet, uint8_t length);
+boolean XBeeProxy_readPacket(XBeeProxy* const proxy, XBeePacket* const packet);
 
-boolean XBeeProxy_sendRemoteAtCommand(XBeePacket* packet, uint8_t length);
+boolean XBeeProxy_sendAtCommand(XBeeProxy* const proxy, XBeePacket* const packet,
+        uint8_t length);
+
+boolean XBeeProxy_sendTransmitRequest(XBeeProxy* const proxy, XBeePacket* const packet,
+        uint8_t length);
+
+boolean XBeeProxy_sendExplicitAddressing(XBeeProxy* const proxy, XBeePacket* const packet,
+        uint8_t length);
+
+boolean XBeeProxy_sendRemoteAtCommand(XBeeProxy* const proxy, XBeePacket* const packet,
+        uint8_t length);
 
 
 #endif     /* digi_proxy_h*/
