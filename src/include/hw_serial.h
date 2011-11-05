@@ -32,6 +32,10 @@ void Serial_create(Serial* const serial, uint8_t uart, uint8_t baudrate);
 
 void Serial_init(Serial* const serial);
 
-void Serial_send(uint8_t value);
+void Serial_send(Serial* const serial, uint8_t value);
+
+uint8_t Serial_read(Serial* const serial);
+
+boolean Serial_available();
 
 #endif          /* hw_serial_h */
