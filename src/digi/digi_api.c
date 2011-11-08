@@ -33,7 +33,7 @@ void XBee_resetPacket(XBeePacket * const packet) {
 	packet->length = 0;
 	packet->index = 0;
 	packet->apiId = 0;
-	memset(packet->frame.payload, 0, 100);
+	memset(packet->frame.payload, 0, 100); //FIXME Magic number
 }
 
 uint8_t XBee_escape(uint8_t value) {
