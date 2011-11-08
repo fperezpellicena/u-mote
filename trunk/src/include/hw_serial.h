@@ -36,6 +36,6 @@ void Serial_send(Serial* const serial, uint8_t value);
 
 uint8_t Serial_read(Serial* const serial);
 
-boolean Serial_available();
+boolean Serial_available(Serial* const serial);
 
 #endif          /* hw_serial_h */

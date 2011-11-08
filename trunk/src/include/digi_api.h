@@ -250,7 +250,7 @@ struct XBeePacket {
 /*..........................................................................*/
 /* UTIL METHODS */
 
-void XBeeProxy_resetPacket(XBeePacket * const packet);
+void XBee_resetPacket(XBeePacket * const packet);
 
 /*..........................................................................*/
 

@@ -17,6 +17,7 @@
 
 #include "digi_proxy.h"
 
+//FIXME Esta api no termina de ser clara
 void XBeeProxy_create(XBeeProxy * const proxy, Serial * const serial, XBee * const xbee) {
 	proxy->serial = serial;
 	proxy->xbee = xbee;
