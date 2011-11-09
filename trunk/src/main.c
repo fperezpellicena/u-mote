@@ -28,19 +28,26 @@ Serial serial;
 #pragma udata packet
 XBeePacket packet;
 #pragma udata
+XBeeProxy proxy;
+uint8_t atCommand[3] = "ND";
 
 void main() {
     BSP_init();
-    Timer0_init();
-    Usart1_init();
-    Interrupts_enable();
+   // Timer0_init();
+   
+    //Interrupts_enable();
 
     XBee_create(&xbee);
-    Serial_create(&serial, XBEE_SERIAL, XBEE_BAUD_RATE);
+    Serial_create(&serial, XBEE_SERIAL, DEFAULT_UART_CONFIG, 25);
     Serial_init(&serial);
-   
 
-     XBee_CreateATCommandPacket(&packet, 0x01, "ND", "", 0x02);
+	Serial_send(&serial, 'V');
+	Serial_send(&serial, 'P');
+	Serial_send(&serial, 'N');
+
+	XBee_createATCommandPacket(&packet, 'B', atCommand);
+	XBeeProxy_create(&proxy, &serial, &xbee);
+	//XBeeProxy_sendAtCommand(&proxy, &packet, 2);
 
     while (1);
 }

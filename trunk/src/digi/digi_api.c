@@ -48,31 +48,42 @@ uint8_t XBee_escape(uint8_t value) {
 
 /* TX METHODS */
 
-void XBee_CreateATCommandPacket(XBeePacket* packet, uint8_t frameId,
-		uint8_t* command, uint8_t* params, uint8_t length) {
+void XBee_createCompleteATCommandPacket(XBeePacket* packet, uint8_t frameId,
+		uint8_t* command, uint8_t* params, uint8_t paramsLength) {
 	uint8_t* p = packet->frame.atCommand.command;
 	*p++ = *command++;
 	*p++ = *command;
 	p = packet->frame.atCommand.value;
-	while (length--) {
+	while (paramsLength--) {
 		*p++ = *params++;
 	}
 	packet->apiId = AT_COMMAND;
 	packet->frame.atCommand.frameId = frameId;
+	packet->length = AT_COMMAND_MINLENGTH + paramsLength;
+}
+
+void XBee_createATCommandPacket(XBeePacket* packet, uint8_t frameId,
+		uint8_t* command) {
+	uint8_t* p = packet->frame.atCommand.command;
+	*p++ = *command++;
+	*p++ = *command;
+	packet->apiId = AT_COMMAND;
+	packet->frame.atCommand.frameId = frameId;
+	packet->length = AT_COMMAND_MINLENGTH;
 }
 
 /*..........................................................................*/
 
-void XBee_CreateTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
+void XBee_createTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* destinationAddress, uint8_t radious, uint8_t options,
-		uint8_t* payload, uint8_t length) {
+		uint8_t* payload, uint8_t dataLength) {
 	uint8_t* p = packet->frame.transmitRequest.destinationAddress;
 	uint8_t i = 0;
 	while (i < MAC_ADDRESS_BYTES_LENGTH) {
 		*p++ = *destinationAddress++;
 	}
 	p = packet->frame.transmitRequest.payload;
-	while (length--) {
+	while (dataLength--) {
 		*p++ = *payload++;
 	}
 	p = packet->frame.transmitRequest.reserved;
@@ -82,21 +93,22 @@ void XBee_CreateTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
 	packet->frame.transmitRequest.options = options;
 	packet->apiId = TRANSMIT_REQUEST;
 	packet->frame.transmitRequest.frameId = frameId;
+	packet->length = TRANSMIT_REQUEST_COMMAND_MINLENGTH + dataLength;
 }
 
 /*..........................................................................*/
 
-void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
+void XBee_createExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* destinationAddress, uint8_t sourceEndpoint,
 		uint8_t destinationEndpoint, uint8_t* clusterId, uint8_t* profileId,
-		uint8_t radious, uint8_t options, uint8_t* payload, uint8_t length) {
+		uint8_t radious, uint8_t options, uint8_t* payload, uint8_t dataLength) {
 	uint8_t* p = packet->frame.explicitAddressing.destinationAddress;
 	uint8_t i = 0;
 	while (i < MAC_ADDRESS_BYTES_LENGTH) {
 		*p++ = *destinationAddress++;
 	}
 	p = packet->frame.explicitAddressing.payload;
-	while (length--) {
+	while (dataLength--) {
 		*p++ = *payload++;
 	}
 	p = packet->frame.explicitAddressing.reserved;
@@ -114,11 +126,12 @@ void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 	packet->frame.explicitAddressing.options = options;
 	packet->apiId = TRANSMIT_REQUEST;
 	packet->frame.explicitAddressing.frameId = frameId;
+	packet->length = EXPLICIT_ADDRESS_COMMAND_MINLENGTH + dataLength;
 }
 
 /*..........................................................................*/
 
-void XBee_CreateRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
+void XBee_createRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* command, uint8_t param, uint8_t* destinationAddress,
 		uint8_t options) {
 	uint8_t i = 0;
@@ -136,13 +149,14 @@ void XBee_CreateRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
 	packet->frame.remoteAtCommand.options = options;
 	packet->apiId = AT_COMMAND;
 	packet->frame.remoteAtCommand.frameId = frameId;
+	packet->length = REMOTE_AT_COMMAND_MINLENGTH;
 }
 
 
 /*..........................................................................*/
 
 /* RX METHODS */
-boolean XBee_ReadAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
 		uint8_t** command, uint8_t* status, uint8_t* value) {
 	uint8_t* p;
 	if (packet->apiId != AT_COMMAND_RESPONSE) {
@@ -175,7 +189,7 @@ boolean XBee_ReadAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
 
 /*..........................................................................*/
 
-boolean XBee_ReadModemStatusPacket(XBeePacket* packet, uint8_t* status) {
+boolean XBee_readModemStatusPacket(XBeePacket* packet, uint8_t* status) {
 	uint8_t* p;
 	if (packet->apiId != MODEM_STATUS) {
 		return false;
@@ -191,7 +205,7 @@ boolean XBee_ReadModemStatusPacket(XBeePacket* packet, uint8_t* status) {
 
 /*..........................................................................*/
 
-boolean XBee_ReadTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
 		uint8_t* retryCount, uint8_t* deliveryStatus, uint8_t* discoveryStatus) {
 	uint8_t* p;
 	if (packet->apiId != TRANSMIT_STATUS) {
@@ -217,7 +231,7 @@ boolean XBee_ReadTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
 
 /*..........................................................................*/
 
-boolean XBee_ReadReceivePacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readReceivePacket(XBeePacket* packet, uint8_t* frameId,
 		uint8_t** sourceAddress, uint8_t* options, uint8_t** payload,
 		uint8_t* length) {
 	uint8_t* p;
@@ -244,7 +258,7 @@ boolean XBee_ReadReceivePacket(XBeePacket* packet, uint8_t* frameId,
 
 /*..........................................................................*/
 
-boolean XBee_ReadRemoteCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readRemoteCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
 		uint8_t** sourceAddress, uint8_t** command, uint8_t* status, uint8_t* value) {
 	uint8_t* p;
 	if (packet->apiId != REMOTE_COMMAND_RESPONSE) {
