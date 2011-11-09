@@ -68,18 +68,17 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
 	return true;
 }
 
-static boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet,
-		uint8_t size) {
+static boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
 	uint8_t* p = (uint8_t*) packet;
 	Serial_send(proxy->serial, START_DELIMITER);
 	// send the most significant bit
-	Serial_send(proxy->serial, (size >> 8) & 0xFF);
+	Serial_send(proxy->serial, (packet->length >> 8) & 0xFF);
 	// then the LSB
-	Serial_send(proxy->serial, size & 0xFF);
+	Serial_send(proxy->serial, packet->length & 0xFF);
 	// just in case it hasn't been initialized.
 	packet->checksum = 0;
 	//Generalizando para cualquier paquete
-	while (size--) {
+	while (packet->length--) {
 		Serial_send(proxy->serial, *p);
 		packet->checksum += *p++;
 	}
@@ -88,41 +87,33 @@ static boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const 
 }
 
 boolean XBeeProxy_sendAtCommand(XBeeProxy * const proxy,
-		XBeePacket * const packet, uint8_t length) {
-	int size = 0;
+		XBeePacket * const packet) {
 	if (packet->apiId == AT_COMMAND || packet->apiId == AT_COMMAND_QUEUE) {
-		size = (length > 0) ? 8 : 4; // Asume que el comando se aplica
-		return XBeeProxy_sendPacket(proxy, packet, size);
+		return XBeeProxy_sendPacket(proxy, packet);
 	}
 	return false;
 }
 
 boolean XBeeProxy_sendTransmitRequest(XBeeProxy * const proxy,
-		XBeePacket * const packet, uint8_t length) {
-	int size = length;
+		XBeePacket * const packet) {
 	if (packet->apiId == TRANSMIT_REQUEST) {
-		size += 14;
-		return XBeeProxy_sendPacket(proxy, packet, size);
+		return XBeeProxy_sendPacket(proxy, packet);
 	}
 	return false;
 }
 
 boolean XBeeProxy_sendExplicitAddressing(XBeeProxy * const proxy,
-		XBeePacket * const packet, uint8_t length) {
-	int size = length;
+		XBeePacket * const packet) {
 	if (packet->apiId == EXPLICIT_ADDRESSING) {
-		size += 20;
-		return XBeeProxy_sendPacket(proxy, packet, size);
+		return XBeeProxy_sendPacket(proxy, packet);
 	}
 	return false;
 }
 
 boolean XBeeProxy_sendRemoteAtCommand(XBeeProxy * const proxy,
-		XBeePacket * const packet, uint8_t length) {
-	int size = length;
+		XBeePacket * const packet) {
 	if (packet->apiId == REMOTE_AT_COMMAND) {
-		size += 16;
-		return XBeeProxy_sendPacket(proxy, packet, size);
+		return XBeeProxy_sendPacket(proxy, packet);
 	}
 	return false;
 }

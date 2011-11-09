@@ -33,17 +33,13 @@ void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const 
 
 boolean XBeeProxy_readPacket(XBeeProxy* const proxy, XBeePacket* const packet);
 
-boolean XBeeProxy_sendAtCommand(XBeeProxy* const proxy, XBeePacket* const packet,
-        uint8_t length);
+boolean XBeeProxy_sendAtCommand(XBeeProxy* const proxy, XBeePacket* const packet);
 
-boolean XBeeProxy_sendTransmitRequest(XBeeProxy* const proxy, XBeePacket* const packet,
-        uint8_t length);
+boolean XBeeProxy_sendTransmitRequest(XBeeProxy* const proxy, XBeePacket* const packet);
 
-boolean XBeeProxy_sendExplicitAddressing(XBeeProxy* const proxy, XBeePacket* const packet,
-        uint8_t length);
+boolean XBeeProxy_sendExplicitAddressing(XBeeProxy* const proxy, XBeePacket* const packet);
 
-boolean XBeeProxy_sendRemoteAtCommand(XBeeProxy* const proxy, XBeePacket* const packet,
-        uint8_t length);
+boolean XBeeProxy_sendRemoteAtCommand(XBeeProxy* const proxy, XBeePacket* const packet);
 
 
 #endif     /* digi_proxy_h*/

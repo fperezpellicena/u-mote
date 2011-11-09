@@ -27,6 +27,13 @@
                                                   /* Oscillator frequency */
 #define BSP_FOSC_HZ          12000000UL
 
+#define DEFAULT_UART_CONFIG USART_TX_INT_OFF	& \
+                            USART_RX_INT_ON	& \
+                            USART_ASYNCH_MODE	& \
+                            USART_EIGHT_BIT	& \
+                            USART_CONT_RX	& \
+                            USART_BRGH_HIGH
+
 /*--------------------------------------------------------------------------*/
                                                /* the system tick rate [Hz] */
 #define BSP_TICKS_PER_SEC    20UL

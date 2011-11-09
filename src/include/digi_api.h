@@ -28,6 +28,10 @@
 #define MAC_ADDRESS_BYTES_LENGTH                0x08
 /*..........................................................................*/
 #define MAX_PACKET_SIZE                         0x64
+#define AT_COMMAND_MINLENGTH                    0x04
+#define TRANSMIT_REQUEST_COMMAND_MINLENGTH      0x0E
+#define EXPLICIT_ADDRESS_COMMAND_MINLENGTH      0x14
+#define REMOTE_AT_COMMAND_MINLENGTH             0x10
 /*..........................................................................*/
 #define XON                                     0x11
 #define XOFF                                    0x13
@@ -256,38 +260,41 @@ void XBee_resetPacket(XBeePacket * const packet);
 
 /* TX METHODS */
 
-void XBee_CreateATCommandPacket(XBeePacket* packet, uint8_t frameId,
-	uint8_t* command,uint8_t* params, uint8_t length);
+void XBee_createCompleteATCommandPacket(XBeePacket* packet, uint8_t frameId,
+	uint8_t* command,uint8_t* params, uint8_t paramsLength);
 
-void XBee_CreateTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
+void XBee_createATCommandPacket(XBeePacket* packet, uint8_t frameId,
+		uint8_t* command);
+
+void XBee_createTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
 	uint8_t* destinationAddress, uint8_t radious, uint8_t options,
-	uint8_t* payload, uint8_t length);
+	uint8_t* payload, uint8_t dataLength);
 
-void XBee_CreateExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
+void XBee_createExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 	uint8_t* destinationAddress, uint8_t sourceEndpoint,
         uint8_t destinationEndpoint, uint8_t* clusterId, uint8_t* profileId,
-        uint8_t radious, uint8_t options,uint8_t* payload, uint8_t length);
+        uint8_t radious, uint8_t options,uint8_t* payload, uint8_t dataLength);
 
-void XBee_CreateRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
+void XBee_createRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
 	uint8_t* command, uint8_t param, uint8_t* destinationAddress,
         uint8_t options);
 
 /*..........................................................................*/
 
 /* RX METHODS */
-boolean XBee_ReadAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
 		uint8_t** command, uint8_t* status, uint8_t* value);
 
-boolean XBee_ReadModemStatusPacket(XBeePacket* packet, uint8_t* status);
+boolean XBee_readModemStatusPacket(XBeePacket* packet, uint8_t* status);
 
-boolean XBee_ReadTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
         uint8_t* retryCount, uint8_t* deliveryStatus, uint8_t* discoveryStatus);
 
-boolean XBee_ReadReceivePacket(XBeePacket* packet, uint8_t* frameId,
+boolean XBee_readReceivePacket(XBeePacket* packet, uint8_t* frameId,
         uint8_t** sourceAddress, uint8_t* options, uint8_t** payload,
         uint8_t* length);
 
-boolean XBee_ReadRemoteCommandResponsePacket(XBeePacket* packet,uint8_t* frameId,
+boolean XBee_readRemoteCommandResponsePacket(XBeePacket* packet,uint8_t* frameId,
         uint8_t** sourceAddress,uint8_t** command, uint8_t* status, uint8_t* value);
 
 #endif
