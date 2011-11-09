@@ -17,7 +17,7 @@
 
 #include "digi_proxy.h"
 
-//FIXME Esta api no termina de ser clara
+
 void XBeeProxy_create(XBeeProxy * const proxy, Serial * const serial, XBee * const xbee) {
 	proxy->serial = serial;
 	proxy->xbee = xbee;
@@ -40,7 +40,8 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
 				break;
 			case XBEE_PACKET_RX_LENGTH_2:
 				packet->length += data;
-				if (packet->length > MAX_PACKET_SIZE) { // in case we somehow get some garbage
+				// in case we somehow get some garbage
+				if (packet->length > MAX_PACKET_SIZE) { 
 					packet->rxState = XBEE_PACKET_RX_START;
 					return false; //LENGTH Error
 				} else {
@@ -68,7 +69,7 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
 	return true;
 }
 
-static boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
+boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
 	uint8_t* p = (uint8_t*) packet;
 	Serial_send(proxy->serial, START_DELIMITER);
 	// send the most significant bit
@@ -84,36 +85,4 @@ static boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const 
 	}
 	Serial_send(proxy->serial, (0xFF - packet->checksum));
 	return true;
-}
-
-boolean XBeeProxy_sendAtCommand(XBeeProxy * const proxy,
-		XBeePacket * const packet) {
-	if (packet->apiId == AT_COMMAND || packet->apiId == AT_COMMAND_QUEUE) {
-		return XBeeProxy_sendPacket(proxy, packet);
-	}
-	return false;
-}
-
-boolean XBeeProxy_sendTransmitRequest(XBeeProxy * const proxy,
-		XBeePacket * const packet) {
-	if (packet->apiId == TRANSMIT_REQUEST) {
-		return XBeeProxy_sendPacket(proxy, packet);
-	}
-	return false;
-}
-
-boolean XBeeProxy_sendExplicitAddressing(XBeeProxy * const proxy,
-		XBeePacket * const packet) {
-	if (packet->apiId == EXPLICIT_ADDRESSING) {
-		return XBeeProxy_sendPacket(proxy, packet);
-	}
-	return false;
-}
-
-boolean XBeeProxy_sendRemoteAtCommand(XBeeProxy * const proxy,
-		XBeePacket * const packet) {
-	if (packet->apiId == REMOTE_AT_COMMAND) {
-		return XBeeProxy_sendPacket(proxy, packet);
-	}
-	return false;
 }
