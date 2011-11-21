@@ -15,32 +15,18 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_serial_h
-#define hw_serial_h
+#ifndef mote_h
+#define mote_h
 
-#include "qep_port.h"
+#include "digi_proxy.h"
 
-typedef struct Serial Serial;
+/* Mote class */
+typedef struct Mote Mote;
 
-struct Serial {
-    uint8_t uart; /* Serial port: 1 or 2*/
-    uint8_t baudrate; /* Baudrate */
-    uint8_t config; /* Mask config */
+struct Mote {
+    XBeeProxy* proxy;        /* Proxy to XBee */
 };
 
-void Serial_create(Serial * const serial, uint8_t uart, uint8_t config,
-        uint8_t baudrate);
+void Mote_create(Mote* mote, XBeeProxy* proxy);
 
-void Serial_init(Serial * const serial);
-
-void Serial_close(Serial * const serial);
-
-void Serial_send(Serial * const serial, uint8_t value);
-
-uint8_t Serial_read(Serial * const serial);
-
-boolean Serial_available(Serial * const serial);
-
-boolean Serial_busy(Serial * const serial);
-
-#endif          /* hw_serial_h */
+#endif  /* mote_h */

@@ -21,6 +21,7 @@
 #include <p18f46j50.h>         /* SFR declarations for PIC18F46J50 device */
 #include <usart.h>                                        /* UART library */
 #include <timers.h>                                     /* Timers library */
+#include <adc.h>                                           /* ADC library */
 
 #include "digi.h"                                         /* XBee library */
 
@@ -34,11 +35,28 @@
                             USART_CONT_RX	& \
                             USART_BRGH_HIGH
 
+#define DEFAULT_ADC_CONFIG  ADC_FOSC_32         & \
+                            ADC_RIGHT_JUST      & \
+                            ADC_1ANA
+
+#define DEFAULT_ADC_CONFIG2 ADC_CH0             & \
+                            ADC_INT_ON
+
 /*--------------------------------------------------------------------------*/
                                                /* the system tick rate [Hz] */
 #define BSP_TICKS_PER_SEC    20UL
 
+/*..........................................................................*/
+/* Init basic BSP */
 void BSP_init(void);
+
+/*..........................................................................*/
+/* Check for power-on reset */
+boolean BSP_powerOnReset(void);
+
+/*..........................................................................*/
+/* Reset power-on reset bit */
+void BSP_clearPowerOnReset(void);
 
 /*..........................................................................*/
                                             /* Low level hardware interface */
