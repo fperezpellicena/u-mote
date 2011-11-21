@@ -19,6 +19,7 @@
 #include "bsp.h"
 
 /*..........................................................................*/
+/* Init basic BSP */
 void BSP_init(void) {
     TRISE = 0;                  /* data direction for Port E (LEDs): output */
     LATE = 0;
@@ -27,17 +28,29 @@ void BSP_init(void) {
 }
 
 /*..........................................................................*/
-void Interrupts_enable() {
+/* Check for power-on reset */
+boolean BSP_powerOnReset(void) {
+	return WDTCONbits.DS == 1 ? true : false;
+}
+
+/*..........................................................................*/
+/* Reset power-on reset bit */
+void BSP_clearPowerOnReset(void) {
+	WDTCONbits.DS = 0;
+}
+
+/*..........................................................................*/
+void Interrupts_enable(void) {
     INTCONbits.GIE = 1;
 }
 
 /*..........................................................................*/
-void Timer0_init() {
+void Timer0_init(void) {
     OpenTimer0(TIMER_INT_ON & T0_SOURCE_INT & T0_16BIT & T0_PS_1_32);
 }
 
 /*..........................................................................*/
-void Usart1_init() {
+void Usart1_init(void) {
     Open1USART(USART_TX_INT_OFF & USART_RX_INT_OFF & USART_ASYNCH_MODE &
             USART_EIGHT_BIT & USART_CONT_RX, 25);
 }

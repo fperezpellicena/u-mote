@@ -15,32 +15,27 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_serial_h
-#define hw_serial_h
+#ifndef hw_adc_h
+#define hw_adc_h
 
 #include "qep_port.h"
 
-typedef struct Serial Serial;
 
-struct Serial {
-    uint8_t uart; /* Serial port: 1 or 2*/
-    uint8_t baudrate; /* Baudrate */
-    uint8_t config; /* Mask config */
-};
+#ifndef AVERAGE_FACTOR
+    #define AVERAGE_FACTOR  16
+    #define DIV_AVERAGE     4
+#endif
 
-void Serial_create(Serial * const serial, uint8_t uart, uint8_t config,
-        uint8_t baudrate);
+void Adc_init(uint8_t config, uint8_t config2, uint8_t channel);
 
-void Serial_init(Serial * const serial);
+void Adc_close();
 
-void Serial_close(Serial * const serial);
+void Adc_startConversion();
 
-void Serial_send(Serial * const serial, uint8_t value);
+uint16_t Adc_readValue();
 
-uint8_t Serial_read(Serial * const serial);
+uint16_t Adc_getValue();
 
-boolean Serial_available(Serial * const serial);
+uint16_t Adc_getAveragedValue();
 
-boolean Serial_busy(Serial * const serial);
-
-#endif          /* hw_serial_h */
+#endif  /* hw_adc_h*/

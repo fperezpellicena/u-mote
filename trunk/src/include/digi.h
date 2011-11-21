@@ -100,4 +100,4 @@ struct XBee {
 /* Default constructor */
 void XBee_create(XBee* xbee);
 
-#endif /* digi_h */
+#endif  /* digi_h */

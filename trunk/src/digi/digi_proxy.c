@@ -17,12 +17,35 @@
 
 #include "digi_proxy.h"
 
-
+/*..........................................................................*/
+/* XBee proxy constructor */
 void XBeeProxy_create(XBeeProxy * const proxy, Serial * const serial, XBee * const xbee) {
 	proxy->serial = serial;
 	proxy->xbee = xbee;
 }
 
+/*..........................................................................*/
+/* Send XBee packet */
+boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
+	uint8_t* p = (uint8_t*) packet;
+	Serial_send(proxy->serial, START_DELIMITER);
+	// send the most significant bit
+	Serial_send(proxy->serial, (packet->length >> 8) & 0xFF);
+	// then the LSB
+	Serial_send(proxy->serial, packet->length & 0xFF);
+	// just in case it hasn't been initialized.
+	packet->checksum = 0;
+	//Generalizando para cualquier paquete
+	while (packet->length--) {
+		Serial_send(proxy->serial, *p);
+		packet->checksum += *p++;
+	}
+	Serial_send(proxy->serial, (0xFF - packet->checksum));
+	return true;
+}
+
+/*..........................................................................*/
+/* Read XBee packet(generalized)*/
 boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
 	uint8_t data;
 	XBee_resetPacket(packet);
@@ -69,20 +92,9 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
 	return true;
 }
 
-boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
-	uint8_t* p = (uint8_t*) packet;
-	Serial_send(proxy->serial, START_DELIMITER);
-	// send the most significant bit
-	Serial_send(proxy->serial, (packet->length >> 8) & 0xFF);
-	// then the LSB
-	Serial_send(proxy->serial, packet->length & 0xFF);
-	// just in case it hasn't been initialized.
-	packet->checksum = 0;
-	//Generalizando para cualquier paquete
-	while (packet->length--) {
-		Serial_send(proxy->serial, *p);
-		packet->checksum += *p++;
-	}
-	Serial_send(proxy->serial, (0xFF - packet->checksum));
-	return true;
+/*..........................................................................*/
+/* Read atCommandResponse */
+XBeeProxy_readAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
+		uint8_t** command, uint8_t* status, uint8_t* value) {
+
 }

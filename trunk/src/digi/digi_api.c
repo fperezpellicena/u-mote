@@ -51,16 +51,19 @@ uint8_t XBee_escape(uint8_t value) {
 void XBee_createCompleteATCommandPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* command, uint8_t* params, uint8_t paramsLength) {
 	uint8_t* p = packet->frame.atCommand.command;
+	uint8_t i = paramsLength;
 	*p++ = *command++;
 	*p++ = *command;
 	p = packet->frame.atCommand.value;
-	while (paramsLength--) {
+	while (i--) {
 		*p++ = *params++;
 	}
 	packet->apiId = AT_COMMAND;
 	packet->frame.atCommand.frameId = frameId;
 	packet->length = AT_COMMAND_MINLENGTH + paramsLength;
 }
+
+/*..........................................................................*/
 
 void XBee_createATCommandPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* command) {
@@ -78,12 +81,13 @@ void XBee_createTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* destinationAddress, uint8_t radious, uint8_t options,
 		uint8_t* payload, uint8_t dataLength) {
 	uint8_t* p = packet->frame.transmitRequest.destinationAddress;
-	uint8_t i = 0;
-	while (i < MAC_ADDRESS_BYTES_LENGTH) {
+	uint8_t i = MAC_ADDRESS_BYTES_LENGTH;
+	while (i--) {
 		*p++ = *destinationAddress++;
 	}
 	p = packet->frame.transmitRequest.payload;
-	while (dataLength--) {
+	i = dataLength;
+	while (i--) {
 		*p++ = *payload++;
 	}
 	p = packet->frame.transmitRequest.reserved;
@@ -103,12 +107,13 @@ void XBee_createExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t destinationEndpoint, uint8_t* clusterId, uint8_t* profileId,
 		uint8_t radious, uint8_t options, uint8_t* payload, uint8_t dataLength) {
 	uint8_t* p = packet->frame.explicitAddressing.destinationAddress;
-	uint8_t i = 0;
-	while (i < MAC_ADDRESS_BYTES_LENGTH) {
+	uint8_t i = MAC_ADDRESS_BYTES_LENGTH;
+	while (i--) {
 		*p++ = *destinationAddress++;
 	}
 	p = packet->frame.explicitAddressing.payload;
-	while (dataLength--) {
+	i = dataLength;
+	while (i--) {
 		*p++ = *payload++;
 	}
 	p = packet->frame.explicitAddressing.reserved;
@@ -134,12 +139,12 @@ void XBee_createExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
 void XBee_createRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
 		uint8_t* command, uint8_t param, uint8_t* destinationAddress,
 		uint8_t options) {
-	uint8_t i = 0;
 	uint8_t* p = packet->frame.remoteAtCommand.command;
+	uint8_t i = MAC_ADDRESS_BYTES_LENGTH;
 	*p++ = *command++;
 	*p++ = *command;
 	p = packet->frame.remoteAtCommand.destinationAddress;
-	while (i < MAC_ADDRESS_BYTES_LENGTH) {
+	while (i--) {
 		*p++ = *destinationAddress++;
 	}
 	p = packet->frame.explicitAddressing.reserved;
