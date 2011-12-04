@@ -1,0 +1,111 @@
+FILE		0x0	0	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"
+FN_START	0x0	25	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"	"_entry"	"external"	
+FN_END		0x4	27	
+FILE		0x0	0	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"
+FN_START	0x8	161	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"main"	"external"	
+CALL		0x8	161	"C:\MCC18\v3_39\src\pmc_common\DPSLP\IsResetFromDeepSleep.c"	"IsResetFromDeepSleep"	0
+ADJUST		0x12	163	1
+ADJUST		0x16	163	1
+CALL		0x18	163	"C:\MCC18\v3_39\src\pmc_common\DPSLP\ReadDSGPR.c"	"ReadDSGPR"	0
+ADJUST		0x1c	163	-2
+ADJUST		0x20	164	1
+ADJUST		0x24	164	1
+CALL		0x26	164	"C:\MCC18\v3_39\src\pmc_common\DPSLP\DeepSleepWakeUpSource.c"	"DeepSleepWakeUpSource"	0
+ADJUST		0x2a	164	-2
+CALL		0x38	168	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"SwitchInit"	0
+ADJUST		0x4c	173	1
+ADJUST		0x4e	173	1
+CALL		0x50	173	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0x52	173	-2
+ADJUST		0x5e	180	1
+ADJUST		0x60	180	1
+CALL		0x62	180	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0x64	180	-2
+ADJUST		0x6e	185	1
+ADJUST		0x70	185	1
+CALL		0x72	185	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0x74	185	-2
+ADJUST		0x7e	190	1
+ADJUST		0x80	190	1
+CALL		0x82	190	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0x84	190	-2
+ADJUST		0x8e	195	1
+ADJUST		0x90	195	1
+CALL		0x92	195	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0x94	195	-2
+ADJUST		0x9e	200	1
+ADJUST		0xa0	200	1
+CALL		0xa2	200	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0xa4	200	-2
+ADJUST		0xae	205	1
+ADJUST		0xb0	205	1
+CALL		0xb2	205	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0xb4	205	-2
+ADJUST		0xbe	210	1
+ADJUST		0xc0	210	1
+CALL		0xc2	210	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0xc4	210	-2
+ADJUST		0xce	215	1
+ADJUST		0xd0	215	1
+CALL		0xd2	215	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	0
+ADJUST		0xd4	215	-2
+CALL		0xd6	217	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"user_main"	0
+CALL		0xda	221	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"SwitchInit"	0
+CALL		0xdc	222	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"user_main"	0
+FN_END		0xe0	225	
+FN_START	0xe2	227	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"user_main"	"external"	
+ADJUST		0xe2	227	1
+ADJUST		0xec	227	5
+CALL		0xf6	233	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"GetKey"	0
+ADJUST		0x13a	245	1
+CALL		0x13e	245	"C:\MCC18\v3_39\src\pmc_common\PORTB\rb0open.c"	"OpenRB0INT"	0
+ADJUST		0x142	245	-1
+ADJUST		0x14c	249	1
+ADJUST		0x150	249	1
+CALL		0x154	249	"C:\MCC18\v3_39\src\pmc_common\DPSLP\GotoDeepSleep.c"	"GotoDeepSleep"	0
+ADJUST		0x158	249	-2
+ADJUST		0x15c	253	-6
+FN_END		0x162	253	
+FN_START	0x164	255	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"DebounceDelay"	"external"	
+ADJUST		0x164	255	1
+ADJUST		0x16e	255	2
+ADJUST		0x18a	259	-3
+FN_END		0x190	259	
+FN_START	0x192	263	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"GetKey"	"external"	
+FN_END		0x19a	271	
+FN_START	0x19c	275	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"SwitchInit"	"external"	
+FN_END		0x1a2	277	
+FN_START	0x1a4	279	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"Blink_LED"	"external"	
+ADJUST		0x1a4	279	1
+ADJUST		0x1ae	279	4
+ADJUST		0x22e	291	-5
+FN_END		0x234	291	
+FILE		0x0	0	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"
+FN_START	0x236	81	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"	"_do_cinit"	"external"	
+FN_END		0x2d2	184	
+FILE		0x0	0	"C:\MCC18\v3_39\src\pmc_common\DPSLP\DeepSleepWakeUpSource.c"
+FN_START	0x2d4	19	"C:\MCC18\v3_39\src\pmc_common\DPSLP\DeepSleepWakeUpSource.c"	"DeepSleepWakeUpSource"	"external"	
+FN_END		0x336	42	
+FN_START	0x338	40	"C:\MCC18\v3_39\src\pmc_common\DPSLP\DeepSleepWakeUpSource.c"	"__pa_0"	"static"	
+FN_END		0x340	40	
+FILE		0x0	0	"C:\MCC18\v3_39\src\pmc_common\DPSLP\GotoDeepSleep.c"
+FN_START	0x342	27	"C:\MCC18\v3_39\src\pmc_common\DPSLP\GotoDeepSleep.c"	"GotoDeepSleep"	"external"	
+FN_END		0x38c	52	
+FILE		0x0	0	"C:\MCC18\v3_39\src\pmc_common\PORTB\rb0open.c"
+FN_START	0x38e	102	"C:\MCC18\v3_39\src\pmc_common\PORTB\rb0open.c"	"OpenRB0INT"	"external"	
+FN_END		0x3d4	126	
+FILE		0x0	0	"C:\MCC18\v3_39\src\pmc_common\DPSLP\ReadDSGPR.c"
+FN_START	0x3d6	20	"C:\MCC18\v3_39\src\pmc_common\DPSLP\ReadDSGPR.c"	"ReadDSGPR"	"external"	
+FN_END		0x40c	26	
+FILE		0x0	0	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"
+FN_START	0x42e	34	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"	"_startup"	"external"	
+FN_END		0x446	51	
+FILE		0x0	0	"C:\MCC18\v3_39\src\pmc_common\DPSLP\IsResetFromDeepSleep.c"
+FN_START	0x448	24	"C:\MCC18\v3_39\src\pmc_common\DPSLP\IsResetFromDeepSleep.c"	"IsResetFromDeepSleep"	"external"	
+FN_END		0x450	34	
+FILE		0x0	0	"C:\MCC18\v3_39\src\pmc_common\DPSLP\ULPWakeUpEnable.c"
+FN_START	0x452	25	"C:\MCC18\v3_39\src\pmc_common\DPSLP\ULPWakeUpEnable.c"	"ULPWakeUpEnable"	"external"	
+FN_END		0x458	33	
+FILE		0x0	0	"C:\MCC18\v3_39\src\extended\stdclib\__init.c"
+FN_START	0x45a	9	"C:\MCC18\v3_39\src\extended\stdclib\__init.c"	"__init"	"external"	
+FN_END		0x45a	9	
