@@ -49,4 +49,5 @@ void Service_initMote(Mote* mote, Serial* serial, XBee* xbee, XBeeProxy* proxy) 
 
 	/* Create Mote */
 	Mote_create(mote, proxy);
+
 }
