@@ -244,4 +244,5 @@ void deepSleep(void) {
 	INTCONbits.GIE = 0;
 	DSCONHbits.DSEN = 1;
 	Sleep();
+	Nop();
 }

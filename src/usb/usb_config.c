@@ -3,7 +3,7 @@
                                                                                 
 Software License Agreement                                                      
                                                                                 
-Copyright © 2007-2008 Microchip Technology Inc.  All rights reserved.           
+Copyright ï¿½ 2007-2008 Microchip Technology Inc.  All rights reserved.           
                                                                                 
 Microchip licenses to you the right to use, modify, copy and distribute Software
 only when embedded on a Microchip microcontroller or digital signal controller  
@@ -30,6 +30,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Created by the Microchip USBConfig Utility, Version 2.7.1.0, 11/22/2011, 22:54:54
 
 #include "GenericTypeDefs.h"
-#include "HardwareProfile.h"
-#include "USB\usb.h"
-
+#include "usb_profile.h"
+#include "usb.h"
+#include "usb_config.h"

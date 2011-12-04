@@ -16,12 +16,17 @@
  */
 
 /**
+ *
  * Funcionamiento:
  *	Cada mote puede estar en dos modos de funcionamiento:
  *		1.- DEPLOY
  *		2.- RUN
  *
- * MODO RUN BÃƒï¿½SICO
+ * MODO DEPLOY
+ *
+ *
+ *
+ * MODO RUN
  *
  *	En modo RUN el mote estÃƒÂ¡ generalmente dormido, tanto el microcontrolador
  *	como el transceptor XBee.
@@ -85,9 +90,16 @@
 #include "digi_proxy.h"
 #include "digi_api.h"
 #include "power.h"
+#include "usb_config.h"
+#include "usb_profile.h"
 #include "service.h"
+#include <portb.h>
 
-#pragma config WDTEN = OFF
+// FIXME Sacar a un archivo de configuración
+#pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
+
+
+#define TEST
 
 Mote mote;
 XBee xbee;
@@ -103,33 +115,17 @@ uint8_t coordinatorAddress[8] = {0x00, 0x13, 0xA2, 0x00, 0x01, 0x02, 0x03, 0x04}
 uint8_t payload[11] = "0123456789";
 uint8_t cluster[3] = "CL";
 uint8_t profile[3] = "PF";
-#endif
 
-void main() {
+void toggleLed(void);
+void test(void);
 
-	/* Mote init */
-	Service_initMote(&mote, &serial, &xbee, &proxy);
-	
-	/* Check for power on reset */
-	if(BSP_powerOnReset()) {
-		/* Clear power-on reset */
-		BSP_clearPowerOnReset();
-		/* Do Stuff */
-
-#ifdef TEST
-	test();
-#endif
-	}
-
-	/* Deep sleep mode */
-	deepSleep();
-
-	while (1);
+void toggleLed(void) {
+	TRISE = 0;
+	// Usa el latch para registrar la salida
+    LATEbits.LATE1 = ~LATEbits.LATE1;
 }
 
-
-#ifdef TEST
-void test() {
+void test(void) {
 	// Test send AtCommand
 	XBee_createATCommandPacket(&packet, 'A', atCommand);
 	XBeeProxy_sendPacket(&proxy, &packet);
@@ -150,3 +146,38 @@ void test() {
 	XBeeProxy_sendPacket(&proxy, &packet);
 }
 #endif
+
+
+void main() {
+
+	/* Mote init */
+	//Service_initMote(&mote, &serial, &xbee, &proxy);
+
+	//TRISBbits.TRISB0 = 1;	// RB0 as input
+	//ANCON1bits.PCFG12 = 1;	// RB0 as digital port
+	TRISBbits.TRISB2 = 0;	// RB2 as output
+
+	OpenRB0INT(PORTB_CHANGE_INT_ON & RISING_EDGE_INT & PORTB_PULLUPS_ON);
+	
+
+	/* Check for power on reset */
+	if (BSP_powerOnReset()) {
+		/* Clear power-on reset */
+		BSP_clearPowerOnReset();
+		/* Do Stuff */
+#ifdef TEST
+		toggleLed();
+		LATBbits.LATB2 = ~LATBbits.LATB2;	// RB2 high
+#endif
+	}
+	
+	/* Deep sleep mode */
+	
+
+	while (1) {
+		INTCON2bits.INTEDG0 = 1;   // 0 - interrupt on rising edge (patch off to on)
+		INTCONbits.INT0IF = 0;      // clear INT0 interrupt flag
+		INTCONbits.INT0IE = 1;      // enable INT0 interrupt
+		deepSleep();
+	}
+}
