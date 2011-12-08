@@ -20,7 +20,7 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>main.c</itemPath>
+      <itemPath>../main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -53,57 +53,16 @@
         <makeCustomizationPostStep></makeCustomizationPostStep>
         <makeCustomizationAlternativeFileToLoadEnabled>false</makeCustomizationAlternativeFileToLoadEnabled>
         <makeCustomizationAlternativeFileToLoad></makeCustomizationAlternativeFileToLoad>
-        <makeCustomizationUseOfUserID>NONE</makeCustomizationUseOfUserID>
-        <makeCustomizationUserID></makeCustomizationUserID>
+        <makeCustomizationUseOfUserID>makeCustomizationUseOfUserID</makeCustomizationUseOfUserID>
+        <makeCustomizationUserID>makeCustomizationUserID</makeCustomizationUserID>
       </makeCustomizationType>
       <C18>
-        <property key="storage-class" value="sca"/>
-        <property key="enable-opa" value="true"/>
-        <property key="enable-all-optimizations" value="true"/>
-        <property key="preprocessor-macros" value=""/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="optimization-master" value="Enable all"/>
-        <property key="code-model" value="mS"/>
-        <property key="warning-level" value="2"/>
-        <property key="extra-include-directories" value=""/>
-        <property key="enable-ow" value="true"/>
-        <property key="verbose" value="false"/>
-        <property key="enable-ou" value="true"/>
-        <property key="enable-ot" value="true"/>
-        <property key="enable-os" value="true"/>
-        <property key="data-model" value="Oa-"/>
-        <property key="enable-or" value="true"/>
-        <property key="enable-op" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-om" value="true"/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-od" value="true"/>
-        <property key="enable-ob" value="true"/>
       </C18>
       <C18-AS>
-        <property key="default.radix" value="HEX"/>
-        <property key="enable.case.sensitivity" value="false"/>
-        <property key="hex.output.format" value="INHX32"/>
-        <property key="preprocessor.macros" value=""/>
-        <property key="warning.level" value="0"/>
-        <property key="cross.reference.file" value=""/>
       </C18-AS>
       <C18-LD>
-        <property key="hex-output-format" value="INHX32"/>
-        <property key="cod-file" value="true"/>
-        <property key="map-file" value=""/>
-        <property key="extra-lib-directories" value=""/>
       </C18-LD>
       <C18LanguageToolchain>
-        <property key="stack-analysis-mplink" value="true"/>
-        <property key="extended-mode-mcc18" value="true"/>
-        <property key="stack-analysis" value="true"/>
-        <property key="stack-analysis-mcc18" value="true"/>
-        <property key="extended-mode" value="true"/>
-        <property key="extended-mode-mpasm" value="true"/>
-        <property key="extended-mode-mplink" value="true"/>
       </C18LanguageToolchain>
       <PICkit3PlatformTool>
       </PICkit3PlatformTool>

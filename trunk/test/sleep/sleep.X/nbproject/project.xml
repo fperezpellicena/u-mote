@@ -3,7 +3,8 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>DeepSleep</name>
+            <name>sleep</name>
+            <creation-uuid>cefad44a-7388-4e0d-b136-a3d260068325</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
