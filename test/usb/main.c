@@ -12,8 +12,8 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the “Company”) for its PIC® Microcontroller is intended and
- supplied to you, the Company’s customer, for use solely and
+ (the ?Company?) for its PIC® Microcontroller is intended and
+ supplied to you, the Company?s customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -22,7 +22,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN “AS IS” CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN ?AS IS? CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -49,6 +49,7 @@
 /** INCLUDES *******************************************************/
 #include "usb.h"
 #include "usb_function_cdc.h"
+#include <string.h>
 
 #include "HardwareProfile.h"
 
@@ -105,7 +106,6 @@ void YourHighPriorityISRCode();
 void YourLowPriorityISRCode();
 void BlinkUSBStatus(void);
 void UserInit(void);
-int debounce(int portBit);
 
 /** VECTOR REMAPPING ***********************************************/
 
@@ -179,32 +179,12 @@ void Low_ISR(void) {
 
 #pragma code
 
-int debounce(int portBit) {
-    static unsigned long state = 0;
-    state = state << 1 | !portBit | 0xE000;
-    if (state > 0xF000) {
-        return 1;
-    }
-    return 0;
-}
-
 //These are your actual interrupt handling routines.
 #pragma interrupt YourHighPriorityISRCode
 
 void YourHighPriorityISRCode() {
-    //Check which interrupt flag caused the interrupt.
-    //Service the interrupt
-    //Clear the interrupt flag
-    //Etc.
-    //    if (INTCONbits.TMR0IF) {
-    //        INTCONbits.TMR0IF = 0;
-    //        lapseTime--;
-    //    }
-    //    if (lapseTime == 0) {
-    //        lapseTime = 100;
 #if defined(USB_INTERRUPT)
     USBDeviceTasks();
-    LATCbits.LATC0 = !LATCbits.LATC0;
 #endif
     //  }
 } //This return will be a "retfie fast", since this is in a #pragma interrupt section
@@ -212,91 +192,37 @@ void YourHighPriorityISRCode() {
 #pragma interruptlow YourLowPriorityISRCode
 
 void YourLowPriorityISRCode() {
-    //Check which interrupt flag caused the interrupt.
-    //Service the interrupt
-    //Clear the interrupt flag
-    //Etc.
-    char port;
-    if (INTCONbits.RBIF) {
-        port = PORTB;
-        Nop();
-        INTCONbits.RBIF = 0;
-        if (USB_BUS_SENSE && (USBGetDeviceState() == DETACHED_STATE)) {
-            usbPlugged = 1;
-        } else {
-            usbPlugged = 0;
-        }
-    }
 } //This return will be a "retfie", since this is in a #pragma interruptlow section
 
 
 /** DECLARATIONS ***************************************************/
 #pragma code
 
-/******************************************************************************
- * Function:        void main(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        Main program entry point.
- *
- * Note:            None
- *****************************************************************************/
-
 void main(void) {
     InitializeSystem();
 
     while (1) {
-        if (usbPlugged == 1) {
+        // Comprueba el terminal que indica la conexión USB al inicio o al reset
+        if (PORTBbits.RB4 == 1) {
+            // Si no se ha activado el USB, lo activa
             if ((USBGetDeviceState() == DETACHED_STATE)) {
                 USBDeviceAttach();
             } else {
-                 // USB Tasks
+                // Si ya se ha activado, realiza las tareas USB
+                // USB Tasks
+                ProcessIO();
             }
-        } else if (usbPlugged == 0) {
+        } else {
+            // Si no está conectado el terminal USB, entra en modo de bajo consumo
             USBDeviceDetach();
             LATCbits.LATC0 = 0;
             OSCCONbits.IDLEN = 0;
             Sleep();
             Nop();
         }
-        ProcessIO();
-        //        OSCCONbits.IDLEN = 0;
-        //        Sleep();
-        //        Nop();
-        // Application-specific tasks.
-        // Application related code may be added here, or in the ProcessIO() function.
-
-
     }//end while
 }//end main
 
-/********************************************************************
- * Function:        static void InitializeSystem(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        InitializeSystem is a centralize initialization
- *                  routine. All required USB initialization routines
- *                  are called from here.
- *
- *                  User application initialization routine should
- *                  also be called from here.
- *
- * Note:            None
- *******************************************************************/
 static void InitializeSystem(void) {
     ADCON1 |= 0x0F; // Default all pins to digital
     {
@@ -308,17 +234,10 @@ static void InitializeSystem(void) {
     ANCON0 = 0xFF; // Default all pins to digital
     ANCON1 = 0xFF; // Default all pins to digital
 
+    // Configura PORTC<0> como salida de test
     TRISCbits.TRISC0 = 0;
-
+    // COnfigura PORTB<4> como entrada para el conector USB
     TRISBbits.TRISB4 = 1;
-
-    INTCONbits.RBIE = 1;
-    INTCONbits.RBIF = 0;
-    INTCON2bits.RBIP = 0;
-
-    INTCONbits.GIEH = 1;
-    INTCONbits.GIEL = 1;
-    RCONbits.IPEN = 1;
 
     UserInit();
 
@@ -326,23 +245,6 @@ static void InitializeSystem(void) {
     //variables to known states.
 }//end InitializeSystem
 
-/******************************************************************************
- * Function:        void UserInit(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        This routine should take care of all of the demo code
- *                  initialization that is required.
- *
- * Note:
- *
- *****************************************************************************/
 void UserInit(void) {
     //Initialize all of the debouncing variables
     buttonCount = 0;
@@ -356,23 +258,11 @@ void UserInit(void) {
     mInitAllSwitches();
 }//end UserInit
 
-/********************************************************************
- * Function:        void ProcessIO(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        This function is a place holder for other user
- *                  routines. It is a mixture of both USB and
- *                  non-USB tasks.
- *
- * Note:            None
- *******************************************************************/
+
+#define RTCC_TAG        "<rtcc>"
+#define DATE_SEPARATOR  '/'
+#define TIME_SEPARATOR  ':'
+
 void ProcessIO(void) {
     BYTE numBytesRead;
 
@@ -380,61 +270,36 @@ void ProcessIO(void) {
     BlinkUSBStatus();
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
-
-    if (buttonPressed) {
-        if (stringPrinted == FALSE) {
-            if (mUSBUSARTIsTxTrfReady()) {
-                putrsUSBUSART("Button Pressed -- \r\n");
-                stringPrinted = TRUE;
-            }
-        }
-    } else {
-        stringPrinted = FALSE;
-    }
-
+    //
     if (mUSBUSARTIsTxTrfReady()) {
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
         if (numBytesRead != 0) {
-            BYTE i;
-
-            for (i = 0; i < numBytesRead; i++) {
-                switch (USB_Out_Buffer[i]) {
-                    case 0x0A:
-                    case 0x0D:
-                        USB_In_Buffer[i] = USB_Out_Buffer[i];
-                        break;
-                    default:
-                        USB_In_Buffer[i] = USB_Out_Buffer[i] + 1;
-                        break;
-                }
-
+            // Si recibe un tag <rtcc>, procesa el contenido
+            if(strncmp(USB_Out_Buffer, RTCC_TAG, strlen(RTCC_TAG))) {
+                putrsUSBUSART("RTCC recibido");
             }
-
-            putUSBUSART(USB_In_Buffer, numBytesRead);
+//            BYTE i;
+//            // Hace un echo
+//            for (i = 0; i < numBytesRead; i++) {
+//                switch (USB_Out_Buffer[i]) {
+//                    case 0x0A:
+//                    case 0x0D:
+//                        USB_In_Buffer[i] = USB_Out_Buffer[i];
+//                        break;
+//                    default:
+//                        USB_In_Buffer[i] = USB_Out_Buffer[i] + 1;
+//                        break;
+//                }
+//
+//            }
+//
+//            putUSBUSART(USB_In_Buffer, numBytesRead);
         }
     }
 
     CDCTxService();
 } //end ProcessIO
 
-/********************************************************************
- * Function:        void BlinkUSBStatus(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        BlinkUSBStatus turns on and off LEDs
- *                  corresponding to the USB device state.
- *
- * Note:            mLED macros can be found in HardwareProfile.h
- *                  USBDeviceState is declared and updated in
- *                  usb_device.c.
- *******************************************************************/
 void BlinkUSBStatus(void) {
     static WORD led_count = 0;
 
