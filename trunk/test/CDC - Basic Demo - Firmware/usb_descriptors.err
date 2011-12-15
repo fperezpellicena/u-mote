@@ -1,0 +1,2 @@
+Error[1027] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\CDC - Basic Demo - Firmware\usb_descriptors.c 157 : unable to locate './USB/usb.h'
+Error[1027] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\CDC - Basic Demo - Firmware\usb_descriptors.c 158 : unable to locate './USB/usb_function_cdc.h'

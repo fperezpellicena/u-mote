@@ -19,6 +19,7 @@
 
 #pragma config WDTEN = OFF          /* Disabled - Controlled by SWDTEN bit                                                       */
 
+void switchChange(void);
 void debounceSwitch(void);
 int debounce(int bit);
 
