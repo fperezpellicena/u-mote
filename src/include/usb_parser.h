@@ -15,4 +15,22 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "usb_device.h"
+#ifndef usb_parser_h
+#define usb_parser_h
+
+// Parseador del contenido USB
+typedef struct USBParser USBParser;
+
+// Función estereotipo para los manejadores de contenido USB
+typedef void (*ParseUSBData)(USBParser* const parser, char* const usbOutBuffer, char* const usbInBuffer);
+
+struct USBParser {
+    ParseUSBData parse;
+    void* object;
+};
+
+void USBParser_parse(USBParser* const parser, char* const usbOutBuffer, char* const usbInBuffer);
+
+void USBParser_create(USBParser* const parser, ParseUSBData parseStrategy, void* object);
+
+#endif  /* usb_parser_h */

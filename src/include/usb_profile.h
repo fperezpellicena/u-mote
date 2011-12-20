@@ -57,7 +57,7 @@
 //  final application design.
 #define DEMO_BOARD PIC18F46J50_PIM
 #define PIC18F46J50_PIM
-#define CLOCK_FREQ 6000000
+#define CLOCK_FREQ 48000000
 #define GetSystemClock() CLOCK_FREQ
 
 #endif
