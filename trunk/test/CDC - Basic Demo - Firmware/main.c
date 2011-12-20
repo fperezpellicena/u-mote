@@ -231,7 +231,6 @@ void UserInit(void);
 
 void main(void) {
     InitializeSystem();
-
     while(1)
     {
         #if defined(USB_INTERRUPT)
