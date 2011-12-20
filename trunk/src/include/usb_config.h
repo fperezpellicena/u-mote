@@ -4,7 +4,7 @@
                	Situational: usb_function_hid.h, usb_function_cdc.h, usb_function_msd.h, etc.
  Processor:		PIC18 or PIC24 USB Microcontrollers
  Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM‚Ñ¢ FS USB Demo Board,
+ 				hardware platforms: PICDEMô FS USB Demo Board, 
  				PIC18F87J50 FS USB Plug-In Module, or
  				Explorer 16 + PIC24 USB PIM.  The firmware may be
  				modified for use on other USB platforms by editing the
@@ -15,8 +15,8 @@
  Software License Agreement:
 
  The software supplied herewith by Microchip Technology Incorporated
- (the ‚ÄúCompany‚Äù) for its PIC¬Æ Microcontroller is intended and
- supplied to you, the Company‚Äôs customer, for use solely and
+ (the ìCompanyî) for its PICÆ Microcontroller is intended and
+ supplied to you, the Companyís customer, for use solely and
  exclusively on Microchip PIC Microcontroller products. The
  software is owned by the Company and/or its supplier, and is
  protected under applicable copyright laws. All rights are reserved.
@@ -25,7 +25,7 @@
  civil liability for the breach of the terms and conditions of this
  license.
 
- THIS SOFTWARE IS PROVIDED IN AN ‚ÄúAS IS‚Äù CONDITION. NO WARRANTIES,
+ THIS SOFTWARE IS PROVIDED IN AN ìAS ISî CONDITION. NO WARRANTIES,
  WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
  TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
  PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
@@ -56,7 +56,7 @@
 								// of applications.  Exceptions to this, are applications
 								// that use EP0 IN or OUT for sending large amounts of
 								// application related data.
-
+									
 #define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
 
 //Device descriptor - if these two definitions are not defined then

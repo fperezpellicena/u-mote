@@ -15,4 +15,10 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "usb_device.h"
+#ifndef usb_rtcc_parser_h
+#define usb_rtcc_parser_h
+
+// Function that parses the incoming USB data to configure the internal RTCC
+void parseRTCCData(char* usbOutBuffer);
+
+#endif /*usb_rtcc_parser_h */
