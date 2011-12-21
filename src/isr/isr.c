@@ -21,14 +21,15 @@
 
 
 
-
 /*..........................................................................*/
 
 /* HIGH LEVEL INTERRUPTION METHOD */
 #pragma interrupt ISR_hi
 
 void ISR_hi(void) {
-	
+#if defined(USB_INTERRUPT)
+    USBDeviceTasks();
+#endif
 }
 
 /*..........................................................................*/
@@ -36,21 +37,21 @@ void ISR_hi(void) {
 #pragma interruptlow ISR_lo
 
 void ISR_lo(void) {
-	
+
 }
 
 /*..........................................................................*/
 #pragma code intVector_hi = 0x08
 
 void intVector_hi(void) {
-	_asm goto ISR_hi _endasm
+    _asm goto ISR_hi _endasm
 }
 
 /*..........................................................................*/
 #pragma code intVector_lo = 0x18
 
 void intVector_lo(void) {
-	_asm goto ISR_lo _endasm
+    _asm goto ISR_lo _endasm
 }
 
 

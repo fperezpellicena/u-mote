@@ -31,6 +31,8 @@ void Adc_close() {
 	CloseADC();
 }
 
+static void Adc_dummy();
+
 /**
  * Realiza una conversión dummy para compensar el ruido de las entradas.
  */
