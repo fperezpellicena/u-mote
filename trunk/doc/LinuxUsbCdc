@@ -1,0 +1,27 @@
+Using a USB CDC Device in Linux
+
+When using a USB device that implements the CDC communication protocol with Linux, the device is recognizable and Linux will be able to receive data from it with any modification.
+Connecting a USB CDC Device to Linux
+
+    Connect the USB CDC device to a PC.
+
+    In a terminal window, use the "dmesg" command to display system information and check if the USB device has been recognized by Linux. If the USB device is recognized, a listing for the device similar to the one below will be displayed:
+
+        usb 7-1: new full speed USB device using uhci_hcd and address 1
+        usb 7-1: configuration #1 chosen from 1 choice
+        cdc_acm 7-1:1.0: This device cannot do calls on its own. It is not a modem.
+        cdc_acm 7-1:1.0: ttyACM0: USB ACM device
+
+
+    If detected correctly, the USB device should be connected as a ttyACM* device.
+
+Transmitting & Receiving Data with a USB CDC Device
+
+    To start receiving data from the USB device, enter the following command in a terminal window. Be sure to replace the * with the number associated with the connected USB device such as from the listing above:
+
+        cat /dev/ttyACM*
+
+
+    The terminal will start to display the data being received from the USB device.
+
+    To send data to the USB device, a different application will need to be used since the terminal window is not capable of sending and receiving data at the same time. One such application that can be used is minicom which runs in a terminal window, or GtkTerm which is an IDE application. When the correct port is selected, these applications will be able to send and receive data from the connected USB device.
