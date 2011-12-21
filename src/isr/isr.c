@@ -18,7 +18,8 @@
 #include "isr.h"
 #include "qp_port.h"
 #include "bsp.h"
-
+#include "usb_config.h"
+#include "usb_device.h"
 
 
 /*..........................................................................*/

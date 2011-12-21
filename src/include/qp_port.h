@@ -30,7 +30,6 @@
 
 #include "qf_port.h"          /* includes qep_port.h and qk_port.h, if used */
 #include "qassert.h"
-#include "usb_config.h"
 
 #define BAUD_RATE          9600U
 

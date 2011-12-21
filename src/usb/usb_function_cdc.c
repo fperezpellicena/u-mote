@@ -101,7 +101,7 @@
 /** I N C L U D E S **********************************************************/
 #include "usb.h"
 #include "usb_function_cdc.h"
-//#include "HardwareProfile.h"
+#include "usb_config.h"
 
 #ifdef USB_USE_CDC
 
