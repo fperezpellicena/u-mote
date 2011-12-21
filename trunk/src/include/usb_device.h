@@ -104,6 +104,7 @@ Description:
 #define USBDEVICE_H
 //DOM-IGNORE-END
 
+#include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "usb_common.h"
 #include "usb_ch9.h"
