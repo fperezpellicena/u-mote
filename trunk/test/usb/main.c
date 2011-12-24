@@ -19,7 +19,7 @@
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
 #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
 #pragma config STVREN = ON            //stack overflow/underflow reset enabled
-#pragma config XINST = OFF          //Extended instruction set disabled
+#pragma config XINST = ON          //Extended instruction set disabled
 #pragma config CPUDIV = OSC1        //No CPU system clock divide
 #pragma config CP0 = OFF            //Program memory is not code-protected
 #pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
