@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include "GenericTypeDefs.h"
 #include "hw_profile.h"
 #include "usb_config.h"
 #include "usb_device.h"
@@ -41,11 +41,11 @@ void processUSBData(void) {
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
         return;
     }
-    // Si est? preparado para recibir datos
+    // Si está preparado para recibir datos
     if (mUSBUSARTIsTxTrfReady()) {
         // Recibe un buffer de tama?o determinado
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
-        // Si ha le?do datos
+        // Si ha leído datos
         if (numBytesRead != 0) {
             // FIXME Usar constantes
             if (strncmp(USB_Out_Buffer, RTCC, strlen(RTCC)) == 0) {
