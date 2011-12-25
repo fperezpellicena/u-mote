@@ -15,8 +15,11 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+#include <string.h>
 #include "GenericTypeDefs.h"
 #include "gps.h"
+#include "util.h"
 
 /*..........................................................................*/
 void NMEAOutputConfig_create(NMEAOutputConfig* config, unsigned char nmeaGLL,
@@ -43,149 +46,134 @@ void NMEAOutputConfig_create(NMEAOutputConfig* config, unsigned char nmeaGLL,
 
 /*..........................................................................*/
 static void NMEACommand_create(NMEACommandFrame * nmeaCommandFrame,
-        enum NMEACommand command, unsigned char* data, unsigned char length);
+        unsigned char rom* command, unsigned char* data, unsigned char length);
 
 /*..........................................................................*/
 static void NMEACommand_create(NMEACommandFrame* nmeaCommandFrame,
-        enum NMEACommand command, unsigned char* data, unsigned char length) {
+        unsigned char rom* command, unsigned char* data, unsigned char length) {
     // Set command number
     unsigned char* p = nmeaCommandFrame->commandNumber;
-    unsigned char i = NMEA_COMMAND_LENGTH;
-    unsigned char* pCommand = NMEACommandValues[command];
-    while (i--) {
-        *p++ = *pCommand++;
+    unsigned char i = 0;
+    //unsigned char* pCommand = command;
+    while (i < NMEA_COMMAND_LENGTH) {
+        *p++ = command[i];
+        i++;
     }
     // Set data
+    i = 0;
     p = nmeaCommandFrame->data;
-    i = length;
-    while (i--) {
-        *p++ = *data++;
+    while (i < length) {
+        *p++ = data[i];
+        i++;
     }
-    // Set data length
+    // Set length
     nmeaCommandFrame->length = length;
 }
 
 /*..........................................................................*/
 void NMEACommand_createTest(NMEACommandFrame* nmeaCommandFrame) {
-    NMEACommand_create(nmeaCommandFrame, NMEA_TEST, NULL, 0);
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_TEST, NULL, 0);
 }
 
 /*..........................................................................*/
 void NMEACommand_createHotStartFrame(NMEACommandFrame* nmeaCommandFrame) {
-    NMEACommand_create(nmeaCommandFrame, NMEA_HOT_START, NULL, 0);
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_HOT_START, NULL, 0);
 }
 
 /*..........................................................................*/
 void NMEACommand_createWarmStartFrame(NMEACommandFrame* nmeaCommandFrame) {
-    NMEACommand_create(nmeaCommandFrame, NMEA_WARM_START, NULL, 0);
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_WARM_START, NULL, 0);
 }
 
 /*..........................................................................*/
 void NMEACommand_createColdStartFrame(NMEACommandFrame* nmeaCommandFrame) {
-    NMEACommand_create(nmeaCommandFrame, NMEA_COLD_START, NULL, 0);
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_COLD_START, NULL, 0);
 }
 
 /*..........................................................................*/
 void NMEACommand_createFullColdStartFrame(NMEACommandFrame* nmeaCommandFrame) {
-    NMEACommand_create(nmeaCommandFrame, NMEA_FULL_COLD_START, NULL, 0);
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_FULL_COLD_START, NULL, 0);
 }
 
 /*..........................................................................*/
 void NMEACommand_createClearEPOFrame(NMEACommandFrame* nmeaCommandFrame) {
     unsigned char* data = "0";
-    NMEACommand_create(nmeaCommandFrame, NMEA_CLEAR_EPO, data, 1);
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_CLEAR_EPO, data, 1);
 }
 
 /*..........................................................................*/
 void NMEACommand_createSetBaudrateFrame(NMEACommandFrame* nmeaCommandFrame,
-        enum NMEABaudrate baudrate) {
-    NMEACommand_create(nmeaCommandFrame, NMEA_SET_BAUDRATE,
-            NMEABaudrateValues[baudrate],
-            strlen(NMEABaudrateValues[baudrate]));
+        unsigned char* baudrate) {
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_BAUDRATE, baudrate,
+            strlen(baudrate));
 }
 
 /*..........................................................................*/
 void NMEACommand_createSetFixCtlFrame(NMEACommandFrame* nmeaCommandFrame,
-        unsigned char* fixInterval, unsigned char length) {
-    unsigned char* padding = ",0,0,0,0"; // Padding data
-    unsigned char paddingLength = 9; // Padding length
-    // Set command number
-    unsigned char* p = nmeaCommandFrame->commandNumber;
-    unsigned char i = NMEA_COMMAND_LENGTH;
-    unsigned char* pCommand = NMEACommandValues[NMEA_SET_FIX_CTL];
-    while (i--) {
-        *p++ = *pCommand++;
-    }
-    // Set fix interval
-    i = length;
-    p = nmeaCommandFrame->data;
-    while (i--) {
-        *p++ = *fixInterval++;
+        unsigned char* fixInterval) {
+    // Padding data
+    unsigned char* padding = ",0,0,0,0";
+    // Padding length
+    unsigned char paddingLength = 9;
+    // Prepare data
+    unsigned char data[11];
+    unsigned char i = 0;
+    while (i < NMEA_FIX_SIZE) {
+        data[i] = fixInterval[i];
+        i++;
     }
     // Set padding data
-    i = paddingLength;
-    while (i--) {
-        *p++ = *padding++;
+    i = 0;
+    while (i < paddingLength) {
+        data[NMEA_FIX_SIZE + i] = padding[i];
+        i++;
     }
-    nmeaCommandFrame->length = length + paddingLength;
+    // Create command
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_OUTPUT, data, NMEA_FIX_SIZE + paddingLength);
 }
 
 /*..........................................................................*/
 void NMEACommand_createSetDgpsModeFrame(NMEACommandFrame* nmeaCommandFrame,
-        enum NMEADgpsMode mode) {
-    // Set command number
-    unsigned char* p = nmeaCommandFrame->commandNumber;
-    unsigned char i = NMEA_COMMAND_LENGTH;
-    unsigned char* pCommand = NMEACommandValues[NMEA_SET_FIX_CTL];
-    while (i--) {
-        *p++ = *pCommand++;
-    }
-    // Set data
-    p = nmeaCommandFrame->data;
-    *p++ = NMEADgpsModeValues[mode];
-    nmeaCommandFrame->length = 1;
+        unsigned char* mode) {
+    // Create command
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_FIX_CTL, mode, 1);
 }
 
 /*..........................................................................*/
 void NMEACommand_createSetSbasFrame(NMEACommandFrame* nmeaCommandFrame,
         BOOL enabled) {
+    // Prepare data
     unsigned char* data = enabled ? "1" : "0";
-    NMEACommand_create(nmeaCommandFrame, NMEA_SBAS, data, 1);
+    // Create command
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SBAS, data, 1);
 }
 
 /*..........................................................................*/
 void NMEACommand_createSetOutput(NMEACommandFrame* nmeaCommandFrame,
         NMEAOutputConfig* config) {
+    // Prepare data
     unsigned char data[] = {
-        config->nmeaGLL, ',',
-        config->nmeaRMC, ',',
-        config->nmeaVTG, ',',
-        config->nmeaGGA, ',',
-        config->nmeaGSA, ',',
-        config->nmeaGSV, ',',
-        config->nmeaGRS, ',',
-        config->nmeaGST, ',',
+        config->nmeaGLL, ',', config->nmeaRMC, ',', config->nmeaVTG, ',',
+        config->nmeaGGA, ',', config->nmeaGSA, ',', config->nmeaGSV, ',',
+        config->nmeaGRS, ',', config->nmeaGST, ',',
         // Padding data not specified
         '1', ',', '1', ',', '1', ',', '1', ',', '1', ',', '1', ',',
-        config->nmeaMALM, ',',
-        config->nmeaMEPH, ',',
-        config->nmeaMDGP, ',',
-        config->nmeaMDBG, ',',
-        config->nmeaZDA, ',',
-        config->nmeaMCHN
+        config->nmeaMALM, ',', config->nmeaMEPH, ',', config->nmeaMDGP, ',',
+        config->nmeaMDBG, ',', config->nmeaZDA, ',', config->nmeaMCHN
     };
-    // Set command number
-    unsigned char* p = nmeaCommandFrame->commandNumber;
-    unsigned char i = NMEA_COMMAND_LENGTH;
-    unsigned char* pCommand = NMEACommandValues[NMEA_OUTPUT];
-    while (i--) {
-        *p++ = *pCommand++;
-    }
-    // Set data
-    i = 0;
-    while (i < NMEA_OUTPUT_CFG_LENGTH) {
-        *p++ = data[i];
-        i++;
-    }
-    nmeaCommandFrame->length = NMEA_OUTPUT_CFG_LENGTH;
+    // Create command
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_OUTPUT,
+            data, NMEA_OUTPUT_CFG_LENGTH);
 }
+
+/*..........................................................................*/
+void NMEACommand_createSetDatum(NMEACommandFrame* nmeaCommandFrame,
+        unsigned char rom* datum) {
+    // Prepare data
+    unsigned char data[NMEA_DATUM_LENGTH];
+    Util_str2ram(datum, data);
+    // Create command
+    NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_OUTPUT,
+            data, NMEA_OUTPUT_CFG_LENGTH);
+}
+
