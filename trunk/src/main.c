@@ -72,7 +72,7 @@ void main(void) {
                 processUSBData();
             }
         } else {
-            // Si no est? conectado el terminal USB, entra en modo de bajo consumo
+            // Si no está conectado el terminal USB, entra en modo de bajo consumo
             USBDeviceDetach();
             LATCbits.LATC0 = 0;
             OSCCONbits.IDLEN = 0;

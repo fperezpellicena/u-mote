@@ -13,17 +13,38 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * On power-up, GPS module sends out through UART:
+ *
+ *          $PMTK011,MTKGPS*08
+ *          $PMTK010,001*2E         (STARTUP MESSAGE)
+ *
+ * and starts to send gps values like:
+ *
+ *          $GPGGA,235945.036,,,,,0,0,,,M,,M,,*41
+ *          $GPGSA,A,1,,,,,,,,,,,,,,,*1E
+ *          $GPGSV,1,1,00*79
+ *          $GPRMC,235945.036,V,,,,,0.00,0.00,050180,,,N*48
+ *
+ * and so on.
+ *
+ * To stop the module transmit continuously, send:
+ *
+ *           $PMTK314,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28
+ *
+ * To receive minimal positioning info:
+ *
+ *          $PMTK314,5,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28
  */
 #ifndef gps_h
 #define gps_h
 
 #include "GenericTypeDefs.h"
 
-
 /*...........................................................................*/
-#define NMEA_MAX_COMMAND_LENGTH     243             /* NMEA Max length frame */
-#define NMEA_PREAMBLE   "$"                         /* NMEA command preamble */
-#define NMEA_CHK_CHAR   "*"                            /* NMEA chk delimiter */
+#define NMEA_MAX_COMMAND_LENGTH 50                  /* NMEA Max length frame */
+#define NMEA_PREAMBLE           "$"                 /* NMEA command preamble */
+#define NMEA_CHK_CHAR           "*"                    /* NMEA chk delimiter */
 
 /*
  * This will identify for the NMEA parser that it is command for MediaTek.
@@ -33,42 +54,58 @@
 #define NMEA_COMMAND_LENGTH     3                     /* NMEA command length */
 #define NMEA_CHECKUM_LENGTH     2                     /* NMEA checkum lenght */
 /* The two bytes are used to identify the end of a command. */
-#define NMEA_CR         13                                /* Carriage return */
-#define NMEA_LF         10                                      /* Line feed */
+#define NMEA_CR                 13                        /* Carriage return */
+#define NMEA_LF                 10                              /* Line feed */
 
 /*...........................................................................*/
 // NMEA baudrates
-enum NMEABaudrate {
-    NMEA_BAUD_DEFAULT = 0, NMEA_BAUD_4800, NMEA_BAUD_9600, NMEA_BAUD_14400,
-    NMEA_BAUD_19200, NMEA_BAUD_38400, NMEA_BAUD_57600, NMEA_BAUD_115200
-};
-
-unsigned char* NMEABaudrateValues[] = {
-    "0", "4800", "9600", "14400", "19200", "38400", "57600", "115200"
-};
+#define NMEA_BAUD_DEFAULT       "0"
+#define NMEA_BAUD_4800          "4800"
+#define NMEA_BAUD_9600          "9600"
+#define NMEA_BAUD_14400         "14400"
+#define NMEA_BAUD_19200         "19200"
+#define NMEA_BAUD_38400         "38400"
+#define NMEA_BAUD_57600         "57600"
+#define NMEA_BAUD_115200        "115200"
 
 /*...........................................................................*/
-enum NMEACommand {
-    NMEA_TEST = 0, NMEA_ACK, NMEA_STARTUP, NMEA_HOT_START, NMEA_WARM_START,
-    NMEA_COLD_START, NMEA_FULL_COLD_START, NMEA_CLEAR_EPO, NMEA_SET_BAUDRATE,
-    NMEA_SET_FIX_CTL,NMEA_DGPS_MODE, NMEA_SBAS, NMEA_OUTPUT
-};
+// NMEA Commands
+#define NMEA_TEST               "000"
+#define NMEA_ACK                "001"
+#define NMEA_STARTUP            "010"
+#define NMEA_HOT_START          "101"
+#define NMEA_WARM_START         "102"
+#define NMEA_COLD_START         "103"
+#define NMEA_FULL_COLD_START    "104"
+#define NMEA_CLEAR_EPO          "127"
+#define NMEA_SET_BAUDRATE       "251"
+#define NMEA_SET_FIX_CTL        "300"
+#define NMEA_DGPS_MODE          "301"
+#define NMEA_SBAS               "313"
+#define NMEA_SET_OUTPUT         "314"
+#define NMEA_SET_DATUM          "330"
 
-unsigned char* NMEACommandValues[] = {
-    "000", "001", "010", "101", "102",
-    "103", "104", "127", "251",
-    "300", "301", "313", "314"
-};
-
+/*...........................................................................*/
 // NMEA DGPS modes
-enum NMEADgpsMode {
-    NO_DGPS_SOURCE = 0, RTCM, WAAS
-};
+#define NMEA_NO_DGPS_SOURCE     "0"
+#define NMEA_RTCM               "1"
+#define NMEA_WAAS               "2"
 
-unsigned char NMEADgpsModeValues[] = {
-    '0', '1', '2'
-};
+/*...........................................................................*/
+// NMEA fix interval msec.
+#define NMEA_5_HZ               "200"
+#define NMEA_10_HZ              "100"
+#define NMEA_FIX_SIZE           3
 
+/*...........................................................................*/
+// NMEA common datums
+#define NMEA_DATUM_WGS1984      "0"
+#define NMEA_DATUM_TOKIO_M      "1"
+#define NMEA_DATUM_TOKIO_A      "2"
+// NMEA datum length
+#define NMEA_DATUM_LENGTH       3
+
+/*...........................................................................*/
 // NMEA output config PMTK314
 typedef struct NMEAOutputConfig NMEAOutputConfig;
 
@@ -99,16 +136,19 @@ struct NMEAOutputConfig {
     unsigned char nmeaMDBG;
     /* GPZDA interval ? Time & Date */
     unsigned char nmeaZDA;
-     /* PMTKCHN interval ? GPS channel status */
+    /* PMTKCHN interval ? GPS channel status */
     unsigned char nmeaMCHN;
 };
 
 #define NMEA_OUTPUT_CFG_LENGTH         39                  /* Config length */
+// Supported freqcuency setting
+#define NMEA_OUTPUT_DISABLED            '0'
+#define NMEA_OUTPUT_EVERY_ONE_POS_FIX   '1'
+#define NMEA_OUTPUT_EVERY_TWO_POS_FIX   '2'
+#define NMEA_OUTPUT_EVERY_THREE_POS_FIX '3'
+#define NMEA_OUTPUT_EVERY_FOUR_POS_FIX  '4'
+#define NMEA_OUTPUT_EVERY_FIVE_POS_FIX  '5'
 
-enum NMEAOutputType {
-    DISABLED = 0, EVERY_ONE_POS_FIX, EVERY_TWO_POS_FIX, EVERY_THREE_POS_FIX,
-    EVERY_FOUR_POS_FIX, EVERY_FIVE_POS_FIX
-};
 
 void NMEAOutputConfig_create(NMEAOutputConfig* config, unsigned char nmeaGLL,
         unsigned char nmeaRMC, unsigned char nmeaVTG, unsigned char nmeaGGA,
@@ -154,18 +194,82 @@ void NMEACommand_createFullColdStartFrame(NMEACommandFrame* nmeaCommandFrame);
 void NMEACommand_createClearEPOFrame(NMEACommandFrame* nmeaCommandFrame);
 
 void NMEACommand_createSetBaudrateFrame(NMEACommandFrame* nmeaCommandFrame,
-        enum NMEABaudrate baudrate);
+        unsigned char* baudrate);
 
 void NMEACommand_createSetFixCtlFrame(NMEACommandFrame* nmeaCommandFrame,
-        unsigned char* fixInterval, unsigned char length);
+        unsigned char* fixInterval);
 
 void NMEACommand_createSetDgpsModeFrame(NMEACommandFrame* nmeaCommandFrame,
-        enum NMEADgpsMode mode) ;
+        unsigned char* mode);
 
 void NMEACommand_createSetSbasFrame(NMEACommandFrame* nmeaCommandFrame,
-        BOOL enabled) ;
+        BOOL enabled);
 
 void NMEACommand_createSetOutput(NMEACommandFrame* nmeaCommandFrame,
-        NMEAOutputConfig* config) ;
+        NMEAOutputConfig* config);
+
+void NMEACommand_createSetDatum(NMEACommandFrame* nmeaCommandFrame,
+        unsigned char rom* datum);
+
+
+/*...........................................................................*/
+/**
+ * Standard NMEA0183
+ * In default configuration outputted messages are GGA, RMC, GSV and GSA messages.
+ * Receiver can be configured to have user defined set of output messages
+ * by command PMTK314
+ * ............................................................................
+ * GGA - Global Positioning System Fix Data
+ * Time, position and fix related data for a GPS receiver.
+ * Example:
+ *  $GPGGA,114353.000,6016.3245,N,02458.3270,E,1,10,0.81,35.2,M,19.5,M,,*50
+ * Format:
+ *  $GPGGA,hhmmss.dd,xxmm.dddd,<N|S>,yyymm.dddd,<E|W>,v,ss,d.d,h.h,M,g.g,M,a.a,
+ *  xxxx*hh<CR><LF>
+ * ............................................................................
+ * RMC - Recommended Minimum Specific GNSS Data.
+ * Time, date, position, course and speed data.
+ * Example:
+ *  $GPRMC,114353.000,A,6016.3245,N,02458.3270,E,0.01,0.00,121009,,,A*69
+ * Format:
+ *  $GPRMC,hhmmss.dd,S,xxmm.dddd,<N|S>,yyymm.dddd,<E|W>,s.s,h.h,ddmmyy,d.d,
+ *  <E|W>,M*hh<CR><LF>
+ * ............................................................................
+ * GSV - Satellites in view
+ * Number of satellites in view, satellite ID (PRN) numbers, elevation, azimuth,
+ * and SNR value. The information for four satellites is a maximum per one message,
+ * additional messages up to maximum of eight are sent if needed.
+ * The satellites are in PRN number order.
+ * Example:
+ *  $GPGSV,3,1,11,29,68,228,47,30,59,151,47,31,44,284,45,02,38,062,44*7C
+ *  $GPGSV,3,2,11,12,28,130,41,10,14,102,35,05,12,110,35,04,11,040,34*70
+ *  $GPGSV,3,3,11,21,05,196,29,16,05,297,28,13,02,021,30*4E
+ * Format:
+ *  $GPGSV,n,m,ss,xx,ee,aaa,cn,????. ,xx,ee,aaa,cn*hh<CR><LF>
+ * ............................................................................
+ * GSA - DOP and Active Satellites
+ * GPS receiver operating mode, satellites used in the navigation solution
+ * reported by the GGA sentence, and DOP values.
+ * Example:
+ *  $GPGSA,A,3,02,21,30,04,16,05,10,12,31,29,,,1.33,0.81,1.06*02
+ * Format:
+ *  $GPGSA,a,b,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,p.p,h.h,v.v*hh<CR><LF>
+ * ............................................................................
+ * Objective:
+ *  Provide a simple API for processing standard commands and compressing
+ *  responses before sending through XBee.
+ *  Compressing means to delete irrelevant information as preamble($) and command
+ *  (GPXXX).
+ *  The module does not need to struct or parse the GPS response, only compress
+ *  and send.
+ */
+
+#define NMEA_OUTPUT_MAX_LENGTH      100
+
+typedef struct NMEAOutput NMEAOutput;
+
+struct NMEAOutput {
+    unsigned char data[NMEA_OUTPUT_MAX_LENGTH];
+};
 
 #endif /* gps_h */

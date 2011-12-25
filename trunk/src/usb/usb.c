@@ -36,6 +36,7 @@ void blinkUSBStatus(void);
  */
 void processUSBData(void) {
     char RTCC[] = "rtcc";
+    char GPS[] = "gps";
     BYTE numBytesRead;
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
@@ -50,6 +51,8 @@ void processUSBData(void) {
             // FIXME Usar constantes
             if (strncmp(USB_Out_Buffer, RTCC, strlen(RTCC)) == 0) {
                 parseRTCCData(USB_Out_Buffer);
+            } else if(strncmp(USB_Out_Buffer, GPS, strlen(GPS)) == 0) {
+                parseGPSData(USB_Out_Buffer);
             }
         }
     }
