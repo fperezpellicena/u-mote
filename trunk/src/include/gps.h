@@ -158,9 +158,9 @@ void NMEAOutputConfig_create(NMEAOutputConfig* config, unsigned char nmeaGLL,
         unsigned char nmeaMCHN);
 
 /*...........................................................................*/
-typedef struct NMEACommandFrame NMEACommandFrame;
+typedef struct NMEACommandPacket NMEACommandPacket;
 
-struct NMEACommandFrame {
+struct NMEACommandPacket {
     /*
      * Three bytes character string.From ?000? to ?999?.
      * An identifier used to tell the decoder how to decode the command
@@ -181,34 +181,34 @@ struct NMEACommandFrame {
     unsigned char length; /* Frame length */
 };
 
-void NMEACommand_createTest(NMEACommandFrame* nmeaCommandFrame);
+void NMEACommand_createTest(NMEACommandPacket* nmeaCommandFrame);
 
-void NMEACommand_createHotStartFrame(NMEACommandFrame* nmeaCommandFrame);
+void NMEACommand_createHotStartFrame(NMEACommandPacket* nmeaCommandFrame);
 
-void NMEACommand_createWarmStartFrame(NMEACommandFrame* nmeaCommandFrame);
+void NMEACommand_createWarmStartFrame(NMEACommandPacket* nmeaCommandFrame);
 
-void NMEACommand_createColdStartFrame(NMEACommandFrame* nmeaCommandFrame);
+void NMEACommand_createColdStartFrame(NMEACommandPacket* nmeaCommandFrame);
 
-void NMEACommand_createFullColdStartFrame(NMEACommandFrame* nmeaCommandFrame);
+void NMEACommand_createFullColdStartFrame(NMEACommandPacket* nmeaCommandFrame);
 
-void NMEACommand_createClearEPOFrame(NMEACommandFrame* nmeaCommandFrame);
+void NMEACommand_createClearEPOFrame(NMEACommandPacket* nmeaCommandFrame);
 
-void NMEACommand_createSetBaudrateFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetBaudrateFrame(NMEACommandPacket* nmeaCommandFrame,
         unsigned char* baudrate);
 
-void NMEACommand_createSetFixCtlFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetFixCtlFrame(NMEACommandPacket* nmeaCommandFrame,
         unsigned char* fixInterval);
 
-void NMEACommand_createSetDgpsModeFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetDgpsModeFrame(NMEACommandPacket* nmeaCommandFrame,
         unsigned char* mode);
 
-void NMEACommand_createSetSbasFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetSbasFrame(NMEACommandPacket* nmeaCommandFrame,
         BOOL enabled);
 
-void NMEACommand_createSetOutput(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetOutput(NMEACommandPacket* nmeaCommandFrame,
         NMEAOutputConfig* config);
 
-void NMEACommand_createSetDatum(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
         unsigned char rom* datum);
 
 
@@ -256,20 +256,20 @@ void NMEACommand_createSetDatum(NMEACommandFrame* nmeaCommandFrame,
  *  $GPGSA,a,b,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,p.p,h.h,v.v*hh<CR><LF>
  * ............................................................................
  * Objective:
- *  Provide a simple API for processing standard commands and compressing
- *  responses before sending through XBee.
- *  Compressing means to delete irrelevant information as preamble($) and command
- *  (GPXXX).
- *  The module does not need to struct or parse the GPS response, only compress
- *  and send.
+ *  Bridging GPS messages to XBee network without processing.
  */
 
-#define NMEA_OUTPUT_MAX_LENGTH      100
+// FIXME
+//  Each sentence begins with a '$' and ends with a carriage return/line feed
+//  sequence and can be no longer than 80 characters of visible text
+//  (plus the line terminators).
+#define NMEA_OUTPUT_MAX_LENGTH      100           /* Max NMEA message length */
 
 typedef struct NMEAOutput NMEAOutput;
 
 struct NMEAOutput {
-    unsigned char data[NMEA_OUTPUT_MAX_LENGTH];
+    unsigned char data[NMEA_OUTPUT_MAX_LENGTH];                   /* Content */
+    unsigned char length;                                  /* Content length */
 };
 
 #endif /* gps_h */

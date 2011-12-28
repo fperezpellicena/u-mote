@@ -18,8 +18,10 @@
 #include "isr.h"
 #include "qp_port.h"
 #include "bsp.h"
+#include "hw_profile.h"
 #include "usb_config.h"
 #include "usb_device.h"
+#include "critical.h"
 
 
 /*..........................................................................*/
@@ -28,8 +30,22 @@
 #pragma interrupt ISR_hi
 
 void ISR_hi(void) {
+    unsigned char index;
+    for (index = 0; index < interruptVectorHI.size; index++) {
+        // Check for active interrupt
+        if (interruptVectorHI.handlers[index].isActive()) {
+            // Clear flag
+            interruptVectorHI.handlers[index].clearFlag();
+            // Set active interrupt
+            activeInterrupt = &interruptVectorHI.handlers[index];
+            break;
+        }
+    }
+    // Execute USB tasks only if usb is plugged
 #if defined(USB_INTERRUPT)
-    USBDeviceTasks();
+    if (USB_PLUGGED) {
+        USBDeviceTasks();
+    }
 #endif
 }
 
@@ -38,7 +54,17 @@ void ISR_hi(void) {
 #pragma interruptlow ISR_lo
 
 void ISR_lo(void) {
-
+    unsigned char index;
+    for (index = 0; index < interruptVectorLO.size; index++) {
+        // Check for active interrupt
+        if (interruptVectorLO.handlers[index].isActive()) {
+            // Clear flag
+            interruptVectorLO.handlers[index].clearFlag();
+            // Set active interrupt
+            activeInterrupt = &interruptVectorLO.handlers[index];
+            break;
+        }
+    }
 }
 
 /*..........................................................................*/
@@ -55,4 +81,53 @@ void intVector_lo(void) {
     _asm goto ISR_lo _endasm
 }
 
+/*..........................................................................*/
+void InterruptHandler_create(InterruptHandler* handler,
+        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
+        ClearInterruptFlag clearFunction) {
+    handler->handle = handleFunction;
+    handler->isActive = checkFunction;
+    handler->clearFlag = clearFunction;
+}
+
+/*..........................................................................*/
+void InterruptHandler_initVectors() {
+    interruptVectorHI.size = 0;
+    interruptVectorLO.size = 0;
+}
+
+/*..........................................................................*/
+void InterruptHandler_addHI(InterruptHandler* handler,
+        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
+        ClearInterruptFlag clearFunction) {
+    if (interruptVectorHI.size < MAX_INTERRUPT_HANDLERS) {
+        handler->handle = handleFunction;
+        handler->isActive = checkFunction;
+        handler->clearFlag = clearFunction;
+        interruptVectorHI.handlers[interruptVectorHI.size] = *handler;
+        interruptVectorHI.size++;
+    }
+}
+
+/*..........................................................................*/
+void InterruptHandler_addLO(InterruptHandler* handler,
+        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
+        ClearInterruptFlag clearFunction) {
+    if (interruptVectorLO.size < MAX_INTERRUPT_HANDLERS) {
+        handler->handle = handleFunction;
+        handler->isActive = checkFunction;
+        handler->clearFlag = clearFunction;
+        interruptVectorLO.handlers[interruptVectorLO.size] = *handler;
+        interruptVectorLO.size++;
+    }
+}
+
+/*..........................................................................*/
+
+/* Handle active interrupt in critical section */
+void InterruptHandler_handleActiveInterrupt() {
+    enterCritical();
+    activeInterrupt->handle();
+    exitCritical();
+}
 

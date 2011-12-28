@@ -15,11 +15,12 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** CONFIGURATION **************************************************/
+/*...........................................................................*/
+/* Pragmas */
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
 #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
-#pragma config STVREN = ON            //stack overflow/underflow reset enabled
-#pragma config XINST = ON          //Extended instruction set disabled
+#pragma config STVREN = ON          //stack overflow/underflow reset enabled
+#pragma config XINST = ON           //Extended instruction set disabled
 #pragma config CPUDIV = OSC1        //No CPU system clock divide
 #pragma config CP0 = OFF            //Program memory is not code-protected
 #pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
@@ -38,56 +39,65 @@
 #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
 #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored  
 
-/** I N C L U D E S **********************************************************/
+/*...........................................................................*/
+/* Includes */
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "hw_profile.h"
 
 #ifdef USB_ENABLED
 #include "usb_device.h"
+#include "power.h"
 #endif
 
-/** P R I V A T E  P R O T O T Y P E S ***************************************/
-static void InitializeSystem(void);
-void blinkUSBStatus(void);
-void UserInit(void);
+/*...........................................................................*/
+/* Prototypes */
+static void BSP_initializeSystem(void);
+static void BSP_prepareSleep(void);
 
-/** DECLARATIONS ***************************************************/
+/*...........................................................................*/
+/* Main */
 #pragma code
 
 void main(void) {
-    InitializeSystem();
+    BSP_initializeSystem();
+    InterruptHandler_initVectors();
 
     while (1) {
 #ifdef USB_ENABLED
         // Comprueba el terminal que indica la conexi?n USB al inicio o al reset
-        if (PORTBbits.RB4 == 1) {
+        if (USB_PLUGGED) {
             // Si no se ha activado el USB, lo activa
             if ((USBGetDeviceState() == DETACHED_STATE)) {
                 USBDeviceAttach();
             } else {
                 // Si ya se ha activado, realiza las tareas USB
-                // USB Tasks
-                blinkUSBStatus();
-                processUSBData();
+                USB_process();
+                USB_blinkStatus();
             }
         } else {
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
-            USBDeviceDetach();
-            LATCbits.LATC0 = 0;
-            OSCCONbits.IDLEN = 0;
-            Sleep();
-            Nop();
+            if ((USBGetDeviceState() == ATTACHED_STATE)) {
+                USBDeviceDetach();
+            }
+            // Ejecuta la interrupción que ha despertado al sistema
+            InterruptHandler_handleActiveInterrupt();
+            BSP_prepareSleep();
+            sleep();
         }
 #endif
-    }//end while
-}//end main
+    }
+}
 
-static void InitializeSystem(void) {
-    ADCON1 |= 0x0F; // Default all pins to digital
+/*...........................................................................*/
+/* FIXME To bsp package */
+static void BSP_initializeSystem(void) {
+    // Default all pins to digital
+    ADCON1 |= 0x0F;
+    //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
     {
         unsigned int pll_startup_counter = 600;
-        OSCTUNEbits.PLLEN = 1; //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+        OSCTUNEbits.PLLEN = 1;
         while (pll_startup_counter--);
     }
 
@@ -99,18 +109,19 @@ static void InitializeSystem(void) {
     // COnfigura PORTB<4> como entrada para el conector USB
     TRISBbits.TRISB4 = 1;
 
-    UserInit();
-
-    USBDeviceInit(); //usb_device.c.  Initializes USB module SFRs and firmware
-    //variables to known states.
-}//end InitializeSystem
-
-void UserInit(void) {
     //Initialize all of the LED pins
     mInitAllLEDs();
 
     //Initialize the pushbuttons
     mInitAllSwitches();
-}
-/** EOF main.c *************************************************/
 
+    // Initializes USB module SFRs and firmware variables to known states
+    USBDeviceInit();
+}
+
+/*...........................................................................*/
+/* FIXME To bsp package */
+static void BSP_prepareSleep(void) {
+    // pre sleep actions
+    LATCbits.LATC0 = 0;
+}

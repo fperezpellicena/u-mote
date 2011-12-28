@@ -18,6 +18,14 @@
 #include "service.h"
 #include "bsp.h"
 #include "hw_adc.h"
+#include "hw_serial.h"
+#include "gps_proxy.h"
+
+Mote mote;
+Serial serial;
+XBee xbee;
+XBeeProxy xbeeProxy;
+GpsProxy gpsProxy;
 
 /**
  * Init mote resources(XBee, Serial, XBeeProxy).
@@ -28,26 +36,38 @@
  * @param xbee		ponter to xbee struct
  * @param proxy		ponter to proxy struct
  */
-void Service_initMote(Mote* mote, Serial* serial, XBee* xbee, XBeeProxy* proxy) {
-	/* BSP init */
-	BSP_init();
-	
-	/* Create XBee */
-	XBee_create(xbee);
+void Service_initMote() {
+    /* BSP init */
+    BSP_init();
 
-	/* Create Serial */
-	Serial_create(serial, XBEE_SERIAL, DEFAULT_UART_CONFIG, 25);
-	
-	/* Init serial */
-	Serial_init(serial);
+    /* Create XBee */
+    XBee_create(&xbee);
 
-	/* Create Proxy */
-	XBeeProxy_create(proxy, serial, xbee);
+    /* Create Serial */
+    Serial_create(&serial, XBEE_SERIAL, DEFAULT_UART_CONFIG, 25);
 
-	/* Init ADC */
-	Adc_init(DEFAULT_ADC_CONFIG, DEFAULT_ADC_CONFIG2, 15);
+    /* Init serial */
+    Serial_init(&serial);
 
-	/* Create Mote */
-	Mote_create(mote, proxy);
+    /* Create Proxy */
+    XBeeProxy_create(&xbeeProxy, &serial, &xbee);
 
+    /* Init ADC */
+    Adc_init(DEFAULT_ADC_CONFIG, DEFAULT_ADC_CONFIG2, 15);
+
+    /* Create Mote */
+    Mote_create(&mote, &xbeeProxy);
+
+}
+
+void Service_readGpsSignal() {
+
+//    NMEAOutput nmeaOutput;
+//    XBeePacket packet;
+//    // Lee la señal GPS
+//    GpsProxy_readOutput(&gpsProxy, &nmeaOutput);
+//    // Crea la trama XBee
+//    XBee_createTransmitRequestPacket(&packet, ..., nmeaOutput.data, nmeaOutput.length, ...);
+//    // Envía la trama
+//    XBeeProxy_sendPacket(&xbeeProxy, &packet);
 }

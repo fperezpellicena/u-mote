@@ -29,8 +29,8 @@
  * (see Section 3.5.1 “Oscillator Control Register”).
  */
 void runPrimaryMode(void) {
-	DSCONHbits.DSEN = 0;
-	OSCCONbits.SCS = 0;
+    DSCONHbits.DSEN = 0;
+    OSCCONbits.SCS = 0;
 }
 
 /*..........................................................................*/
@@ -56,8 +56,8 @@ void runPrimaryMode(void) {
  * and unpredictable operation may result.
  */
 void runSecondaryMode(void) {
-	DSCONHbits.DSEN = 0;
-	OSCCONbits.SCS = 1;
+    DSCONHbits.DSEN = 0;
+    OSCCONbits.SCS = 1;
 }
 
 /*..........................................................................*/
@@ -74,8 +74,8 @@ void runSecondaryMode(void) {
  * the primary oscillator is shutdown and the OSTS bit is cleared.
  */
 void runRcMode(void) {
-	DSCONHbits.DSEN = 0;
-	OSCCONbits.SCS = 3;
+    DSCONHbits.DSEN = 0;
+    OSCCONbits.SCS = 3;
 }
 
 /*..........................................................................*/
@@ -99,12 +99,13 @@ void runRcMode(void) {
  * The IDLEN and SCS bits are not affected by the wake-up.
  */
 void idlePrimaryMode(void) {
-	OSCCONbits.IDLEN = 1;
-	// If PRI_RUN is not enabled(SCS != '00') then set SCS = 0x00
-	if (OSCCONbits.SCS != 0) {
-		OSCCONbits.SCS = 0;
-	}
-	Sleep();
+    OSCCONbits.IDLEN = 1;
+    // If PRI_RUN is not enabled(SCS != '00') then set SCS = 0x00
+    if (OSCCONbits.SCS != 0) {
+        OSCCONbits.SCS = 0;
+    }
+    Sleep();
+    Nop();
 }
 
 /*..........................................................................*/
@@ -136,13 +137,14 @@ void idlePrimaryMode(void) {
  * unpredictable operation may result.
  */
 void idleSecondaryMode(void) {
-	// FIXME ¿Should check for timer 1 status?
-	OSCCONbits.IDLEN = 1;
-	// If SEC_RUN is not enabled(SCS = '01') then set SCS = 0x01
-	if (OSCCONbits.SCS != 1) {
-		OSCCONbits.SCS = 1;
-	}
-	Sleep();
+    // FIXME ¿Should check for timer 1 status?
+    OSCCONbits.IDLEN = 1;
+    // If SEC_RUN is not enabled(SCS = '01') then set SCS = 0x01
+    if (OSCCONbits.SCS != 1) {
+        OSCCONbits.SCS = 1;
+    }
+    Sleep();
+    Nop();
 }
 
 /*..........................................................................*/
@@ -164,13 +166,14 @@ void idleSecondaryMode(void) {
  * The INTRC source will continue to run if either the WDT or the FSCM is enabled.
  */
 void idleRcMode(void) {
-	// FIXME ¿Should check for timer 1 status?
-	OSCCONbits.IDLEN = 1;
-	// If RC_RUN is not enabled(SCS = '11') then set SCS = 0x11
-	if (OSCCONbits.SCS != 3) {
-		OSCCONbits.SCS = 3;
-	}
-	Sleep();
+    // FIXME ¿Should check for timer 1 status?
+    OSCCONbits.IDLEN = 1;
+    // If RC_RUN is not enabled(SCS = '11') then set SCS = 0x11
+    if (OSCCONbits.SCS != 3) {
+        OSCCONbits.SCS = 3;
+    }
+    Sleep();
+    Nop();
 }
 
 /*..........................................................................*/
@@ -188,8 +191,9 @@ void idleRcMode(void) {
  * If the Timer1 oscillator is enabled, it will also continue to run.
  */
 void sleep(void) {
-	OSCCONbits.IDLEN = 0;
-	Sleep();
+    OSCCONbits.IDLEN = 0;
+    Sleep();
+    Nop();
 }
 
 /*..........................................................................*/
@@ -239,10 +243,10 @@ void sleep(void) {
  *  code execution will resume at the device’s Reset vector.
  */
 void deepSleep(void) {
-	WDTCONbits.REGSLP = 1;
-	OSCCONbits.IDLEN = 0;
-	INTCONbits.GIE = 0;
-	DSCONHbits.DSEN = 1;
-	Sleep();
-	Nop();
+    WDTCONbits.REGSLP = 1;
+    OSCCONbits.IDLEN = 0;
+    INTCONbits.GIE = 0;
+    DSCONHbits.DSEN = 1;
+    Sleep();
+    Nop();
 }

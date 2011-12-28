@@ -14,29 +14,42 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <string.h>
 #include "GenericTypeDefs.h"
 #include "hw_profile.h"
 #include "usb_config.h"
 #include "usb_device.h"
 #include "usb.h"
 #include "usb_function_cdc.h"
-#include "usb_rtcc_parser.h"
+#include "usb_rtcc_handler.h"
+#include "usb_gps_handler.h"
+#include "util.h"
 
+/* Error message */
+#define USB_ERROR_MSG   "Comando desconocido"
 
 #pragma udata
 char USB_In_Buffer[64];
 char USB_Out_Buffer[64];
 
+
 /* Definición de la función para procesamiento de información USB */
-void processUSBData(void);
-void blinkUSBStatus(void);
+/* FIXME Poner en un archivo de cabeceras para evitar warning de compilación */
+void USB_process(void);
+void USB_blinkStatus(void);
 
 /**
  * Implementación de la función de procesamiento de información USB
  */
-void processUSBData(void) {
-    char RTCC[] = "rtcc";
-    char GPS[] = "gps";
+void USB_process(void) {
+    unsigned char length;
+    char RTCC_CONF[] = "rtccconfig";
+    char RTCC_TEST[] = "rtcctest";
+    char GPS_CONF[] = "gpsconfig";
+    char GPS_TEST[] = "gpsconfig";
+//    char SENSOR_LIST[] = "sensorlist";
+//    char SENSOR_TEST[] = "sensortest";
     BYTE numBytesRead;
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
@@ -48,20 +61,34 @@ void processUSBData(void) {
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
         // Si ha leído datos
         if (numBytesRead != 0) {
-            // FIXME Usar constantes
-            if (strncmp(USB_Out_Buffer, RTCC, strlen(RTCC)) == 0) {
-                parseRTCCData(USB_Out_Buffer);
-            } else if(strncmp(USB_Out_Buffer, GPS, strlen(GPS)) == 0) {
-                parseGPSData(USB_Out_Buffer);
+            if (strncmp(USB_Out_Buffer, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
+                USBRtccHandler_parseRTCCData(USB_Out_Buffer);
+            } else if (strncmp(USB_Out_Buffer, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
+                length = USBRtccHandler_testRTCC(USB_In_Buffer);
+            } else if (strncmp(USB_Out_Buffer, GPS_CONF, strlen(GPS_CONF)) == 0) {
+                USBGpsHandler_parseGPSData(USB_Out_Buffer);
+            } else if (strncmp(USB_Out_Buffer, GPS_TEST, strlen(GPS_TEST)) == 0) {
+                length = USBGpsHandler_testGPS(USB_In_Buffer);
+            }/* else if (strncmp(USB_Out_Buffer, SENSOR_LIST, strlen(SENSOR_LIST)) == 0) {
+                listSensors(USB_In_Buffer);
+            } else if (strncmp(USB_Out_Buffer, SENSOR_TEST, strlen(SENSOR_TEST)) == 0) {
+                testSensors(USB_In_Buffer);
+            } */else {
+                // Si el comando es erróneo, muestra un mensaje de error
+                Util_str2ram(USB_ERROR_MSG, USB_In_Buffer);
             }
         }
     }
+//    if (USBUSARTIsTxTrfReady() && length != 0) {
+//        putUSBUSART(USB_In_Buffer, length);
+//        length = 0;
+//    }
     CDCTxService();
 }
 
 //Blink the LEDs according to the USB device status
 
-void blinkUSBStatus(void) {
+void USB_blinkStatus(void) {
     static WORD led_count = 0;
 
     if (led_count == 0)led_count = 10000U;

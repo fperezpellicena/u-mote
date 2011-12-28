@@ -15,25 +15,13 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef digi_proxy_h
-#define digi_proxy_h
+#ifndef usb_rtcc_handler_h
+#define usb_rtcc_handler_h
 
-#include "digi.h"
-#include "digi_api.h"
-#include "hw_serial.h"
+// Function that parses the incoming USB data to configure the internal RTCC
+void USBRtccHandler_parseRTCCData(char* usbOutBuffer);
 
-typedef struct XBeeProxy XBeeProxy;
+/* Test RTCC */
+unsigned char USBRtccHandler_testRTCC(char* usbOutBuffer);
 
-struct XBeeProxy {
-    Serial* serial;                           /* Hardware physical interface */
-    XBee* xbee;                               /* Xbee firmware configuration */
-};
-
-void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
-
-boolean XBeeProxy_readPacket(XBeeProxy* const proxy, XBeePacket* const packet);
-
-boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet);
-
-
-#endif     /* digi_proxy_h*/
+#endif /*usb_rtcc_handler_h */

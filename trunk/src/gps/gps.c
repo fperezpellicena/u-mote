@@ -45,11 +45,11 @@ void NMEAOutputConfig_create(NMEAOutputConfig* config, unsigned char nmeaGLL,
 }
 
 /*..........................................................................*/
-static void NMEACommand_create(NMEACommandFrame * nmeaCommandFrame,
+static void NMEACommand_create(NMEACommandPacket * nmeaCommandFrame,
         unsigned char rom* command, unsigned char* data, unsigned char length);
 
 /*..........................................................................*/
-static void NMEACommand_create(NMEACommandFrame* nmeaCommandFrame,
+static void NMEACommand_create(NMEACommandPacket* nmeaCommandFrame,
         unsigned char rom* command, unsigned char* data, unsigned char length) {
     // Set command number
     unsigned char* p = nmeaCommandFrame->commandNumber;
@@ -71,45 +71,45 @@ static void NMEACommand_create(NMEACommandFrame* nmeaCommandFrame,
 }
 
 /*..........................................................................*/
-void NMEACommand_createTest(NMEACommandFrame* nmeaCommandFrame) {
+void NMEACommand_createTest(NMEACommandPacket* nmeaCommandFrame) {
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_TEST, NULL, 0);
 }
 
 /*..........................................................................*/
-void NMEACommand_createHotStartFrame(NMEACommandFrame* nmeaCommandFrame) {
+void NMEACommand_createHotStartFrame(NMEACommandPacket* nmeaCommandFrame) {
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_HOT_START, NULL, 0);
 }
 
 /*..........................................................................*/
-void NMEACommand_createWarmStartFrame(NMEACommandFrame* nmeaCommandFrame) {
+void NMEACommand_createWarmStartFrame(NMEACommandPacket* nmeaCommandFrame) {
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_WARM_START, NULL, 0);
 }
 
 /*..........................................................................*/
-void NMEACommand_createColdStartFrame(NMEACommandFrame* nmeaCommandFrame) {
+void NMEACommand_createColdStartFrame(NMEACommandPacket* nmeaCommandFrame) {
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_COLD_START, NULL, 0);
 }
 
 /*..........................................................................*/
-void NMEACommand_createFullColdStartFrame(NMEACommandFrame* nmeaCommandFrame) {
+void NMEACommand_createFullColdStartFrame(NMEACommandPacket* nmeaCommandFrame) {
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_FULL_COLD_START, NULL, 0);
 }
 
 /*..........................................................................*/
-void NMEACommand_createClearEPOFrame(NMEACommandFrame* nmeaCommandFrame) {
+void NMEACommand_createClearEPOFrame(NMEACommandPacket* nmeaCommandFrame) {
     unsigned char* data = "0";
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_CLEAR_EPO, data, 1);
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetBaudrateFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetBaudrateFrame(NMEACommandPacket* nmeaCommandFrame,
         unsigned char* baudrate) {
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_BAUDRATE, baudrate,
             strlen(baudrate));
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetFixCtlFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetFixCtlFrame(NMEACommandPacket* nmeaCommandFrame,
         unsigned char* fixInterval) {
     // Padding data
     unsigned char* padding = ",0,0,0,0";
@@ -133,14 +133,14 @@ void NMEACommand_createSetFixCtlFrame(NMEACommandFrame* nmeaCommandFrame,
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetDgpsModeFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetDgpsModeFrame(NMEACommandPacket* nmeaCommandFrame,
         unsigned char* mode) {
     // Create command
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_FIX_CTL, mode, 1);
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetSbasFrame(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetSbasFrame(NMEACommandPacket* nmeaCommandFrame,
         BOOL enabled) {
     // Prepare data
     unsigned char* data = enabled ? "1" : "0";
@@ -149,7 +149,7 @@ void NMEACommand_createSetSbasFrame(NMEACommandFrame* nmeaCommandFrame,
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetOutput(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetOutput(NMEACommandPacket* nmeaCommandFrame,
         NMEAOutputConfig* config) {
     // Prepare data
     unsigned char data[] = {
@@ -167,7 +167,7 @@ void NMEACommand_createSetOutput(NMEACommandFrame* nmeaCommandFrame,
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetDatum(NMEACommandFrame* nmeaCommandFrame,
+void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
         unsigned char rom* datum) {
     // Prepare data
     unsigned char data[NMEA_DATUM_LENGTH];

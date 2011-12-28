@@ -20,4 +20,6 @@
 
 void Util_str2ram(unsigned char rom* src, unsigned char* dest);
 
+void Util_strCopy(unsigned char* src, unsigned char* dest, unsigned char length);
+
 #endif /* util_h*/

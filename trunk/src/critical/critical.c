@@ -15,25 +15,18 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef digi_proxy_h
-#define digi_proxy_h
+#include "critical.h"
+#include <p18f46j50.h>
 
-#include "digi.h"
-#include "digi_api.h"
-#include "hw_serial.h"
+static unsigned char interruptSFR;
 
-typedef struct XBeeProxy XBeeProxy;
+void enterCritical(void) {
+    interruptSFR = INTCON;
+    while (INTCONbits.GIE == 1){
+        INTCONbits.GIE == 0;
+    }
+}
 
-struct XBeeProxy {
-    Serial* serial;                           /* Hardware physical interface */
-    XBee* xbee;                               /* Xbee firmware configuration */
-};
-
-void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
-
-boolean XBeeProxy_readPacket(XBeeProxy* const proxy, XBeePacket* const packet);
-
-boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet);
-
-
-#endif     /* digi_proxy_h*/
+void exitCritical(void) {
+    INTCON = interruptSFR;
+}

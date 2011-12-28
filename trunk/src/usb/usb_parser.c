@@ -17,7 +17,6 @@
 
 #include <string.h>
 #include "usb_parser.h"
-#include "usb_rtcc_parser.h"
 
 // Create custom stategy parser
 
