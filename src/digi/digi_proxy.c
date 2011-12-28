@@ -18,83 +18,87 @@
 #include "digi_proxy.h"
 
 /*..........................................................................*/
+
 /* XBee proxy constructor */
 void XBeeProxy_create(XBeeProxy * const proxy, Serial * const serial, XBee * const xbee) {
-	proxy->serial = serial;
-	proxy->xbee = xbee;
+    proxy->serial = serial;
+    proxy->xbee = xbee;
 }
 
 /*..........................................................................*/
+
 /* Send XBee packet */
 boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
-	uint8_t* p = (uint8_t*) packet;
-	Serial_send(proxy->serial, START_DELIMITER);
-	// send the most significant bit
-	Serial_send(proxy->serial, (packet->length >> 8) & 0xFF);
-	// then the LSB
-	Serial_send(proxy->serial, packet->length & 0xFF);
-	// just in case it hasn't been initialized.
-	packet->checksum = 0;
-	//Generalizando para cualquier paquete
-	while (packet->length--) {
-		Serial_send(proxy->serial, *p);
-		packet->checksum += *p++;
-	}
-	Serial_send(proxy->serial, (0xFF - packet->checksum));
-	return true;
+    uint8_t* p = (uint8_t*) packet;
+    Serial_send(proxy->serial, START_DELIMITER);
+    // send the most significant bit
+    Serial_send(proxy->serial, (packet->length >> 8) & 0xFF);
+    // then the LSB
+    Serial_send(proxy->serial, packet->length & 0xFF);
+    // just in case it hasn't been initialized.
+    packet->checksum = 0;
+    //Generalizando para cualquier paquete
+    while (packet->length--) {
+        Serial_send(proxy->serial, *p);
+        packet->checksum += *p++;
+    }
+    Serial_send(proxy->serial, (0xFF - packet->checksum));
+    return true;
 }
 
 /*..........................................................................*/
+
 /* Read XBee packet(generalized)*/
 boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
-	uint8_t data;
-	XBee_resetPacket(packet);
-	while (Serial_available(proxy->serial)) {
-		data = Serial_read(proxy->serial);
-		switch (packet->rxState) {
-			case XBEE_PACKET_RX_START:
-				if (data == XBEE_PACKET_RX_START)
-					packet->rxState = XBEE_PACKET_RX_LENGTH_1;
-				break;
-			case XBEE_PACKET_RX_LENGTH_1:
-				packet->length = data;
-				packet->length <<= 8;
-				packet->rxState = XBEE_PACKET_RX_LENGTH_2;
-				break;
-			case XBEE_PACKET_RX_LENGTH_2:
-				packet->length += data;
-				// in case we somehow get some garbage
-				if (packet->length > MAX_PACKET_SIZE) { 
-					packet->rxState = XBEE_PACKET_RX_START;
-					return false; //LENGTH Error
-				} else {
-					packet->rxState = XBEE_PACKET_RX_PAYLOAD;
-				}
-				packet->checksum = 0;
-				break;
-			case XBEE_PACKET_RX_PAYLOAD:
-				*packet->dataPtr++ = data;
-				if (++packet->index >= packet->length) {
-					packet->rxState = XBEE_PACKET_RX_CRC;
-				}
-				packet->checksum += data;
-				break;
-			case XBEE_PACKET_RX_CRC:
-				packet->checksum += data;
-				packet->rxState = XBEE_PACKET_RX_START;
-				if (packet->checksum == 0xFF) {
-					return true; //Everything OK!
-				} else {
-					return false; //CRC Error
-				}
-		}
-	}
-	return true;
+    uint8_t data;
+    XBee_resetPacket(packet);
+    while (Serial_available(proxy->serial)) {
+        data = Serial_read(proxy->serial);
+        switch (packet->rxState) {
+            case XBEE_PACKET_RX_START:
+                if (data == XBEE_PACKET_RX_START)
+                    packet->rxState = XBEE_PACKET_RX_LENGTH_1;
+                break;
+            case XBEE_PACKET_RX_LENGTH_1:
+                packet->length = data;
+                packet->length <<= 8;
+                packet->rxState = XBEE_PACKET_RX_LENGTH_2;
+                break;
+            case XBEE_PACKET_RX_LENGTH_2:
+                packet->length += data;
+                // in case we somehow get some garbage
+                if (packet->length > MAX_PACKET_SIZE) {
+                    packet->rxState = XBEE_PACKET_RX_START;
+                    return false; //LENGTH Error
+                } else {
+                    packet->rxState = XBEE_PACKET_RX_PAYLOAD;
+                }
+                packet->checksum = 0;
+                break;
+            case XBEE_PACKET_RX_PAYLOAD:
+                *packet->dataPtr++ = data;
+                if (++packet->index >= packet->length) {
+                    packet->rxState = XBEE_PACKET_RX_CRC;
+                }
+                packet->checksum += data;
+                break;
+            case XBEE_PACKET_RX_CRC:
+                packet->checksum += data;
+                packet->rxState = XBEE_PACKET_RX_START;
+                if (packet->checksum == 0xFF) {
+                    return true; //Everything OK!
+                } else {
+                    return false; //CRC Error
+                }
+        }
+    }
+    return true;
 }
 
 /*..........................................................................*/
+
 /* Read atCommandResponse */
 XBeeProxy_readAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
-		uint8_t** command, uint8_t* status, uint8_t* value) {
+        uint8_t** command, uint8_t* status, uint8_t* value) {
 
 }

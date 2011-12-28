@@ -23,6 +23,7 @@
 #include "hw_serial.h"
 #include "digi_proxy.h"
 
-void Service_initMote(Mote* mote, Serial* serial, XBee* xbee, XBeeProxy* proxy);
+/* Mote* mote, Serial* serial, XBee* xbee, XBeeProxy* proxy */
+void Service_initMote();
 
 #endif  /* service_h */

@@ -15,25 +15,11 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef digi_proxy_h
-#define digi_proxy_h
+#ifndef critical_h
+#define critical_h
 
-#include "digi.h"
-#include "digi_api.h"
-#include "hw_serial.h"
+void enterCritical(void);
 
-typedef struct XBeeProxy XBeeProxy;
+void exitCritical(void);
 
-struct XBeeProxy {
-    Serial* serial;                           /* Hardware physical interface */
-    XBee* xbee;                               /* Xbee firmware configuration */
-};
-
-void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
-
-boolean XBeeProxy_readPacket(XBeeProxy* const proxy, XBeePacket* const packet);
-
-boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet);
-
-
-#endif     /* digi_proxy_h*/
+#endif	/* critical_h */

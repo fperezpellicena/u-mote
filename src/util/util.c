@@ -16,6 +16,18 @@
  */
 #include "util.h"
 
+/**
+ * Copy string from rom char* to ram char*
+ *
+ * @param src   rom char* string
+ * @param dest  ram char* string
+ */
 void Util_str2ram(unsigned char rom* src, unsigned char* dest) {
-     while ((*dest++ = *src++) != '\0');
+    while ((*dest++ = *src++) != '\0');
+}
+
+void Util_strCopy(unsigned char* src, unsigned char* dest, unsigned char length) {
+    while (length--) {
+        *dest++ = *src++;
+    }
 }

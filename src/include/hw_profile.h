@@ -102,4 +102,16 @@
 #define INPUT_PIN 1
 #define OUTPUT_PIN 0
 
+/*...........................................................................*/
+/* FIXME Esto debería ir en bsp.h */
+/* USB attach detector */
+#define USB_PLUG_PIN      PORTBbits.RB4
+
+#ifdef USB_ENABLED
+#ifdef USB_PLUG_PIN
+#define USB_PLUGGED       USB_PLUG_PIN == 1
+#else
+#error "USB_PLUG_PIN not defined"
+#endif
+
 #endif  /* hw_profile_h */

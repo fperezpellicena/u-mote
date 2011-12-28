@@ -14,10 +14,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef usb_gps_parser_h
-#define usb_gps_parser_h
 
-// Function that parses the incoming USB data to configure the external GPS
-void parseGPSData(char* usbOutBuffer);
+#ifndef gps_proxy_h
+#define gps_proxy_h
 
-#endif /*usb_gps_parser_h */
+#include "gps.h"
+#include "hw_serial.h"
+
+
+typedef struct GpsProxy GpsProxy;
+
+struct GpsProxy {
+    Serial* serial;
+};
+
+void GpsProxy_create(GpsProxy * const proxy, Serial * const serial);
+
+void GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet);
+
+void GpsProxy_sendCommand(GpsProxy * const proxy, NMEACommandPacket* packet);
+
+
+#endif /* gps_proxy_h */

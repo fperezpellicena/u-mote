@@ -15,10 +15,17 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef usb_rtcc_parser_h
-#define usb_rtcc_parser_h
+#include "gps_proxy.h"
 
-// Function that parses the incoming USB data to configure the internal RTCC
-void parseRTCCData(char* usbOutBuffer);
+void GpsProxy_create(GpsProxy * const proxy, Serial * const serial) {
+    proxy->serial = serial;
+}
 
-#endif /*usb_rtcc_parser_h */
+void GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
+
+}
+
+void GpsProxy_sendCommand(GpsProxy * const proxy, NMEACommandPacket* packet) {
+
+}
+

@@ -14,26 +14,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef usb_gps_handler_h
+#define usb_gps_handler_h
 
-#include <string.h>
-#include <stdlib.h>
-#include <rtcc.h>
-#include "usb_rtcc_parser.h"
+/** Parse the incoming USB data to configure the external GPS */
+void USBGpsHandler_parseGPSData(char* usbBuffer);
 
-rom const char* SEPARATOR = "#";
+/** Test GPS */
+unsigned char USBGpsHandler_testGPS(char* usbBuffer);
 
-/**
- * Implementación del prototipo de función para parsear el contenido USB
- * de configuración del RTCC
- */
-void parseRTCCData(char* usbOutBuffer) {
-    rtccTimeDate timestamp;
-    char* result = NULL;
-    result = strtokpgmram(usbOutBuffer, (rom const char far*)SEPARATOR);
-    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
-    timestamp.f.hour = atoi(result);
-    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
-    timestamp.f.min = atoi(result);
-
-    RtccWriteTimeDate(&timestamp,TRUE);
-}
+#endif /*usb_gps_handler_h */
