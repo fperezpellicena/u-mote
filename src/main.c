@@ -44,6 +44,7 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "hw_profile.h"
+#include "digi_isr.h"
 
 #ifdef USB_ENABLED
 #include "usb_device.h"
@@ -60,8 +61,8 @@ static void BSP_prepareSleep(void);
 #pragma code
 
 void main(void) {
+    // Init basic system
     BSP_initializeSystem();
-    InterruptHandler_initVectors();
 
     while (1) {
 #ifdef USB_ENABLED
@@ -90,6 +91,7 @@ void main(void) {
 }
 
 /*...........................................................................*/
+
 /* FIXME To bsp package */
 static void BSP_initializeSystem(void) {
     // Default all pins to digital
@@ -117,9 +119,17 @@ static void BSP_initializeSystem(void) {
 
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
+
+    /* Install interrupts */
+    // Init interrupt vectors
+    InterruptHandler_initVectors();
+    // Install interrupt handlers
+    InterruptHandler_addHI(&XBee_handleInterrupt, &XBee_checkInterrupt,
+            &XBee_clearInterruptFlag);
 }
 
 /*...........................................................................*/
+
 /* FIXME To bsp package */
 static void BSP_prepareSleep(void) {
     // pre sleep actions

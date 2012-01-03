@@ -21,11 +21,14 @@
 #include "hw_serial.h"
 #include "gps_proxy.h"
 
+/*..........................................................................*/
+/* All this variables have External linkage and can be used in any file */
 Mote mote;
 Serial serial;
 XBee xbee;
-XBeeProxy xbeeProxy;
+XBeeProxy xbeeProxy;    
 GpsProxy gpsProxy;
+/*..........................................................................*/
 
 /**
  * Init mote resources(XBee, Serial, XBeeProxy).
@@ -58,6 +61,15 @@ void Service_initMote() {
     /* Create Mote */
     Mote_create(&mote, &xbeeProxy);
 
+}
+
+/**
+ * Send XBee packet using XBeeProxy internal instance
+ *
+ * @param packet packet to send
+ */
+void Service_sendXbeePacket(XBeePacket* packet) {
+    XBeeProxy_sendPacket(&xbeeProxy, packet);
 }
 
 void Service_readGpsSignal() {

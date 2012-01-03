@@ -32,7 +32,7 @@ typedef void (*HandleInterrupt)(void);
 typedef BOOL(*CheckInterrupt)(void);
 
 /* Check interrupt function prototype */
-typedef BOOL(*ClearInterruptFlag)(void);
+typedef void(*ClearInterruptFlag)(void);
 
 /*..........................................................................*/
 /* Interrupt handler class */
@@ -70,14 +70,12 @@ void InterruptHandler_create(InterruptHandler* handler,
 void InterruptHandler_initVectors();
 
 /*..........................................................................*/
-void InterruptHandler_addHI(InterruptHandler* handler,
-        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
-        ClearInterruptFlag clearFunction);
+void InterruptHandler_addHI(HandleInterrupt handleFunction,
+        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction);
 
 /*..........................................................................*/
-void InterruptHandler_addLO(InterruptHandler* handler,
-        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
-        ClearInterruptFlag clearFunction);
+void InterruptHandler_addLO(HandleInterrupt handleFunction,
+        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction);
 
 /*..........................................................................*/
 void InterruptHandler_handleActiveInterrupt();
