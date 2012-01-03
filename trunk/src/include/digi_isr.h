@@ -15,19 +15,27 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef service_h
-#define service_h
+#ifndef digi_isr_h
+#define digi_isr_h
 
-#include "mote.h"
-#include "digi.h"
-#include "hw_serial.h"
-#include "digi_proxy.h"
+#include "GenericTypeDefs.h"
 
-/* Mote* mote, Serial* serial, XBee* xbee, XBeeProxy* proxy */
-void Service_initMote();
+/**
+ *  Interrupt function executed on XBee wake up to send mote status
+ */
+void XBee_handleInterrupt(void);
 
-void Service_sendXbeePacket(XBeePacket* packet);
+/**
+ * Check XBee interrupt flag.
+ * Reads INTCON register to determine if xbee has interrupted execution.
+ *
+ * @return true when INTCON flag is True
+ */
+BOOL XBee_checkInterrupt(void);
 
-void Service_readGpsSignal();
+/**
+ * Clear XBee interrupt flag.
+ */
+void XBee_clearInterruptFlag(void);
 
-#endif  /* service_h */
+#endif /* digi_isr_h */

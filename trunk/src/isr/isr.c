@@ -91,33 +91,33 @@ void InterruptHandler_create(InterruptHandler* handler,
 }
 
 /*..........................................................................*/
+/**
+ * Init interrupt vectors size to zero.
+ * Doing this, avoids error on first power up checking for active interrupts.
+ */
 void InterruptHandler_initVectors() {
     interruptVectorHI.size = 0;
     interruptVectorLO.size = 0;
 }
 
 /*..........................................................................*/
-void InterruptHandler_addHI(InterruptHandler* handler,
-        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
-        ClearInterruptFlag clearFunction) {
+void InterruptHandler_addHI(HandleInterrupt handleFunction,
+        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction) {
     if (interruptVectorHI.size < MAX_INTERRUPT_HANDLERS) {
-        handler->handle = handleFunction;
-        handler->isActive = checkFunction;
-        handler->clearFlag = clearFunction;
-        interruptVectorHI.handlers[interruptVectorHI.size] = *handler;
+        interruptVectorHI.handlers[interruptVectorHI.size].handle = handleFunction;
+        interruptVectorHI.handlers[interruptVectorHI.size].isActive = checkFunction;
+        interruptVectorHI.handlers[interruptVectorHI.size].clearFlag = clearFunction;
         interruptVectorHI.size++;
     }
 }
 
 /*..........................................................................*/
-void InterruptHandler_addLO(InterruptHandler* handler,
-        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
-        ClearInterruptFlag clearFunction) {
+void InterruptHandler_addLO(HandleInterrupt handleFunction,
+        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction) {
     if (interruptVectorLO.size < MAX_INTERRUPT_HANDLERS) {
-        handler->handle = handleFunction;
-        handler->isActive = checkFunction;
-        handler->clearFlag = clearFunction;
-        interruptVectorLO.handlers[interruptVectorLO.size] = *handler;
+        interruptVectorLO.handlers[interruptVectorLO.size].handle = handleFunction;
+        interruptVectorLO.handlers[interruptVectorLO.size].isActive = checkFunction;
+        interruptVectorLO.handlers[interruptVectorLO.size].clearFlag = clearFunction;
         interruptVectorLO.size++;
     }
 }
