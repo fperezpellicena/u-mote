@@ -22,17 +22,17 @@
 #include "digi_proxy.h"
 
 /*..........................................................................*/
-#define MAX_INTERRUPT_HANDLERS      10            /* Max interrupt handlers */
+#define MAX_INTERRUPT_HANDLERS      1            /* Max interrupt handlers */
 
 /*..........................................................................*/
 /* Handler function prototype */
-typedef void (*HandleInterrupt)(void);
+typedef void rom (*HandleInterrupt)(void);
 
 /* Check interrupt function prototype */
-typedef BOOL(*CheckInterrupt)(void);
+typedef BOOL rom (*CheckInterrupt)(void);
 
 /* Check interrupt function prototype */
-typedef void(*ClearInterruptFlag)(void);
+typedef void rom (*ClearInterruptFlag)(void);
 
 /*..........................................................................*/
 /* Interrupt handler class */
@@ -53,13 +53,6 @@ struct InterruptHandlerVector {
     InterruptHandler handlers[MAX_INTERRUPT_HANDLERS];
     unsigned char size;
 };
-
-/*..........................................................................*/
-/* Interrupt vectors */
-InterruptHandlerVector interruptVectorHI;
-InterruptHandlerVector interruptVectorLO;
-/* Current active interrupt to dispath */
-InterruptHandler* activeInterrupt;
 
 /*..........................................................................*/
 void InterruptHandler_create(InterruptHandler* handler,

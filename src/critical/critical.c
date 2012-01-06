@@ -22,8 +22,9 @@ static unsigned char interruptSFR;
 
 void enterCritical(void) {
     interruptSFR = INTCON;
-    while (INTCONbits.GIE == 1){
-        INTCONbits.GIE == 0;
+    while (INTCONbits.GIEH || INTCONbits.GIEL){
+        INTCONbits.GIEH = 0;
+        INTCONbits.GIEL = 0;
     }
 }
 
