@@ -23,6 +23,13 @@
 #include "usb_device.h"
 #include "critical.h"
 
+/*..........................................................................*/
+/* Interrupt vectors */
+InterruptHandlerVector interruptVectorHI;
+InterruptHandlerVector interruptVectorLO;
+/* Current active interrupt to dispath */
+volatile InterruptHandler* activeInterrupt;
+
 
 /*..........................................................................*/
 

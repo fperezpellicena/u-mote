@@ -35,7 +35,8 @@ void XBee_handleInterrupt(void) {
     // ..........
     // ..........
     // Send packet
-    Service_sendXbeePacket(&packet);
+    // Service_sendXbeePacket(&packet);
+    LATDbits.LATD5 = !LATDbits.LATD5;
 }
 
 /**
@@ -45,12 +46,32 @@ void XBee_handleInterrupt(void) {
  * @return true when INTCON flag is True
  */
 BOOL XBee_checkInterrupt(void) {
-    return INTCONbits.INT0F;
+    return INTCON3bits.INT1IF;
 }
 
 /**
  * Clear XBee interrupt flag.
  */
 void XBee_clearInterruptFlag(void) {
-    INTCONbits.INT0F = 0;
+    INTCON3bits.INT1IF = 0;
+}
+
+// TODO Revisar INT0 interrupt
+
+void XBee_installInterrupt(void) {
+    TRISDbits.TRISD5 = 0;
+    RPINR1 = 21;
+    /* Input switch */
+    TRISDbits.TRISD4 = 1;
+    /* Falling edge */
+    INTCON2bits.INTEDG1 = 0;
+    /* Input interrupt enable */
+    INTCON3bits.INT1IE = 1;
+    /* Portb high interrupt priority */
+    INTCON3bits.INT1IP = 1;
+    /* enable all high priority interrupts */
+    RCONbits.IPEN = 1;
+    INTCONbits.GIEH = 1;
+    /* Clear flag */
+    INTCON3bits.INT1IF = 0;
 }
