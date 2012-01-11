@@ -272,4 +272,16 @@ struct NMEAOutput {
     unsigned char length;                                  /* Content length */
 };
 
+
+typedef struct Gps Gps;
+
+typedef void rom (*EnableGpsModule)(void);
+
+typedef BOOL rom (*ValidGpsMeasure)(void);
+
+struct Gps {
+    EnableGpsModule enable;
+    ValidGpsMeasure isValidPosition;
+};
+
 #endif /* gps_h */
