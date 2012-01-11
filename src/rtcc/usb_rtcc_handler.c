@@ -25,18 +25,39 @@ rom const char* SEPARATOR = "#";
 /**
  * Recupera la fecha/hora del buffer USB y la establece en el sistema.
  *
+ * Recibe una trama con el siguiente formato:
+ *      rtccconfig#mday#20#mon#5#year#11#hour#12#min#10#sec#00
+ * equivalente a: 20/5/2011 12:10:00
+ *
+ * TODO Se podría implementar comprobación de los datos recibidos
+ *
  * @param usbBuffer
  */
 void USBRtccHandler_parseRTCCData(char* usbBuffer) {
     rtccTimeDate timestamp;
     char* result = NULL;
+    // Skip rtcc SOF(start of frame)
     result = strtokpgmram(usbBuffer, (rom const char far*)SEPARATOR);
+    // Read mday
+    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
+    timestamp.f.mday = atoi(result);
+    // Read mon
+    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
+    timestamp.f.mon = atoi(result);
+    // Read year
+    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
+    timestamp.f.year = atoi(result);
+    // Read hour
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.hour = atoi(result);
+    // Read min
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.min = atoi(result);
-    // TODO Continuar con el resto
-    RtccWriteTimeDate(&timestamp,TRUE);
+    // Read sec
+    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
+    timestamp.f.sec = atoi(result);
+    // Write rtcc
+    RtccWriteTimeDate(&timestamp, TRUE);
 }
 
 /**
@@ -49,11 +70,11 @@ unsigned char USBRtccHandler_testRTCC(char* usbBuffer) {
     // Lee la fecha/hora
     rtccTimeDate timestamp;
     RtccReadTimeDate(&timestamp);
-    // Pone ddmmyy en el buffer
+    // Pone dd/mm/yy en el buffer
     usbBuffer[i++] = timestamp.f.mday;
     usbBuffer[i++] = timestamp.f.mon;
     usbBuffer[i++] = timestamp.f.year;
-    // Pone hhmmss
+    // Pone hh:mm:ss
     usbBuffer[i++] = timestamp.f.hour;
     usbBuffer[i++] = timestamp.f.min;
     usbBuffer[i++] = timestamp.f.sec;

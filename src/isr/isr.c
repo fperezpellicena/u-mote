@@ -28,7 +28,7 @@
 InterruptHandlerVector interruptVectorHI;
 InterruptHandlerVector interruptVectorLO;
 /* Current active interrupt to dispath */
-volatile InterruptHandler* activeInterrupt;
+InterruptHandler* activeInterrupt;
 
 
 /*..........................................................................*/

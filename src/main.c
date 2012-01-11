@@ -55,6 +55,7 @@
 /* Prototypes */
 static void BSP_initializeSystem(void);
 static void BSP_prepareSleep(void);
+static void BSP_installInterrupts(void);
 
 /*...........................................................................*/
 /* Main */
@@ -63,6 +64,8 @@ static void BSP_prepareSleep(void);
 void main(void) {
     // Init basic system
     BSP_initializeSystem();
+    // Install all system interrupts
+    BSP_installInterrupts();
 
     while (1) {
 #ifdef USB_ENABLED
@@ -86,6 +89,11 @@ void main(void) {
             // Ejecuta la interrupción que ha despertado al sistema
             InterruptHandler_handleActiveInterrupt();
         }
+#else
+        BSP_prepareSleep();
+        sleep();
+        // Ejecuta la interrupción que ha despertado al sistema
+        InterruptHandler_handleActiveInterrupt();
 #endif
     }
 }
@@ -107,7 +115,6 @@ static void BSP_initializeSystem(void) {
     ANCON1 = 0xFF; // Default all pins to digital
 
 
-
     // Configura PORTC<0> como salida de test
     TRISCbits.TRISC0 = 0;
     // COnfigura PORTB<4> como entrada para el conector USB
@@ -121,15 +128,6 @@ static void BSP_initializeSystem(void) {
 
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
-
-    /* Install interrupts */
-    // FIXME No queda muy bien esto
-    // Init interrupt vectors
-    InterruptHandler_initVectors();
-//    // Install interrupt handlers
-    InterruptHandler_addHI(&XBee_handleInterrupt, &XBee_checkInterrupt,
-            &XBee_clearInterruptFlag);
-    XBee_installInterrupt();
 }
 
 /*...........................................................................*/
@@ -140,4 +138,12 @@ static void BSP_prepareSleep(void) {
     LATCbits.LATC0 = 0;
     INTCONbits.GIEH = 1;
     INTCONbits.GIEL = 1;
+}
+
+/* Install interrupts */
+static void BSP_installInterrupts(void) {
+    // Init interrupt vectors
+    InterruptHandler_initVectors();
+    // Install xbee ISR
+    XBee_installInterrupt();
 }

@@ -20,6 +20,10 @@
 #include "qf_port.h"
 #include "digi_proxy.h"
 #include "service.h"
+#include "isr.h"
+
+/* Método privado para configurar la interrupción */
+static void XBee_configureInterrupt();
 
 #pragma udata digi_isr_data
 static XBeePacket packet;
@@ -36,7 +40,7 @@ void XBee_handleInterrupt(void) {
     // ..........
     // Send packet
     // Service_sendXbeePacket(&packet);
-    LATDbits.LATD5 = !LATDbits.LATD5;
+    LATDbits.LATD5 = !LATDbits.LATD5; // Test
 }
 
 /**
@@ -56,10 +60,11 @@ void XBee_clearInterruptFlag(void) {
     INTCON3bits.INT1IF = 0;
 }
 
-// TODO Revisar INT0 interrupt
-
-void XBee_installInterrupt(void) {
+/** TODO Revisar INT0 interrupt ahora funciona con INT1*/
+static void XBee_configureInterrupt() {
+    /* Output led */
     TRISDbits.TRISD5 = 0;
+    /* Remap pin to INT1*/
     RPINR1 = 21;
     /* Input switch */
     TRISDbits.TRISD4 = 1;
@@ -74,4 +79,13 @@ void XBee_installInterrupt(void) {
     INTCONbits.GIEH = 1;
     /* Clear flag */
     INTCON3bits.INT1IF = 0;
+}
+
+/** Install interrupt */
+void XBee_installInterrupt(void) {
+    // Configure interrupt
+    XBee_configureInterrupt();
+    // Install interrupt handlers
+    InterruptHandler_addHI(&XBee_handleInterrupt, &XBee_checkInterrupt,
+            &XBee_clearInterruptFlag);
 }
