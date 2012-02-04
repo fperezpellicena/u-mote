@@ -52,26 +52,19 @@ char write(unsigned char value) {
 
 unsigned char read(unsigned char ack) {
     unsigned char i, val = 0;
-    //printf("Valor inicial: %u \r\n", val);
     DATA_DDR = 1;
     DATA = 1;
-    //Write1USART('X');
     for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
         Delay1KTCYx(3);
         SCK = 1; //clk for SENSI-BUS
         if (PORTBbits.RB1) {
             val = (val | i); //read bit
-            //      Write1USART('1');
-        } else {
-            //    Write1USART('0');
-        }
+        } 
         Delay1KTCYx(3);
         SCK = 0;
     }
-    //Write1USART('Y');
 
-    //Write1USART('Z');
     if (ack) {
         DATA_DDR = 0;
         DATA = 0; //in case of "ack==1" pull down DATA-Line
@@ -81,7 +74,6 @@ unsigned char read(unsigned char ack) {
     Delay1KTCYx(3); //pulswith approx. 5 us
     SCK = 0;
     Delay1KTCYx(1); //observe hold time
-    //printf("\r\nValor leído: %u \r\n", val);
     return val;
 }
 
@@ -143,8 +135,6 @@ char writeStatusRegister(unsigned char *p_value) {
 
 char measure(int *p_value, unsigned char *p_checksum, unsigned char mode) {
     unsigned char error = 0;
-    // unsigned int i;
-    int val;
     start(); //transmission start
     switch (mode) { //send command to sensor
         case TEMP: error += write(MEASURE_TEMP);
@@ -156,20 +146,10 @@ char measure(int *p_value, unsigned char *p_checksum, unsigned char mode) {
     Delay1KTCYx(5);
     DATA_DDR = 1;
     while (PORTBbits.RB1 == 1);
-    LATDbits.LATD1 = 1;
-
-    //    val = read(ACK);
-    //    val = val << 8;
-    //    printf("\nValor devuelto 1: %i \r\n", val);
-    //
-    //    val = val | read(ACK);
-    //     printf("\nValor devuelto 2: %u \r\n", val);
-    //     printf("\nValor devuelto 3: %u \r\n", read(NACK));
 
     *(p_value) = read(ACK); //read the first byte (MSB)
     *(p_value) = *(p_value) << 8;
     *(p_value) += read(ACK); //read the second byte (LSB)
-    // printf("Valor: %u \r\n", *(p_value));
     *p_checksum = read(NACK); //read checksum
 
     return error;
