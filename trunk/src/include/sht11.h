@@ -24,13 +24,13 @@
 #define STAT_REG_W      0x06    		/* Write status register command */
 #define RESET           0x1E    		/* Reset */
 
-#define ACK 1							/* Send ACK */
-#define NACK 0							/* Not send ACK */
+#define ACK 1					/* Send ACK */
+#define NACK 0					/* Not send ACK */
 
-#define DATA        TRISBbits.TRISB1	/* Data tx/rx pin */
+#define DATA        TRISBbits.TRISB1            /* Data tx/rx pin */
 #define DATA_DDR    LATBbits.LATB1		/* Data direction register */
 #define SCK         LATBbits.LATB2		/* Clk pin */
-#define SCK_DDR     TRISBbits.TRISB2	/* Clk direction register */
+#define SCK_DDR     TRISBbits.TRISB2            /* Clk direction register */
 
 /* Sensor measures temperature and humidity */
 enum Modes {
@@ -43,7 +43,7 @@ typedef union {
 } value;
 
 /**
- *	Generates a transmission start
+ * Generates a transmission start
  *       _____         ________
  * DATA:      |_______|
  *           ___     ___
