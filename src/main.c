@@ -45,11 +45,14 @@
 #include "Compiler.h"
 #include "hw_profile.h"
 #include "digi_isr.h"
+#include "gps_isr.h"
 
 #ifdef USB_ENABLED
 #include "usb_device.h"
 #include "power.h"
 #endif
+
+
 
 /*...........................................................................*/
 /* Prototypes */
@@ -146,4 +149,6 @@ static void BSP_installInterrupts(void) {
     InterruptHandler_initVectors();
     // Install xbee ISR
     XBee_installInterrupt();
+    // Install gps ISR
+    Gps_installInterrupt();
 }

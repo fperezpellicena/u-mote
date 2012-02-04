@@ -15,36 +15,17 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  *
  * On power-up, GPS module sends out through UART:
- *
- *          $PMTK011,MTKGPS*08
- *          $PMTK010,001*2E         (STARTUP MESSAGE)
- *
- * and starts to send gps values like:
- *
- *          $GPGGA,235945.036,,,,,0,0,,,M,,M,,*41
- *          $GPGSA,A,1,,,,,,,,,,,,,,,*1E
- *          $GPGSV,1,1,00*79
- *          $GPRMC,235945.036,V,,,,,0.00,0.00,050180,,,N*48
- *
- * and so on.
- *
- * To stop the module transmit continuously, send:
- *
- *           $PMTK314,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28
- *
- * To receive minimal positioning info:
- *
- *          $PMTK314,5,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28
  */
-#ifndef gps_h
-#define gps_h
+
+#ifndef gps_api_h
+#define gps_api_h
 
 #include "GenericTypeDefs.h"
 
 /*...........................................................................*/
 #define NMEA_MAX_COMMAND_LENGTH 50                  /* NMEA Max length frame */
-#define NMEA_PREAMBLE           "$"                 /* NMEA command preamble */
-#define NMEA_CHK_CHAR           "*"                    /* NMEA chk delimiter */
+#define NMEA_PREAMBLE           '$'                 /* NMEA command preamble */
+#define NMEA_CHK_CHAR           '*'                    /* NMEA chk delimiter */
 
 /*
  * This will identify for the NMEA parser that it is command for MediaTek.
@@ -230,7 +211,7 @@ void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
  * RMC - Recommended Minimum Specific GNSS Data.
  * Time, date, position, course and speed data.
  * Example:
- *  $GPRMC,114353.000,A,6016.3245,N,02458.3270,E,0.01,0.00,121009,,,A*69
+ *  $GPRMC,114353.000,A,6016.3245,$GPGGA,114353.000,6016.3245,N,02458.3270,E,1,10,0.81,35.2,M,19.5,M,,*50N,02458.3270,E,0.01,0.00,121009,,,A*69
  * Format:
  *  $GPRMC,hhmmss.dd,S,xxmm.dddd,<N|S>,yyymm.dddd,<E|W>,s.s,h.h,ddmmyy,d.d,
  *  <E|W>,M*hh<CR><LF>
@@ -268,20 +249,16 @@ void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
 typedef struct NMEAOutput NMEAOutput;
 
 struct NMEAOutput {
-    unsigned char data[NMEA_OUTPUT_MAX_LENGTH];                   /* Content */
-    unsigned char length;                                  /* Content length */
+    unsigned char data[NMEA_OUTPUT_MAX_LENGTH]; /* Content */
+    unsigned char length; /* Content length */
+    unsigned char rxState; /* Read status */
+    unsigned int chkRead; /* Checksum */
+    unsigned int chkCalculated; /* Checksum */
 };
 
-
-typedef struct Gps Gps;
-
-typedef void rom (*EnableGpsModule)(void);
-
-typedef BOOL rom (*ValidGpsMeasure)(void);
-
-struct Gps {
-    EnableGpsModule enable;
-    ValidGpsMeasure isValidPosition;
+enum NMEAReadStatus {
+    NMEA_PACKET_PREAMBLE, NMEA_PACKET_DATA, NMEA_PACKET_CRC_1,
+    NMEA_PACKET_CRC_2
 };
 
-#endif /* gps_h */
+#endif /* gps_api_h */

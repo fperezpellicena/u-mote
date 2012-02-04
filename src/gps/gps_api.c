@@ -17,8 +17,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "GenericTypeDefs.h"
-#include "gps.h"
+#include "gps_api.h"
 #include "util.h"
 
 /*..........................................................................*/
@@ -176,4 +175,3 @@ void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_OUTPUT,
             data, NMEA_OUTPUT_CFG_LENGTH);
 }
-

@@ -56,10 +56,10 @@ void high_ISR(void) {
 #pragma interrupt toggle_light
 
 void toggle_light(void) {
-    if(INTCONbits.RBIF == 1) {
+    if(INTCON3bits.INT1IF == 1) {
         reg = PORTB;
         _asm nop _endasm
-        INTCONbits.RBIF = 0;
+        INTCON3bits.INT1IF = 0;
         /* Toggle led */
 LATEbits.LATE0 = ~LATEbits.LATE0;
 }
@@ -68,17 +68,20 @@ LATEbits.LATE0 = ~LATEbits.LATE0;
 void main(void) {
     /* Output led */
     TRISEbits.TRISE0 = 0;
+    RPINR1 = 21;
     /* Input switch */
-    TRISBbits.TRISB4 = 1;
+    TRISDbits.TRISD4 = 1;
+    /* Falling edge */
+    INTCON2bits.INTEDG1 = 0;
     /* Input interrupt enable */
-    INTCONbits.RBIE = 1;
+    INTCON3bits.INT1IE = 1;
     /* Portb high interrupt priority */
-    INTCON2bits.RBIP = 1;
+    INTCON3bits.INT1IP = 1;
     /* enable all high priority interrupts */
     RCONbits.IPEN = 1;
     INTCONbits.GIEH = 1;
     /* Clear flag */
-    INTCONbits.RBIF = 0;
+    INTCON3bits.INT1IF = 0;
 
     while (1) {
         WDTCONbits.REGSLP = 1;
