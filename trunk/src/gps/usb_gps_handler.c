@@ -17,7 +17,7 @@
 
 #include "GenericTypeDefs.h"
 #include "usb_gps_handler.h"
-#include "gps.h"
+#include "gps_api.h"
 #include "gps_proxy.h"
 
 NMEACommandPacket command;

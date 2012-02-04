@@ -22,11 +22,21 @@
 #include "service.h"
 #include "isr.h"
 
+#define GPS_ENABLED 1
+
+#ifdef GPS_ENABLED
+    #include "gps_isr.h"
+    #include "gps_api.h"
+#endif
+
 /* Método privado para configurar la interrupción */
 static void XBee_configureInterrupt();
 
 #pragma udata digi_isr_data
-static XBeePacket packet;
+static XBeePacket xbeePacket;
+#ifdef GPS_ENABLED
+    static NMEAOutput gpsData;
+#endif
 #pragma udata
 
 /**
@@ -38,6 +48,9 @@ void XBee_handleInterrupt(void) {
     // Init XBeePacket
     // ..........
     // ..........
+#ifdef GPS_ENABLED
+    Gps_enable();
+#endif
     // Send packet
     // Service_sendXbeePacket(&packet);
     LATDbits.LATD5 = !LATDbits.LATD5; // Test

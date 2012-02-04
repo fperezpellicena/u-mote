@@ -13,26 +13,34 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 
-#ifndef gps_proxy_h
-#define gps_proxy_h
+#ifndef gps_isr_h
+#define gps_isr_h
 
-#include "gps_api.h"
-#include "hw_serial.h"
+#include "GenericTypeDefs.h"
 
+/**
+ * Handle Gps interrupt
+ */
+void Gps_handleInterrupt(void);
 
-typedef struct GpsProxy GpsProxy;
+/**
+ * Check for Gps valid signal
+ *
+ * @return TRUE when gps gets valid satellite fixed position
+ */
+BOOL Gps_checkInterrupt(void);
 
-struct GpsProxy {
-    Serial* serial;
-};
+/**
+ * Clear interrupt flag after ISR processing
+ */
+void Gps_clearInterruptFlag(void);
 
-void GpsProxy_create(GpsProxy * const proxy, Serial * const serial);
+/**
+ * Install Gps interrupt on interrupt vector
+ */
+void Gps_installInterrupt(void);
 
-BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet);
-
-void GpsProxy_sendCommand(GpsProxy * const proxy, NMEACommandPacket* packet);
-
-
-#endif /* gps_proxy_h */
+#endif /* gps_h */

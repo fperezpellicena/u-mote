@@ -16,13 +16,45 @@
  */
 
 #include "gps_proxy.h"
+#include "gps_api.h"
 
 void GpsProxy_create(GpsProxy * const proxy, Serial * const serial) {
     proxy->serial = serial;
 }
 
-void GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
-
+BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
+     uint8_t data;
+    while (Serial_available(proxy->serial)) {
+        data = Serial_read(proxy->serial);
+        switch(packet->rxState) {
+            case NMEA_PACKET_PREAMBLE:  //$
+                if(data == NMEA_PREAMBLE) {
+                    packet->rxState = NMEA_PACKET_DATA;
+                }
+                break;
+            case NMEA_PACKET_DATA:
+                packet->data[packet->length] = data;
+                packet->length += 1;
+                // Checksum is x'or-ed
+                packet->chkCalculated ^= data;
+                if(data == NMEA_CHK_CHAR) {
+                    packet->rxState = NMEA_PACKET_CRC_1;
+                }
+                break;
+            case NMEA_PACKET_CRC_1:
+                // High chk byte
+                packet->chkRead = (data << 8);
+                break;
+            case NMEA_PACKET_CRC_2:
+                // Low chk byte
+                packet->chkRead += data;
+                if(packet->chkRead == packet->chkCalculated) {
+                    return true;
+                }
+                return false;
+                break;
+        }
+    }
 }
 
 void GpsProxy_sendCommand(GpsProxy * const proxy, NMEACommandPacket* packet) {
