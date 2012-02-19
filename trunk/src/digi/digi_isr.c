@@ -21,8 +21,15 @@
 #include "digi_proxy.h"
 #include "service.h"
 #include "isr.h"
+#include <rtcc.h>
 
-#define GPS_ENABLED 1
+// FIXME Esto posiblemente no va aquí
+#define GPS_ENABLED
+#define SHT_ENABLED
+
+#ifdef SHT_ENABLED
+    #include "sht11.h"
+#endif
 
 #ifdef GPS_ENABLED
     #include "gps_isr.h"
@@ -32,11 +39,19 @@
 /* Método privado para configurar la interrupción */
 static void XBee_configureInterrupt();
 
+extern XBeePacket xbeePacket;       /* XBee packet to send */
+
 #pragma udata digi_isr_data
-static XBeePacket xbeePacket;
-#ifdef GPS_ENABLED
-    static NMEAOutput gpsData;
+static rtccTimeDate timestampData;  /* Timestamp data */
+
+#ifdef SHT_ENABLED
+    static Sht11 shtData;           /* SHT11 sensor data */
 #endif
+
+#ifdef GPS_ENABLED
+    static NMEAOutput gpsData;      /* GPS data */
+#endif
+    
 #pragma udata
 
 /**
@@ -46,13 +61,17 @@ static XBeePacket xbeePacket;
  */
 void XBee_handleInterrupt(void) {
     // Init XBeePacket
-    // ..........
-    // ..........
+    XBee_resetPacket(&xbeePacket);
+    // Read timestamp from RTCC
+    RtccReadTimeDate(&timestampData);
+#ifdef SHT_ENABLED
+    Sht11_measure(&shtData);
+#endif
 #ifdef GPS_ENABLED
     Gps_enable();
 #endif
     // Send packet
-    // Service_sendXbeePacket(&packet);
+    Service_sendXbeePacket(&xbeePacket);
     LATDbits.LATD5 = !LATDbits.LATD5; // Test
 }
 

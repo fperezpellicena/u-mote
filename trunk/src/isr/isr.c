@@ -27,7 +27,7 @@
 /* Interrupt vectors */
 InterruptHandlerVector interruptVectorHI;
 InterruptHandlerVector interruptVectorLO;
-/* Current active interrupt to dispath */
+/* Current active interrupt to dispatch */
 InterruptHandler* activeInterrupt;
 
 
@@ -38,6 +38,23 @@ InterruptHandler* activeInterrupt;
 
 void ISR_hi(void) {
     unsigned char index;
+    // Execute USB tasks only if usb is plugged
+#ifdef USB_INTERRUPT
+    if (USB_PLUGGED) {
+        USBDeviceTasks();
+    } else {
+        for (index = 0; index < interruptVectorHI.size; index++) {
+            // Check for active interrupt
+            if (interruptVectorHI.handlers[index].isActive()) {
+                // Clear flag
+                interruptVectorHI.handlers[index].clearFlag();
+                // Set active interrupt
+                activeInterrupt = &interruptVectorHI.handlers[index];
+                break;
+            }
+        }
+    }
+#else
     for (index = 0; index < interruptVectorHI.size; index++) {
         // Check for active interrupt
         if (interruptVectorHI.handlers[index].isActive()) {
@@ -48,11 +65,6 @@ void ISR_hi(void) {
             break;
         }
     }
-    // Execute USB tasks only if usb is plugged
-#if defined(USB_INTERRUPT)
-    if (USB_PLUGGED) {
-        USBDeviceTasks();
-    }
 #endif
 }
 
@@ -62,6 +74,20 @@ void ISR_hi(void) {
 
 void ISR_lo(void) {
     unsigned char index;
+#ifdef USB_INTERRUPT
+    if (!USB_PLUGGED) {
+        for (index = 0; index < interruptVectorLO.size; index++) {
+            // Check for active interrupt
+            if (interruptVectorLO.handlers[index].isActive()) {
+                // Clear flag
+                interruptVectorLO.handlers[index].clearFlag();
+                // Set active interrupt
+                activeInterrupt = &interruptVectorLO.handlers[index];
+                break;
+            }
+        }
+    }
+#else
     for (index = 0; index < interruptVectorLO.size; index++) {
         // Check for active interrupt
         if (interruptVectorLO.handlers[index].isActive()) {
@@ -72,6 +98,7 @@ void ISR_lo(void) {
             break;
         }
     }
+#endif
 }
 
 /*..........................................................................*/
@@ -98,6 +125,7 @@ void InterruptHandler_create(InterruptHandler* handler,
 }
 
 /*..........................................................................*/
+
 /**
  * Init interrupt vectors size to zero.
  * Doing this, avoids error on first power up checking for active interrupts.

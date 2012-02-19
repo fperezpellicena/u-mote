@@ -26,10 +26,19 @@ rom const char* SEPARATOR = "#";
  * Recupera la fecha/hora del buffer USB y la establece en el sistema.
  *
  * Recibe una trama con el siguiente formato:
- *      rtccconfig#mday#20#mon#5#year#11#hour#12#min#10#sec#00
+ *      rtccconfig#mday#12#wday#6#mon#2#year#12#hour#12#min#10#sec#00
+ *      rtccconfig#12#06#02#12#12#10#00
  * equivalente a: 20/5/2011 12:10:00
  *
  * TODO Se podría implementar comprobación de los datos recibidos
+ * PreCondition:    rtccTimeDate structure fields have to have proper values:
+ *      sec:  BCD codification, 00-59
+ *      min:  BCD codification, 00-59
+ *      hour: BCD codification, 00-24
+ *      wday: BCD codification, 00-06
+ *      mday: BCD codification, 01-31
+ *      mon: BCD codification, 01-12
+ *      year: BCD codification, 00-99
  *
  * @param usbBuffer
  */
@@ -41,6 +50,9 @@ void USBRtccHandler_parseRTCCData(char* usbBuffer) {
     // Read mday
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.mday = atoi(result);
+    // Read wday
+    result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
+    timestamp.f.wday = atoi(result);
     // Read mon
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.mon = atoi(result);
@@ -57,7 +69,11 @@ void USBRtccHandler_parseRTCCData(char* usbBuffer) {
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.sec = atoi(result);
     // Write rtcc
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    RTCCFGbits.RTCWREN = 1;
     RtccWriteTimeDate(&timestamp, TRUE);
+    RTCCFGbits.RTCEN = 1;
 }
 
 /**
@@ -69,6 +85,10 @@ unsigned char USBRtccHandler_testRTCC(char* usbBuffer) {
     unsigned char i = 0;
     // Lee la fecha/hora
     rtccTimeDate timestamp;
+    // if already in the middle of SYNC, wait for next period
+    while (RTCCFGbits.RTCSYNC != 1);
+    // wait while RTCC registers are unsafe to read
+    while (RTCCFGbits.RTCSYNC == 1);
     RtccReadTimeDate(&timestamp);
     // Pone dd/mm/yy en el buffer
     usbBuffer[i++] = timestamp.f.mday;

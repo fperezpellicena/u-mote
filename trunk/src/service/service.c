@@ -15,6 +15,7 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <rtcc.h>
 #include "service.h"
 #include "bsp.h"
 #include "hw_adc.h"
@@ -23,11 +24,14 @@
 
 /*..........................................................................*/
 /* All this variables have External linkage and can be used in any file */
+#pragma udata mote_data
 Mote mote;
 Serial serial;
 XBee xbee;
-XBeeProxy xbeeProxy;    
+XBeePacket xbeePacket;
+XBeeProxy xbeeProxy;
 GpsProxy gpsProxy;
+#pragma
 /*..........................................................................*/
 
 /**
@@ -40,6 +44,7 @@ GpsProxy gpsProxy;
  * @param proxy		ponter to proxy struct
  */
 void Service_initMote() {
+    rtccTimeDate d;
     /* BSP init */
     BSP_init();
 
@@ -61,6 +66,8 @@ void Service_initMote() {
     /* Create Mote */
     Mote_create(&mote, &xbeeProxy);
 
+    /* Enable RTCC */
+    RTCCFGbits.RTCEN = 1; // enable RTCC module
 }
 
 /**
@@ -72,14 +79,18 @@ void Service_sendXbeePacket(XBeePacket* packet) {
     XBeeProxy_sendPacket(&xbeeProxy, packet);
 }
 
+boolean Service_readXbeePacket(XBeePacket* packet) {
+    return XBeeProxy_readPacket(&xbeeProxy, packet);
+}
+
 void Service_readGpsSignal() {
 
-//    NMEAOutput nmeaOutput;
-//    XBeePacket packet;
-//    // Lee la señal GPS
-//    GpsProxy_readOutput(&gpsProxy, &nmeaOutput);
-//    // Crea la trama XBee
-//    XBee_createTransmitRequestPacket(&packet, ..., nmeaOutput.data, nmeaOutput.length, ...);
-//    // Envía la trama
-//    XBeeProxy_sendPacket(&xbeeProxy, &packet);
+    //    NMEAOutput nmeaOutput;
+    //    XBeePacket packet;
+    //    // Lee la señal GPS
+    //    GpsProxy_readOutput(&gpsProxy, &nmeaOutput);
+    //    // Crea la trama XBee
+    //    XBee_createTransmitRequestPacket(&packet, ..., nmeaOutput.data, nmeaOutput.length, ...);
+    //    // Envía la trama
+    //    XBeeProxy_sendPacket(&xbeeProxy, &packet);
 }

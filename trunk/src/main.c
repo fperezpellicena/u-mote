@@ -18,17 +18,21 @@
 /*...........................................................................*/
 /* Pragmas */
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
-#pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
+//#pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
 #pragma config STVREN = ON          //stack overflow/underflow reset enabled
 #pragma config XINST = ON           //Extended instruction set disabled
 #pragma config CPUDIV = OSC1        //No CPU system clock divide
 #pragma config CP0 = OFF            //Program memory is not code-protected
-#pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
+//#pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
+
+#pragma config OSC = INTOSCPLL      // Internal OSC(8mhz), PLL enabled by soft
+#pragma config PLLDIV = 2           // Divide By 2(4 Mhz) to generate 96Mhz
+
 #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
 #pragma config IESO = OFF           //Two-Speed Start-up disabled
 #pragma config WDTPS = 32768        //1:32768
 #pragma config DSWDTOSC = INTOSCREF //DSWDT uses INTOSC/INTRC as clock
-#pragma config RTCOSC = T1OSCREF    //RTCC uses T1OSC/T1CKI as clock
+#pragma config RTCOSC = INTOSCREF   //RTCC uses INTRC
 #pragma config DSBOREN = OFF        //Zero-Power BOR disabled in Deep Sleep
 #pragma config DSWDTEN = OFF        //Disabled
 #pragma config DSWDTPS = 8192       //1:8,192 (8.5 seconds)
@@ -44,8 +48,11 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "hw_profile.h"
+// Fuentes de interrupción asíncronas
 #include "digi_isr.h"
 #include "gps_isr.h"
+// Clase de servicio
+#include "service.h"
 
 #ifdef USB_ENABLED
 #include "usb_device.h"
@@ -131,6 +138,9 @@ static void BSP_initializeSystem(void) {
 
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
+
+    // Initializes mote API
+    Service_initMote();
 }
 
 /*...........................................................................*/

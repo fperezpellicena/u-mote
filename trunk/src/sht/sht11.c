@@ -23,139 +23,151 @@
 #include <math.h>
 #include <stdlib.h>
 
-char write(unsigned char value) {
+char Sht11_write(unsigned char value) {
     unsigned char i, error = 0;
     //shift bit for masking
     for (i = 0x80; i > 0; i /= 2) {
         if (i & value) {
-            DATA = 1; //masking value with i , write to SENSI-BUS
+            SHT_DATA = 1; //masking value with i , write to SENSI-BUS
         } else {
-            DATA = 0;
+            SHT_DATA = 0;
         }
         Delay1KTCYx(1); //observe setup time
-        SCK = 1; //clk for SENSI-BUS
+        SHT_SCK = 1; //clk for SENSI-BUS
         Delay1KTCYx(3); //pulswith approx. 5 us
-        SCK = 0;
+        SHT_SCK = 0;
         Delay1KTCYx(1); //observe hold time
     }
-    DATA = 1; //release DATA-line
+    SHT_DATA = 1; //release SHT_DATA-line
     Delay1KTCYx(1); //observe setup time
-    SCK = 1; //clk #9 for ack
+    SHT_SCK = 1; //clk #9 for ack
     Delay1KTCYx(2);
     // To read SHT ack(low), change pin direction
-    DATA_DDR = 1;
+    SHT_DATA_DDR = 1;
     // Read pin
-    error = PORTBbits.RB1; //check ack (DATA will be pulled down by SHT11)
-    SCK = 0;
+    error = PORTBbits.RB1; //check ack (SHT_DATA will be pulled down by SHT11)
+    SHT_SCK = 0;
     return error; //error=1 in case of no acknowledge
 }
 
-unsigned char read(unsigned char ack) {
+unsigned char Sht11_read(unsigned char ack) {
     unsigned char i, val = 0;
-    DATA_DDR = 1;
-    DATA = 1;
+    SHT_DATA_DDR = 1;
+    SHT_DATA = 1;
     for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
         Delay1KTCYx(3);
-        SCK = 1; //clk for SENSI-BUS
+        SHT_SCK = 1; //clk for SENSI-BUS
         if (PORTBbits.RB1) {
             val = (val | i); //read bit
-        } 
+        }
         Delay1KTCYx(3);
-        SCK = 0;
+        SHT_SCK = 0;
     }
 
     if (ack) {
-        DATA_DDR = 0;
-        DATA = 0; //in case of "ack==1" pull down DATA-Line
+        SHT_DATA_DDR = 0;
+        SHT_DATA = 0; //in case of "ack==1" pull down SHT_DATA-Line
     }
     Delay1KTCYx(2); //observe setup time
-    SCK = 1; //clk #9 for ack
+    SHT_SCK = 1; //clk #9 for ack
     Delay1KTCYx(3); //pulswith approx. 5 us
-    SCK = 0;
+    SHT_SCK = 0;
     Delay1KTCYx(1); //observe hold time
     return val;
 }
 
 //----------------------------------------------------------------------------------
 
-void start(void) {
-    DATA = 1;
-    SCK = 0; //Initial state
+void Sht11_start(void) {
+    SHT_DATA = 1;
+    SHT_SCK = 0; //Initial state
     Delay1KTCYx(1);
-    SCK = 1;
+    SHT_SCK = 1;
     Delay1KTCYx(1);
-    DATA = 0;
+    SHT_DATA = 0;
     Delay1KTCYx(1);
-    SCK = 0;
+    SHT_SCK = 0;
     Delay1KTCYx(3);
-    SCK = 1;
+    SHT_SCK = 1;
     Delay1KTCYx(1);
-    DATA = 1;
+    SHT_DATA = 1;
     Delay1KTCYx(1);
-    SCK = 0;
+    SHT_SCK = 0;
 }
 
-void reset(void) {
+void Sht11_reset(void) {
     unsigned char i;
-    DATA = 1;
-    SCK = 0; //Initial state
-    for (i = 0; i < 9; i++) //9 SCK cycles
+    SHT_DATA = 1;
+    SHT_SCK = 0; //Initial state
+    for (i = 0; i < 9; i++) //9 SHT_SCK cycles
     {
-        SCK = 1;
+        SHT_SCK = 1;
         Delay1KTCYx(1);
-        SCK = 0;
+        SHT_SCK = 0;
     }
-    start(); //transmission start
+    Sht11_start(); //transmission start
 }
 
-char softReset(void) {
+char Sht11_softReset(void) {
     unsigned char error = 0;
-    reset(); //reset communication
-    error += write(RESET); //send RESET-command to sensor
+    Sht11_reset(); //reset communication
+    error += Sht11_write(SHT_RESET); //send SHT_RESET-command to sensor
     return error; //error=1 in case of no response form the sensor
 }
 
-char readStatusRegister(unsigned char *p_value, unsigned char *p_checksum) {
+char Sht11_readStatusRegister(unsigned char *p_value, unsigned char *p_checksum) {
     unsigned char error = 0;
-    start(); //transmission start
-    error = write(STAT_REG_R); //send command to sensor
-    *p_value = read(ACK); //read status register (8-bit)
-    *p_checksum = read(NACK); //read checksum (8-bit)
+    Sht11_start(); //transmission start
+    error = Sht11_write(SHT_STAT_REG_R); //send command to sensor
+    *p_value = Sht11_read(SHT_ACK); //read status register (8-bit)
+    *p_checksum = Sht11_read(SHT_NACK); //read checksum (8-bit)
     return error; //error=1 in case of no response form the sensor
 }
 
-char writeStatusRegister(unsigned char *p_value) {
+char Sht11_writeStatusRegister(unsigned char *p_value) {
     unsigned char error = 0;
-    start(); //transmission start
-    error += write(STAT_REG_W); //send command to sensor
-    error += write(*p_value); //send value of status register
+    Sht11_start(); //transmission start
+    error += Sht11_write(SHT_STAT_REG_W); //send command to sensor
+    error += Sht11_write(*p_value); //send value of status register
     return error; //error>=1 in case of no response form the sensor
 }
 
-char measure(int *p_value, unsigned char *p_checksum, unsigned char mode) {
+char Sht11_measure(Sht11* shtData) {
     unsigned char error = 0;
-    start(); //transmission start
+    // Get measures
+    error += Sht11_measureParam((int*) &shtData->temperature.i, &shtData->temp_chk, SHT_MEASURE_TEMP);
+    error += Sht11_measureParam((int*) &shtData->humidity.i, &shtData->humi_chk, SHT_MEASURE_HUMI);
+    // Calculate compensated values
+    shtData->temperature.f = (float) shtData->temperature.i; //converts integer to float
+    shtData->humidity.f = (float) shtData->humidity.i; //converts integer to float
+    Sht11_calculate(&shtData->humidity.f, &shtData->temperature.f); //calculate humidity,temperature
+    return error;
+}
+
+char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char mode) {
+    unsigned char error = 0;
+    Sht11_start(); //transmission start
     switch (mode) { //send command to sensor
-        case TEMP: error += write(MEASURE_TEMP);
+        case SHT_TEMP: error += Sht11_write(SHT_MEASURE_TEMP);
             break;
-        case HUMI: error += write(MEASURE_HUMI);
+        case SHT_HUMI: error += Sht11_write(SHT_MEASURE_HUMI);
             break;
         default: break;
     }
     Delay1KTCYx(5);
-    DATA_DDR = 1;
+    SHT_DATA_DDR = 1;
     while (PORTBbits.RB1 == 1);
 
-    *(p_value) = read(ACK); //read the first byte (MSB)
+    *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
     *(p_value) = *(p_value) << 8;
-    *(p_value) += read(ACK); //read the second byte (LSB)
-    *p_checksum = read(NACK); //read checksum
+    *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
+    *p_checksum = Sht11_read(SHT_NACK); //read checksum
 
     return error;
 }
 
-void calculate(float *p_humidity, float *p_temperature) {
+void Sht11_calculate(float *p_humidity, float *p_temperature) {
     const float C1 = -2.0468; // for 12 Bit RH
     const float C2 = +0.0367; // for 12 Bit RH
     const float C3 = -0.0000015955; // for 12 Bit RH
@@ -175,7 +187,7 @@ void calculate(float *p_humidity, float *p_temperature) {
     *p_humidity = rh_true; //return humidity[%RH]
 }
 
-void calculateHumidity(float* p_humidity) {
+void Sht11_calculateHumidity(float* p_humidity) {
     const float C1 = 4;
     const float C2 = -0.0405;
     const float C3 = 0.0000028;
@@ -183,7 +195,7 @@ void calculateHumidity(float* p_humidity) {
     *p_humidity = C1 * measure + C2 * measure + C3 * measure * measure;
 }
 
-void calculateTemperature(float* p_temp) {
+void Sht11_calculateTemperature(float* p_temp) {
     const float D1 = 39.64;
     const float D2 = -0.01;
     float measure = *p_temp;
