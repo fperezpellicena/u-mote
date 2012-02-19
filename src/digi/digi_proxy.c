@@ -92,7 +92,7 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
                 }
         }
     }
-    return true;
+    return false;
 }
 
 /*..........................................................................*/

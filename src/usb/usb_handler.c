@@ -31,6 +31,7 @@
 #pragma udata
 char USB_In_Buffer[64];
 char USB_Out_Buffer[64];
+#pragma
 
 /**
  * Implementación de la función de procesamiento de información USB
@@ -41,8 +42,9 @@ void USB_process(void) {
     char RTCC_TEST[] = "rtcctest";
     char GPS_CONF[] = "gpsconfig";
     char GPS_TEST[] = "gpsconfig";
-//    char SENSOR_LIST[] = "sensorlist";
-//    char SENSOR_TEST[] = "sensortest";
+    //    char SENSOR_LIST[] = "sensorlist";
+    //    char SENSOR_TEST[] = "sensortest";
+    char XBEE_JOIN[] = "xbeejoin";
     BYTE numBytesRead;
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
@@ -50,6 +52,7 @@ void USB_process(void) {
     }
     // Recibe un buffer de tamaño determinado
     numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
+
     // Si ha leído datos
     if (numBytesRead != 0) {
         if (strncmp(USB_Out_Buffer, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
@@ -60,20 +63,24 @@ void USB_process(void) {
             USBGpsHandler_parseGPSData(USB_Out_Buffer);
         } else if (strncmp(USB_Out_Buffer, GPS_TEST, strlen(GPS_TEST)) == 0) {
             length = USBGpsHandler_testGPS(USB_In_Buffer);
+        } else if (strncmp(USB_Out_Buffer, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
+            length = USBXBeeHandler_join(USB_In_Buffer);
         }/* else if (strncmp(USB_Out_Buffer, SENSOR_LIST, strlen(SENSOR_LIST)) == 0) {
             listSensors(USB_In_Buffer);
         } else if (strncmp(USB_Out_Buffer, SENSOR_TEST, strlen(SENSOR_TEST)) == 0) {
             testSensors(USB_In_Buffer);
-        } */else {
-             // Si el comando es erróneo, muestra un mensaje de error
-             Util_str2ram(USB_ERROR_MSG, USB_In_Buffer);
+        } */ else {
+            // Si el comando es erróneo, muestra un mensaje de error
+            length = USB_ERROR_MSG_LEN;
+            Util_str2ram(USB_ERROR_MSG, USB_In_Buffer);
+        }
+        // Si está preparado para enviar datos
+        if (USBUSARTIsTxTrfReady() && length != 0) {
+            putUSBUSART(USB_In_Buffer, length);
+            length = 0;
         }
     }
-    // Si está preparado para enviar datos
-    if (USBUSARTIsTxTrfReady() && length != 0) {
-        putUSBUSART(USB_In_Buffer, length);
-        length = 0;
-    }
+
     CDCTxService();
 }
 

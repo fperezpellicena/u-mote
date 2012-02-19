@@ -18,29 +18,41 @@
 #ifndef sht11_h
 #define sht11_h
 
-#define MEASURE_TEMP    0x03    		/* Measure temperature command */
-#define MEASURE_HUMI    0x05    		/* Measure humidity command */
-#define STAT_REG_R      0x07    		/* Read status register command */
-#define STAT_REG_W      0x06    		/* Write status register command */
-#define RESET           0x1E    		/* Reset */
+#define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
+#define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
+#define SHT_STAT_REG_R      0x07    		/* Read status register command */
+#define SHT_STAT_REG_W      0x06    		/* Write status register command */
+#define SHT_RESET           0x1E    		/* Reset */
 
-#define ACK 1					/* Send ACK */
-#define NACK 0					/* Not send ACK */
+#define SHT_ACK 1					/* Send ACK */
+#define SHT_NACK 0					/* Not send ACK */
 
-#define DATA        TRISBbits.TRISB1            /* Data tx/rx pin */
-#define DATA_DDR    LATBbits.LATB1		/* Data direction register */
-#define SCK         LATBbits.LATB2		/* Clk pin */
-#define SCK_DDR     TRISBbits.TRISB2            /* Clk direction register */
+#define SHT_DATA        TRISBbits.TRISB1            /* Data tx/rx pin */
+#define SHT_DATA_DDR    LATBbits.LATB1		/* Data direction register */
+#define SHT_SCK         LATBbits.LATB2		/* Clk pin */
+#define SHT_SCK_DDR     TRISBbits.TRISB2            /* Clk direction register */
 
 /* Sensor measures temperature and humidity */
 enum Modes {
-    TEMP, HUMI
+    SHT_TEMP, SHT_HUMI
 };
 
-typedef union {
-    unsigned int i;
-    float f;
-} value;
+/* Sht11 class */
+typedef struct Sht11 Sht11;
+
+struct Sht11 {
+
+    union {
+        unsigned int i;
+        float f;
+    } temperature;
+    union {
+        unsigned int i;
+        float f;
+    } humidity;
+    unsigned char temp_chk;
+    unsigned char humi_chk;
+};
 
 /**
  * Generates a transmission start
@@ -49,7 +61,7 @@ typedef union {
  *           ___     ___
  * SCK : ___|   |___|   |______
  */
-void start(void);
+void Sht11_start(void);
 
 /**
  *
@@ -59,25 +71,28 @@ void start(void);
  *          _    _    _    _    _    _    _    _    _        ___     ___
  * SCK : __| |__| |__| |__| |__| |__| |__| |__| |__| |______|   |___|   |______
  */
-void reset(void);
+void Sht11_reset(void);
 
 /* Resets the sensor by a softreset */
-char softReset(void);
+char Sht11_softReset(void);
 
 /* Reads a byte form the Sensibus and gives an acknowledge in case of "ack=1" */
-unsigned char read(unsigned char ack);
+unsigned char Sht11_read(unsigned char ack);
 
 /* Writes a byte on the Sensibus and checks the acknowledge */
-char write(unsigned char value);
+char Sht11_write(unsigned char value);
 
 /* Reads the status register with checksum (8-bit) */
-char readStatusRegister(unsigned char *p_value, unsigned char *p_checksum);
+char Sht11_readStatusRegister(unsigned char *p_value, unsigned char *p_checksum);
 
 /* Writes the status register with checksum (8-bit) */
-char writeStatusRegister(unsigned char *p_value);
+char Sht11_writeStatusRegister(unsigned char *p_value);
 
 /* Makes a measurement (humidity/temperature) with checksum */
-char measure(int *p_value, unsigned char *p_checksum, unsigned char mode);
+char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char mode);
+
+/* Measures temperature and humidity */
+char Sht11_measure(Sht11* shtData);
 
 /* 
  * Calculates temperature [°C] and humidity [%RH]
@@ -85,11 +100,11 @@ char measure(int *p_value, unsigned char *p_checksum, unsigned char mode);
  *          temp [Ticks] (14 bit)
  * output:  humi [%]
  */
-void calculate(float *p_humidity, float *p_temperature);
+void Sht11_calculate(float *p_humidity, float *p_temperature);
 
-void calculateHumidity(float* p_humidity);
+void Sht11_calculateHumidity(float* p_humidity);
 
-void calculateTemperature(float* p_temp);
+void Sht11_calculateTemperature(float* p_temp);
 
 
 #endif /* sht11_h */

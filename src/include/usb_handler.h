@@ -19,7 +19,8 @@
 #define usb_handler_h
 
 /* Error message */
-#define USB_ERROR_MSG   "Comando desconocido"
+#define USB_ERROR_MSG       "Comando desconocido"
+#define USB_ERROR_MSG_LEN   19
 
 /* Procesamiento de información USB */
 void USB_process(void);
