@@ -25,6 +25,8 @@
 #include "usb_function_cdc.h"
 #include "usb_rtcc_handler.h"
 #include "usb_gps_handler.h"
+#include "usb_digi_handler.h"
+#include "usb_sht_handler.h"
 #include "util.h"
 
 
@@ -40,6 +42,7 @@ void USB_process(void) {
     unsigned char length;
     char RTCC_CONF[] = "rtccconfig";
     char RTCC_TEST[] = "rtcctest";
+    char SHT_TEST[] = "shttest";
     char GPS_CONF[] = "gpsconfig";
     char GPS_TEST[] = "gpsconfig";
     //    char SENSOR_LIST[] = "sensorlist";
@@ -61,10 +64,12 @@ void USB_process(void) {
             length = USBRtccHandler_testRTCC(USB_In_Buffer);
         } else if (strncmp(USB_Out_Buffer, GPS_CONF, strlen(GPS_CONF)) == 0) {
             USBGpsHandler_parseGPSData(USB_Out_Buffer);
+        } else if (strncmp(USB_Out_Buffer, SHT_TEST, strlen(SHT_TEST)) == 0) {
+            length = USBShtHandler_sht11Test(USB_Out_Buffer);
         } else if (strncmp(USB_Out_Buffer, GPS_TEST, strlen(GPS_TEST)) == 0) {
             length = USBGpsHandler_testGPS(USB_In_Buffer);
         } else if (strncmp(USB_Out_Buffer, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
-            length = USBXBeeHandler_join(USB_In_Buffer);
+            USBXBeeHandler_join(USB_In_Buffer);
         }/* else if (strncmp(USB_Out_Buffer, SENSOR_LIST, strlen(SENSOR_LIST)) == 0) {
             listSensors(USB_In_Buffer);
         } else if (strncmp(USB_Out_Buffer, SENSOR_TEST, strlen(SENSOR_TEST)) == 0) {

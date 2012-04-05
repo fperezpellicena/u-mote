@@ -54,6 +54,9 @@ struct Sht11 {
     unsigned char humi_chk;
 };
 
+/* Init pins and registers*/
+void Sht11_init();
+
 /**
  * Generates a transmission start
  *       _____         ________
