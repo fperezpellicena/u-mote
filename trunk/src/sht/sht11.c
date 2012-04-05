@@ -16,12 +16,26 @@
  */
 
 #include "sht11.h"
+#include "power.h"
 #include <p18f46j50.h>
 #include <usart.h>
 #include <stdio.h>
 #include <delays.h>
 #include <math.h>
 #include <stdlib.h>
+
+void Sht11_init() {
+    SHT_DATA_DDR = 0;
+    SHT_SCK_DDR = 0;
+    SHT_DATA = 1;
+    SHT_SCK = 0;
+
+    TRISDbits.TRISD1 = 0;
+    LATDbits.LATD1 = 0;
+
+    ANCON1bits.PCFG10 = 1;
+    ANCON1bits.PCFG8 = 1;
+}
 
 char Sht11_write(unsigned char value) {
     unsigned char i, error = 0;
@@ -149,21 +163,19 @@ char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char m
     unsigned char error = 0;
     Sht11_start(); //transmission start
     switch (mode) { //send command to sensor
-        case SHT_TEMP: error += Sht11_write(SHT_MEASURE_TEMP);
+        case SHT_MEASURE_TEMP: error += Sht11_write(SHT_MEASURE_TEMP);
             break;
-        case SHT_HUMI: error += Sht11_write(SHT_MEASURE_HUMI);
+        case SHT_MEASURE_HUMI: error += Sht11_write(SHT_MEASURE_HUMI);
             break;
         default: break;
     }
     Delay1KTCYx(5);
     SHT_DATA_DDR = 1;
     while (PORTBbits.RB1 == 1);
-
     *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
     *(p_value) = *(p_value) << 8;
     *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
     *p_checksum = Sht11_read(SHT_NACK); //read checksum
-
     return error;
 }
 

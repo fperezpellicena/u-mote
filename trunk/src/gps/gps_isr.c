@@ -17,6 +17,7 @@
 
 #include <p18f46j50.h>
 #include "gps_isr.h"
+#include "isr.h"
 
 /* Método privado para configurar la interrupción */
 static void Gps_configureInterrupt(void);

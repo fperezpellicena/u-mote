@@ -44,7 +44,7 @@ GpsProxy gpsProxy;
  * @param proxy		ponter to proxy struct
  */
 void Service_initMote() {
-    rtccTimeDate d;
+    
     /* BSP init */
     BSP_init();
 
