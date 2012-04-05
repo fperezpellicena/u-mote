@@ -1,0 +1,8 @@
+Reglas de diseño
+
+-Separacion de pistas las que vienen por defecto
+- Minimo ancho de pista: 12 mils, recomendado 20
+- Vias, la corona exterior 60 mils minima, recomendado 80, pero halzas de 60 q sino son muy grandes para nuestras placas
+
+
+Intentar poner puntos de test
