@@ -43,6 +43,4 @@ void XBeeProxy_handleBottomHalveInterrupt(void);
 
 BOOL XBeeProxy_checkInterrupt(void);
 
-void XBeeProxy_ackInterrupt(void);
-
 #endif     /* digi_proxy_h*/

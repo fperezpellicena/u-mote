@@ -57,9 +57,9 @@
 #include "service.h"
 
 #ifdef USB_ENABLED
-#include "usb_device.h"
-#include "usb_handler.h"
-#include "power.h"
+#   include "usb_device.h"
+#   include "usb_handler.h"
+#   include "power.h"
 #endif
 
 /*...........................................................................*/
@@ -68,7 +68,7 @@
 
 void main(void) {
     // Init basic system
-    BSP_initializeSystem();
+    BSP_init();
     // Install all system interrupts
     BSP_installInterrupts();
 
@@ -85,7 +85,6 @@ void main(void) {
                 // Si ya se ha activado, realiza las tareas USB
                 USB_process();
                 // FIXME En la PCB no hay leds para el estado del USB, habrá que ponerlos??.
-                // AL usar low speed usb, los intervalos son muy largos
                 USB_blinkStatus();
             }
         } else {

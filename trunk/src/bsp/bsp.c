@@ -23,21 +23,9 @@
 #include "digi_proxy.h"
 #include <p18cxxx.h>
 
-// FIXME Corregido pero no probado:
-//      Enable PLL on USB PLUGIN (power saving)
-void BSP_enablePLL(void) {
-    //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-    {
-    unsigned int pll_startup_counter = 600;
-    OSCTUNEbits.PLLEN = 1;
-    while (pll_startup_counter--);
-    }
-}
 
 /*...........................................................................*/
-
-/* FIXME To bsp package */
-void BSP_initializeSystem(void) {
+void BSP_init(void) {
     // Default all pins to digital
     ADCON1 |= 0x0F;
 
@@ -63,8 +51,18 @@ void BSP_initializeSystem(void) {
 }
 
 /*...........................................................................*/
+// FIXME Corregido pero no probado:
+//      Enable PLL on USB PLUGIN (power saving)
+void BSP_enablePLL(void) {
+    //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+    {
+    unsigned int pll_startup_counter = 600;
+    OSCTUNEbits.PLLEN = 1;
+    while (pll_startup_counter--);
+    }
+}
 
-/* FIXME To bsp package */
+/*...........................................................................*/
 void BSP_prepareSleep(void) {
     // Disable PLL
     OSCTUNEbits.PLLEN = 0;
@@ -75,6 +73,7 @@ void BSP_prepareSleep(void) {
     INTCONbits.GIEL = 1;
 }
 
+/*...........................................................................*/
 /* Install interrupts */
 void BSP_installInterrupts(void) {
     // Init interrupt vectors

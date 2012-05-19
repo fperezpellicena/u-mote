@@ -18,6 +18,8 @@
 #ifndef bsp_h
 #define bsp_h
 
+#include "GenericTypeDefs.h"
+
 
 /*..........................................................................*/
 /* UART SECTION */
@@ -44,6 +46,8 @@
 // else if xbee interrupt mcu via I/O pin, uncomment this define
 #define XBEE_INTERRUPT				ON_SLEEP_INTERRUPT
 
+#define SLEEP_STATUS_MESSAGES FALSE	// If xbee uart send sleep status messages on wake/sleep
+
 // Defines based on previous selection
 #if XBEE_INTERRUPT == SERIAL_INTERRUPT
 #	if XBEE_SERIAL == EUSART1 
@@ -69,7 +73,7 @@
 
 /*...........................................................................*/
 /* Prototypes */
-void BSP_initializeSystem(void);
+void BSP_init(void);
 void BSP_prepareSleep(void);
 void BSP_installInterrupts(void);
 void BSP_enablePLL(void);
