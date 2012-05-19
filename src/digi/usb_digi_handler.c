@@ -17,19 +17,20 @@
 
 #include "usb_digi_handler.h"
 #include "digi_api.h"
-#include "service.h"
+#include "digi_proxy.h"
 #include "power.h"
 
-/* External variable from service.c */
-extern XBeePacket xbeePacket;
+#pragma udata usbXbeeHandler
+XBeePacket xbeePacket;
+#pragma udata
 
 void USBXBeeHandler_join(char usbBuffer[]) {
     unsigned int status;
     // Send ATCB1
     XBee_createATCommandPacket(&xbeePacket, 0x01, "ATCB1");
-    Service_sendXbeePacket(&xbeePacket);
+    XBeeProxy_sendPacket(&xbeePacket);
     // Wait for response
-    while(!Service_readXbeePacket(&xbeePacket)){
+    while(!XBeeProxy_readPacket(&xbeePacket)){
         idleRcMode();
     }
     // Parse packet
@@ -37,6 +38,6 @@ void USBXBeeHandler_join(char usbBuffer[]) {
     if(xbeePacket.frame.modemStatus.status) {
         // Send ATSM8
         XBee_createATCommandPacket(&xbeePacket, 0x02, "ATSM8");
-        Service_sendXbeePacket(&xbeePacket);
+        XBeeProxy_sendPacket(&xbeePacket);
     }
 }

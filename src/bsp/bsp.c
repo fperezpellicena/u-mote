@@ -15,47 +15,72 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "qp_port.h"
 #include "bsp.h"
+#include "hw_profile.h"
+#include "usb_device.h"
+#include "service.h"
+#include "isr.h"
+#include "digi_proxy.h"
+#include <p18cxxx.h>
 
-/*..........................................................................*/
-/* Init basic BSP */
-void BSP_init(void) {
-    TRISE = 0;                  /* data direction for Port E (LEDs): output */
-    LATE = 0;
-	
-    RCONbits.IPEN = 1;                            /* enable priority levels */
+// FIXME Corregido pero no probado:
+//      Enable PLL on USB PLUGIN (power saving)
+void BSP_enablePLL(void) {
+    //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+    {
+    unsigned int pll_startup_counter = 600;
+    OSCTUNEbits.PLLEN = 1;
+    while (pll_startup_counter--);
+    }
 }
 
-/*..........................................................................*/
-/* Check for power-on reset */
-boolean BSP_powerOnReset(void) {
-	return WDTCONbits.DS == 1 ? true : false;
+/*...........................................................................*/
+
+/* FIXME To bsp package */
+void BSP_initializeSystem(void) {
+    // Default all pins to digital
+    ADCON1 |= 0x0F;
+
+    ANCON0 = 0xFF; // Default all pins to digital
+    ANCON1 = 0xFF; // Default all pins to digital
+
+    // Configura PORTC<0> como salida de test
+    TRISCbits.TRISC0 = 0;
+    // COnfigura PORTB<4> como entrada para el conector USB
+    TRISBbits.TRISB4 = 1;
+
+    //Initialize all of the LED pins
+    mInitAllLEDs();
+
+    //Initialize the pushbuttons
+    mInitAllSwitches();
+
+    // Initializes USB module SFRs and firmware variables to known states
+    USBDeviceInit();
+
+    // Initializes mote API
+    Service_initMote();
 }
 
-/*..........................................................................*/
-/* Reset power-on reset bit */
-void BSP_clearPowerOnReset(void) {
-	WDTCONbits.DS = 0;
+/*...........................................................................*/
+
+/* FIXME To bsp package */
+void BSP_prepareSleep(void) {
+    // Disable PLL
+    OSCTUNEbits.PLLEN = 0;
+    // Pre-sleep actions
+    LATCbits.LATC0 = 0;
+    // Enable interrupts
+    INTCONbits.GIEH = 1;
+    INTCONbits.GIEL = 1;
 }
 
-/*..........................................................................*/
-void Interrupts_enable(void) {
-    INTCONbits.GIE = 1;
-}
-
-/*..........................................................................*/
-void Timer0_init(void) {
-    OpenTimer0(TIMER_INT_ON & T0_SOURCE_INT & T0_16BIT & T0_PS_1_32);
-}
-
-/*..........................................................................*/
-void Usart1_init(void) {
-    Open1USART(USART_TX_INT_OFF & USART_RX_INT_OFF & USART_ASYNCH_MODE &
-            USART_EIGHT_BIT & USART_CONT_RX, 25);
-}
-
-/*..........................................................................*/
-void Usart1_write(uint8_t byte) {
-    Write1USART(byte);
+/* Install interrupts */
+void BSP_installInterrupts(void) {
+    // Init interrupt vectors
+    InterruptHandler_initVectors();
+    // Install xbee ISR
+    XBeeProxy_installInterrupt();
+    // Install gps ISR
+    //Gps_installInterrupt();
 }

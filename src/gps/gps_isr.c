@@ -75,8 +75,8 @@ void Gps_installInterrupt(void) {
     // Configure interrupt
     Gps_configureInterrupt();
     // Install interrupt handler
-    InterruptHandler_addLO(&Gps_handleInterrupt, &Gps_checkInterrupt,
-            &Gps_clearInterruptFlag);
+//    InterruptHandler_addLO(&Gps_handleInterrupt, &Gps_checkInterrupt,
+//            &Gps_clearInterruptFlag);
     // Enable GPS
     Gps_enable();
 }

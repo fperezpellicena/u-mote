@@ -15,63 +15,122 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "bsp.h"
 #include "hw_serial.h"
-#include <usart.h>
+#include <p18f46j50.h>
 
-void Serial_create(Serial * const serial, uint8_t uart, uint8_t config,
-		uint8_t baudrate) {
-	serial->uart = uart;
-	serial->config = config;
-	serial->baudrate = baudrate;
+/** Interrupt driven uart */
+
+static void Serial_1_init(UINT8 baudrate);
+static void Serial_2_init(UINT8 baudrate);
+
+static void Serial_1_init(UINT8 baudrate) {
+    // I/O config.
+    TRISCbits.TRISC7 = 1;
+    TRISCbits.TRISC6 = 0;
+    // Tx status
+    TXSTA1bits.SYNC = 0;
+    TXSTA1bits.TXEN = 1;
+    TXSTA1bits.BRGH = 0;
+    // Rx status
+    RCSTA1bits.SPEN = 1;
+    RCSTA1bits.CREN = 1;
+    // Baudrate
+    SPBRG1 = baudrate; // 9600bps -> 12
+    // Interrupts
+#ifdef  EUSART1_INTERRUPT
+    PIE1bits.RC1IE = 1;
+    PIE1bits.TX1IE = 0;
+    PIR1bits.RC1IF = 0;
+
+    IPR1bits.RC1IP = 1; // High priority defatult
+#endif
 }
 
-void Serial_init(Serial * const serial) {
-	if (serial->uart == 1) {
-		Open1USART(serial->config, serial->baudrate);
-	} else {
-		Open2USART(serial->config, serial->baudrate);
-	}
+static void Serial_2_init(UINT8 baudrate) {
+    // PPS - Configure RX2 RA5 (RP2)
+    RPINR16 = 4;
+    // PPS - Configure TX2 RA1 (RP1)
+    RPOR1 = 5;
+
+    TRISAbits.TRISA1 = 1;
+    TRISAbits.TRISA5 = 0;
+
+    TXSTA2bits.SYNC = 0;
+    TXSTA2bits.TXEN = 1;
+    TXSTA2bits.BRGH = 0;
+
+    RCSTA2bits.SPEN2 = 1;
+    RCSTA2bits.CREN2 = 1;
+
+    SPBRG2 = baudrate; // 9600bps -> 12
+#ifdef EUSART2_INTERRUPT
+        PIE3bits.RC2IE = 1;
+        PIE3bits.TX2IE = 0;
+        PIR3bits.RC2IF = 0;
+
+        IPR3bits.RC2IP = 1; // High priority defatult
+#endif
 }
 
-void Serial_send(Serial * const serial, uint8_t value) {
-	while(Serial_busy(serial));
-	if (serial->uart == 1) {
-		Write1USART(value);
-	} else {
-		Write2USART(value);
-	}
+void Serial_create(Serial * const serial, UINT8 uart, UINT8 baudrate) {
+    serial->uart = uart;
+    if (uart == EUSART1) {
+        Serial_1_init(baudrate);
+    } else {
+        Serial_2_init(baudrate);
+    }
 }
 
-uint8_t Serial_read(Serial * const serial) {
-	if (serial->uart == 1) {
-		return Read1USART();
-	} else {
-		return Read2USART();
-	}
+void Serial_send(Serial * const serial, UINT8 value) {
+    while (!TXSTA1bits.TRMT);
+    if (serial->uart == EUSART1) {
+        TXREG1 = value;
+    } else {
+        TXREG2 = value;
+    }
 }
 
-boolean Serial_available(Serial * const serial) {
-	if (serial->uart == 1 && DataRdy1USART()) {
-		return true;
-	} else if (serial->uart == 2 && DataRdy2USART()) {
-		return true;
-	}
-	return false;
+UINT8 Serial_read(Serial * const serial) {
+    /* Store received byte */
+    if (serial->uart == EUSART1) {
+        return RCREG1;
+    } else {
+        return RCREG2;
+    }
+}
+
+BOOL Serial_available(Serial * const serial) {
+    if (serial->uart == EUSART1 && PIR1bits.RC1IF) {
+        return TRUE; // Data is available, return TRUE
+    } else if (serial->uart == 2 && PIR3bits.RC2IF) {
+        return TRUE; // Data is available, return TRUE
+    }
+    return FALSE;
 }
 
 void Serial_close(Serial * const serial) {
-	if (serial->uart == 1) {
-		Close1USART();
-	} else {
-		Close2USART();
-	}
+    if (serial->uart == EUSART1) {
+        RCSTA1 &= 0b01001111; // Disable the receiver
+        TXSTA1bits.TXEN = 0; // and transmitter
+        PIE1 &= 0b11001111; // Disable both interrupts
+    } else {
+        RCSTA2 &= 0b01001111; // Disable the receiver
+        TXSTA2bits.TXEN = 0; // and transmitter
+        PIE3 &= 0b11001111; // Disable both interrupts
+    }
 }
 
-boolean Serial_busy(Serial * const serial) {
-	if (serial->uart == 1 && Busy1USART()) {
-		return true;
-	} else if(serial->uart == 2 && Busy2USART()){
-		return true;
-	}
-	return false;
+/** Interrupt handler functions */
+BOOL Serial_checkInterrupt(Serial * const serial) {
+    return Serial_available(serial);
+}
+
+void Serial_ackInterrupt(Serial * const serial) {
+    /* Store received byte */
+    if (serial->uart == EUSART1) {
+        PIR1bits.RC1IF = 0;
+    } else {
+        PIR3bits.RC2IF = 0;
+    }
 }

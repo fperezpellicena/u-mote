@@ -15,45 +15,76 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "bsp.h"
+#include "hw_serial.h"
 #include "digi_proxy.h"
+#include "isr.h"
+#include <rtcc.h>
+
+#ifdef SHT_ENABLED
+    #include "sht11.h"
+#endif
+
+#ifdef GPS_ENABLED
+    #include "gps_isr.h"
+    #include "gps_api.h"
+#endif
+
+#pragma udata digi_isr_data
+static rtccTimeDate timestampData;  /* Timestamp data */
+
+#ifdef SHT_ENABLED
+    static Sht11 shtData;           /* SHT11 sensor data */
+#endif
+
+#ifdef GPS_ENABLED
+    static NMEAOutput gpsData;      /* GPS data */
+#endif
+
+#pragma udata
+
+
+static Serial xbeeProxySerial;
+static XBeePacket xbeeProxyPacket;
 
 /*..........................................................................*/
 
 /* XBee proxy constructor */
-void XBeeProxy_create(XBeeProxy * const proxy, Serial * const serial, XBee * const xbee) {
-    proxy->serial = serial;
-    proxy->xbee = xbee;
+void XBeeProxy_create(void) {
+    Serial_create(&xbeeProxySerial, XBEE_SERIAL, EUSART_9600);
+    XBeeProxy_installInterrupt();
 }
+
 
 /*..........................................................................*/
 
 /* Send XBee packet */
-boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
-    uint8_t* p = (uint8_t*) packet;
-    Serial_send(proxy->serial, START_DELIMITER);
+BOOL XBeeProxy_sendPacket(XBeePacket * const packet) {
+    UINT8* p = (UINT8*) packet;
+    Serial_send(&xbeeProxySerial, START_DELIMITER);
     // send the most significant bit
-    Serial_send(proxy->serial, (packet->length >> 8) & 0xFF);
+    Serial_send(&xbeeProxySerial, (packet->length >> 8) & 0xFF);
     // then the LSB
-    Serial_send(proxy->serial, packet->length & 0xFF);
+    Serial_send(&xbeeProxySerial, packet->length & 0xFF);
     // just in case it hasn't been initialized.
     packet->checksum = 0;
     //Generalizando para cualquier paquete
     while (packet->length--) {
-        Serial_send(proxy->serial, *p);
+        Serial_send(&xbeeProxySerial, *p);
         packet->checksum += *p++;
     }
-    Serial_send(proxy->serial, (0xFF - packet->checksum));
-    return true;
+    Serial_send(&xbeeProxySerial, (0xFF - packet->checksum));
+    return TRUE;
 }
 
 /*..........................................................................*/
 
 /* Read XBee packet(generalized)*/
-boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet) {
-    uint8_t data;
+BOOL XBeeProxy_readPacket(XBeePacket * const packet) {
+    UINT8 data;
     XBee_resetPacket(packet);
-    while (Serial_available(proxy->serial)) {
-        data = Serial_read(proxy->serial);
+    while (Serial_available(&xbeeProxySerial)) {
+        data = Serial_read(&xbeeProxySerial);
         switch (packet->rxState) {
             case XBEE_PACKET_RX_START:
                 if (data == XBEE_PACKET_RX_START)
@@ -69,7 +100,7 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
                 // in case we somehow get some garbage
                 if (packet->length > MAX_PACKET_SIZE) {
                     packet->rxState = XBEE_PACKET_RX_START;
-                    return false; //LENGTH Error
+                    return FALSE; //LENGTH Error
                 } else {
                     packet->rxState = XBEE_PACKET_RX_PAYLOAD;
                 }
@@ -86,19 +117,119 @@ boolean XBeeProxy_readPacket(XBeeProxy * const proxy, XBeePacket * const packet)
                 packet->checksum += data;
                 packet->rxState = XBEE_PACKET_RX_START;
                 if (packet->checksum == 0xFF) {
-                    return true; //Everything OK!
+                    return TRUE; //Everything OK!
                 } else {
-                    return false; //CRC Error
+                    return FALSE; //CRC Error
                 }
         }
     }
-    return false;
+    return FALSE;
+}
+
+
+/* Read XBee packet(generalized)*/
+BOOL XBeeProxy_read(void) {
+    UINT8 data = xbeeProxyPacket.lastByte;
+    switch (xbeeProxyPacket.rxState) {
+        case XBEE_PACKET_RX_START:
+            if (data == XBEE_PACKET_RX_START)
+                xbeeProxyPacket.rxState = XBEE_PACKET_RX_LENGTH_1;
+            break;
+        case XBEE_PACKET_RX_LENGTH_1:
+            xbeeProxyPacket.length = data;
+            xbeeProxyPacket.length <<= 8;
+            xbeeProxyPacket.rxState = XBEE_PACKET_RX_LENGTH_2;
+            break;
+        case XBEE_PACKET_RX_LENGTH_2:
+            xbeeProxyPacket.length += data;
+            // in case we somehow get some garbage
+            if (xbeeProxyPacket.length > MAX_PACKET_SIZE) {
+                xbeeProxyPacket.rxState = XBEE_PACKET_RX_START;
+                return FALSE; //LENGTH Error
+            } else {
+                xbeeProxyPacket.rxState = XBEE_PACKET_RX_PAYLOAD;
+            }
+            xbeeProxyPacket.checksum = 0;
+            break;
+        case XBEE_PACKET_RX_PAYLOAD:
+            *xbeeProxyPacket.dataPtr++ = data;
+            if (++xbeeProxyPacket.index >= xbeeProxyPacket.length) {
+                xbeeProxyPacket.rxState = XBEE_PACKET_RX_CRC;
+            }
+            xbeeProxyPacket.checksum += data;
+            break;
+        case XBEE_PACKET_RX_CRC:
+            xbeeProxyPacket.checksum += data;
+            xbeeProxyPacket.rxState = XBEE_PACKET_RX_START;
+            if (xbeeProxyPacket.checksum == 0xFF) {
+                return TRUE; //Everything OK!
+            } else {
+                return FALSE; //CRC Error
+            }
+    }
+    return FALSE;
 }
 
 /*..........................................................................*/
+/** Interrupt handler section */
+    
+void XBeeProxy_installInterrupt(void) {
+    // Install interrupt handler
+    InterruptHandler_addHI(&XBeeProxy_handleTopHalveInterrupt,
+            &XBeeProxy_handleBottomHalveInterrupt, &XBeeProxy_checkInterrupt,
+            &XBeeProxy_ackInterrupt);
+#if XBEE_INTERRUPT == ON_SLEEP_INTERRUPT
+    // If ON_SLEEP_INTERRUPT enabled, configure pin interruption
+    XBEE_ON_SLEEP_PIN();
+    XBEE_ON_SLEEP_INT();     // Enable interrupt
+    XBEE_ON_SLEEP_EDGE();    // Falling edge
+    // INT0 has always high priority
+#endif
+}
 
-/* Read atCommandResponse */
-XBeeProxy_readAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
-        uint8_t** command, uint8_t* status, uint8_t* value) {
+/* Top halve interrupt handler */
+void XBeeProxy_handleTopHalveInterrupt(void) {
+#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+    // If serial interrupt is configured, read last received byte
+    // and store it in lastByte field
+    UINT8 byte = Serial_read(&xbeeProxySerial);
+    xbeeProxyPacket.lastByte = byte;
+#else
+    // If ON_SLEEP_INTERRUPT enabled, read full data from serial
+    XBeeProxy_readPacket(&xbeeProxyPacket);
+#endif
+}
 
+/* Bottom halve interrupt handler*/
+void XBeeProxy_handleBottomHalveInterrupt(void) {
+#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+    // If serial interrupt is configured, process last received byte
+    // and check for valid frame
+    // If valid frame received, create new data frame and send
+    if(XBeeProxy_read() == TRUE) {
+        // Crea una trama y la envía
+    }
+#else
+    // Crea una trama y la envía
+#endif
+}
+
+BOOL XBeeProxy_checkInterrupt(void) {
+#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+     // If serial interrupt is configured, check serial
+    return Serial_checkInterrupt(&xbeeProxySerial);
+#else
+    // If pin interrupt is enabled, check pin
+    return XBEE_ON_SLEEP_FLAG;
+#endif
+}
+
+void XBeeProxy_ackInterrupt(void) {
+#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+    // If serial interrupt is configured, clear serial IF
+    Serial_ackInterrupt(&xbeeProxySerial);
+#else
+    // If pin interrupt is enabled, clear pin IF
+    XBEE_ON_SLEEP_CLEAR_FLAG();
+#endif
 }

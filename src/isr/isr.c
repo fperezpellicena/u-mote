@@ -16,12 +16,10 @@
  */
 
 #include "isr.h"
-#include "qp_port.h"
-#include "bsp.h"
 #include "hw_profile.h"
 #include "usb_config.h"
 #include "usb_device.h"
-#include "critical.h"
+//#include "critical.h"
 
 /*..........................................................................*/
 /* Interrupt vectors */
@@ -36,6 +34,7 @@ InterruptHandler* activeInterrupt;
 /* HIGH LEVEL INTERRUPTION METHOD */
 #pragma interrupt ISR_hi
 
+/** Internally, clears GIE bit, so it is not reentrant */
 void ISR_hi(void) {
     unsigned char index;
     // Execute USB tasks only if usb is plugged
@@ -46,10 +45,12 @@ void ISR_hi(void) {
         for (index = 0; index < interruptVectorHI.size; index++) {
             // Check for active interrupt
             if (interruptVectorHI.handlers[index].isActive()) {
-                // Clear flag
-                interruptVectorHI.handlers[index].clearFlag();
                 // Set active interrupt
                 activeInterrupt = &interruptVectorHI.handlers[index];
+                // Top halve function
+                activeInterrupt->handleTopHalveInterrupt();
+                // Ack interrupt
+                activeInterrupt->ackInterrupt();
                 break;
             }
         }
@@ -58,8 +59,6 @@ void ISR_hi(void) {
     for (index = 0; index < interruptVectorHI.size; index++) {
         // Check for active interrupt
         if (interruptVectorHI.handlers[index].isActive()) {
-            // Clear flag
-            interruptVectorHI.handlers[index].clearFlag();
             // Set active interrupt
             activeInterrupt = &interruptVectorHI.handlers[index];
             break;
@@ -72,6 +71,7 @@ void ISR_hi(void) {
 /* LOW LEVEL INTERRUPTION METHOD */
 #pragma interruptlow ISR_lo
 
+/** Internally, clears GIE bit, so it is not reentrant */
 void ISR_lo(void) {
     unsigned char index;
 #ifdef USB_INTERRUPT
@@ -79,10 +79,12 @@ void ISR_lo(void) {
         for (index = 0; index < interruptVectorLO.size; index++) {
             // Check for active interrupt
             if (interruptVectorLO.handlers[index].isActive()) {
-                // Clear flag
-                interruptVectorLO.handlers[index].clearFlag();
                 // Set active interrupt
                 activeInterrupt = &interruptVectorLO.handlers[index];
+                // Top halve function
+                activeInterrupt->handleTopHalveInterrupt();
+                // Ack interrupt
+                activeInterrupt->ackInterrupt();
                 break;
             }
         }
@@ -91,8 +93,6 @@ void ISR_lo(void) {
     for (index = 0; index < interruptVectorLO.size; index++) {
         // Check for active interrupt
         if (interruptVectorLO.handlers[index].isActive()) {
-            // Clear flag
-            interruptVectorLO.handlers[index].clearFlag();
             // Set active interrupt
             activeInterrupt = &interruptVectorLO.handlers[index];
             break;
@@ -117,11 +117,12 @@ void intVector_lo(void) {
 
 /*..........................................................................*/
 void InterruptHandler_create(InterruptHandler* handler,
-        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
-        ClearInterruptFlag clearFunction) {
-    handler->handle = handleFunction;
+        HandleInterrupt topHandleFunction, HandleInterrupt bottomHandleFunction,
+        CheckInterrupt checkFunction, AckInterrupt ackInterruptFunction) {
+    handler->handleTopHalveInterrupt = topHandleFunction;
+    handler->handleBottomHalveInterrupt = bottomHandleFunction;
     handler->isActive = checkFunction;
-    handler->clearFlag = clearFunction;
+    handler->ackInterrupt = ackInterruptFunction;
 }
 
 /*..........................................................................*/
@@ -130,39 +131,47 @@ void InterruptHandler_create(InterruptHandler* handler,
  * Init interrupt vectors size to zero.
  * Doing this, avoids error on first power up checking for active interrupts.
  */
-void InterruptHandler_initVectors() {
+void InterruptHandler_initVectors(void) {
     interruptVectorHI.size = 0;
     interruptVectorLO.size = 0;
 }
 
 /*..........................................................................*/
-void InterruptHandler_addHI(HandleInterrupt handleFunction,
-        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction) {
+void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
+        AckInterrupt ackInterruptFunction) {
     if (interruptVectorHI.size < MAX_INTERRUPT_HANDLERS) {
-        interruptVectorHI.handlers[interruptVectorHI.size].handle = handleFunction;
+        interruptVectorHI.handlers[interruptVectorHI.size].handleTopHalveInterrupt = topHandleFunction;
+        interruptVectorHI.handlers[interruptVectorHI.size].handleBottomHalveInterrupt = bottomHandleFunction;
         interruptVectorHI.handlers[interruptVectorHI.size].isActive = checkFunction;
-        interruptVectorHI.handlers[interruptVectorHI.size].clearFlag = clearFunction;
+        interruptVectorHI.handlers[interruptVectorHI.size].ackInterrupt = ackInterruptFunction;
         interruptVectorHI.size++;
     }
 }
 
 /*..........................................................................*/
-void InterruptHandler_addLO(HandleInterrupt handleFunction,
-        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction) {
+void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
+        AckInterrupt ackInterruptFunction) {
     if (interruptVectorLO.size < MAX_INTERRUPT_HANDLERS) {
-        interruptVectorLO.handlers[interruptVectorLO.size].handle = handleFunction;
+        interruptVectorLO.handlers[interruptVectorLO.size].handleTopHalveInterrupt = topHandleFunction;
+        interruptVectorLO.handlers[interruptVectorLO.size].handleBottomHalveInterrupt = bottomHandleFunction;
         interruptVectorLO.handlers[interruptVectorLO.size].isActive = checkFunction;
-        interruptVectorLO.handlers[interruptVectorLO.size].clearFlag = clearFunction;
+        interruptVectorLO.handlers[interruptVectorLO.size].ackInterrupt = ackInterruptFunction;
         interruptVectorLO.size++;
     }
 }
 
 /*..........................................................................*/
 
-/* Handle active interrupt in critical section */
-void InterruptHandler_handleActiveInterrupt() {
-    enterCritical();
-    activeInterrupt->handle();
-    exitCritical();
+/**
+ * Handle active interrupt in botton halve stategy.
+ *
+ * Interrupt Bottom halve, does not run in critical section, so it can be 
+ * interrupted.
+ * It also does not clear flag, because it must be done in interrupt context.
+ */
+void InterruptHandler_handleActiveInterrupt(void) {
+    activeInterrupt->handleBottomHalveInterrupt();
 }
 

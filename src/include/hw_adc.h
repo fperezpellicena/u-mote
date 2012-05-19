@@ -18,24 +18,23 @@
 #ifndef hw_adc_h
 #define hw_adc_h
 
-#include "qep_port.h"
-
+#include "GenericTypeDefs.h"
 
 #ifndef AVERAGE_FACTOR
     #define AVERAGE_FACTOR  16
     #define DIV_AVERAGE     4
 #endif
 
-void Adc_init(uint8_t config, uint8_t config2, uint8_t channel);
+void Adc_init(UINT8 config, UINT8 config2, UINT8 channel);
 
 void Adc_close();
 
 void Adc_startConversion();
 
-uint16_t Adc_readValue();
+UINT16 Adc_readValue();
 
-uint16_t Adc_getValue();
+UINT16 Adc_getValue();
 
-uint16_t Adc_getAveragedValue();
+UINT16 Adc_getAveragedValue();
 
 #endif  /* hw_adc_h*/

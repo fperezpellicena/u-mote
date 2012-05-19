@@ -94,7 +94,7 @@ void USB_process(void) {
 void USB_blinkStatus(void) {
     static WORD led_count = 0;
 
-    if (led_count == 0)led_count = 10000U;
+    if (led_count == 0)led_count = 100U;    // Ajustado para USB low speed
     led_count--;
 
 #define mLED_Both_Off()         {mLED_1_Off();mLED_2_Off();}

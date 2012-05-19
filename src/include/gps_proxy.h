@@ -20,6 +20,7 @@
 
 #include "gps_api.h"
 #include "hw_serial.h"
+#include "GenericTypeDefs.h"
 
 
 typedef struct GpsProxy GpsProxy;

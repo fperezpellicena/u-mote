@@ -22,7 +22,7 @@
 #include "digi_proxy.h"
 
 /*..........................................................................*/
-#define MAX_INTERRUPT_HANDLERS      1            /* Max interrupt handlers */
+#define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
 
 /*..........................................................................*/
 /* Handler function prototype */
@@ -32,17 +32,23 @@ typedef void rom (*HandleInterrupt)(void);
 typedef BOOL rom (*CheckInterrupt)(void);
 
 /* Check interrupt function prototype */
-typedef void rom (*ClearInterruptFlag)(void);
+typedef void rom (*AckInterrupt)(void);
 
 /*..........................................................................*/
 /* Interrupt handler class */
 typedef struct InterruptHandler InterruptHandler;
 
 struct InterruptHandler {
-    HandleInterrupt handle; /* Function handler */
-    BOOL enabled; /* Indicates if interrupt is enabled */
-    CheckInterrupt isActive; /* Check if interrupt has happened */
-    ClearInterruptFlag clearFlag; /* Clear interrupt flag */
+    /* Top halve Function handler */
+    HandleInterrupt handleTopHalveInterrupt;
+    /* Bottom halve Function handler */
+    HandleInterrupt handleBottomHalveInterrupt;
+    /* Indicates if interrupt is enabled */
+    BOOL enabled;
+    /* Check if interrupt has happened */
+    CheckInterrupt isActive;
+    /* Clear interrupt flag */
+    AckInterrupt ackInterrupt; 
 };
 
 /*..........................................................................*/
@@ -56,22 +62,24 @@ struct InterruptHandlerVector {
 
 /*..........................................................................*/
 void InterruptHandler_create(InterruptHandler* handler,
-        HandleInterrupt handleFunction, CheckInterrupt checkFunction,
-        ClearInterruptFlag clearFunction);
+        HandleInterrupt topHandleFunction, HandleInterrupt bottomHandleFunction,
+        CheckInterrupt checkFunction, AckInterrupt ackInterruptFunction);
 
 /*..........................................................................*/
-void InterruptHandler_initVectors();
+void InterruptHandler_initVectors(void);
 
 /*..........................................................................*/
-void InterruptHandler_addHI(HandleInterrupt handleFunction,
-        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction);
+void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
+        AckInterrupt ackInterruptFunction);
 
 /*..........................................................................*/
-void InterruptHandler_addLO(HandleInterrupt handleFunction,
-        CheckInterrupt checkFunction, ClearInterruptFlag clearFunction);
+void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
+        AckInterrupt ackInterruptFunction);
 
 /*..........................................................................*/
-void InterruptHandler_handleActiveInterrupt();
+void InterruptHandler_handleActiveInterrupt(void);
 
 
 #endif  /* isr_h*/

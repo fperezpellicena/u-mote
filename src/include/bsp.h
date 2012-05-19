@@ -18,55 +18,61 @@
 #ifndef bsp_h
 #define bsp_h
 
-#include <p18f46j50.h>         /* SFR declarations for PIC18F46J50 device */
-#include <usart.h>                                        /* UART library */
-#include <timers.h>                                     /* Timers library */
-#include <adc.h>                                           /* ADC library */
-
-#include "digi.h"                                         /* XBee library */
-
-                                                  /* Oscillator frequency */
-#define BSP_FOSC_HZ          12000000UL
-
-#define DEFAULT_UART_CONFIG USART_TX_INT_OFF	& \
-                            USART_RX_INT_ON	& \
-                            USART_ASYNCH_MODE	& \
-                            USART_EIGHT_BIT	& \
-                            USART_CONT_RX	& \
-                            USART_BRGH_HIGH
-
-#define DEFAULT_ADC_CONFIG  ADC_FOSC_32         & \
-                            ADC_RIGHT_JUST      & \
-                            ADC_1ANA
-
-#define DEFAULT_ADC_CONFIG2 ADC_CH0             & \
-                            ADC_INT_ON
-
-/*--------------------------------------------------------------------------*/
-                                               /* the system tick rate [Hz] */
-#define BSP_TICKS_PER_SEC    20UL
 
 /*..........................................................................*/
-/* Init basic BSP */
-void BSP_init(void);
+/* UART SECTION */
+
+#define EUSART_9600			25	// EUSART 9600 baudrate
+
+/* EUSART1 */
+#define EUSART1    			0	// EUSART 1
+
+/* EUSART2 */
+#define EUSART2    			1	// EUSART 2
+
 
 /*..........................................................................*/
-/* Check for power-on reset */
-boolean BSP_powerOnReset(void);
+/* XBEE SECTION */
 
-/*..........................................................................*/
-/* Reset power-on reset bit */
-void BSP_clearPowerOnReset(void);
+#define XBEE_SERIAL     			EUSART1	// Xbee serial port
 
-/*..........................................................................*/
-                                            /* Low level hardware interface */
+#define ON_SLEEP_INTERRUPT			2		// Xbee on_sleep interrupt 
 
-void Interrupts_enable(void);
+// if xbee interrupt mcu via serial, uncomment this define
+// #define XBEE_INTERRUPT			SERIAL_INTERRUPT
 
-void Timer0_init(void);
+// else if xbee interrupt mcu via I/O pin, uncomment this define
+#define XBEE_INTERRUPT				ON_SLEEP_INTERRUPT
 
-void Usart1_init(void);
+// Defines based on previous selection
+#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+#	if XBEE_SERIAL == EUSART1 
+#		define EUSART1_INTERRUPT
+#	else
+#		define EUSART2_INTERRUPT
+#	endif
+#else
+#	define XBEE_ON_SLEEP_PIN()	(TRISBbits.TRISB0 = 1)
+#	define XBEE_ON_SLEEP_INT()	(INTCONbits.INT0IE = 1)
+#	define XBEE_ON_SLEEP_EDGE()	(INTCON2bits.INTEDG0 = 0)
+#	define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
+#	define XBEE_ON_SLEEP_CLEAR_FLAG()	(INTCONbits.INT0IF = 0)
+#	if XBEE_SERIAL == EUSART1 
+#		define EUSART1_POLL
+#	else
+#		define EUSART2_POLL
+#	endif
+#endif
 
-void Usart1_write(uint8_t byte);
+#define XBEE_BAUDRATE   EUSART_9600		// Xbee serial baudrate
 
-#endif                                                             /* bsp_h */
+
+/*...........................................................................*/
+/* Prototypes */
+void BSP_initializeSystem(void);
+void BSP_prepareSleep(void);
+void BSP_installInterrupts(void);
+void BSP_enablePLL(void);
+
+
+#endif 	/* bsp_h */

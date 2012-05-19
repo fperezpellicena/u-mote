@@ -24,7 +24,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-void Sht11_init() {
+void Sht11_init(void) {
     SHT_DATA_DDR = 0;
     SHT_SCK_DDR = 0;
     SHT_DATA = 1;
@@ -171,7 +171,11 @@ char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char m
     }
     Delay1KTCYx(5);
     SHT_DATA_DDR = 1;
+    // Long busy wait can block usb
     while (PORTBbits.RB1 == 1);
+    // Read two bytes response
+    // FIXME No es crítico: No funciona con usb, intentar habilitar una interrupción de pin
+    // y encapsular las siguientes líneas dentro de la ISR.
     *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
     *(p_value) = *(p_value) << 8;
     *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
