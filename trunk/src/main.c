@@ -47,25 +47,20 @@
 /* Includes */
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
+#include "bsp.h"
 #include "hw_profile.h"
+#include "isr.h"
+
 // Fuentes de interrupción asíncronas
-#include "digi_isr.h"
 #include "gps_isr.h"
 // Clase de servicio
 #include "service.h"
 
 #ifdef USB_ENABLED
 #include "usb_device.h"
+#include "usb_handler.h"
 #include "power.h"
 #endif
-
-
-
-/*...........................................................................*/
-/* Prototypes */
-static void BSP_initializeSystem(void);
-static void BSP_prepareSleep(void);
-static void BSP_installInterrupts(void);
 
 /*...........................................................................*/
 /* Main */
@@ -81,12 +76,16 @@ void main(void) {
 #ifdef USB_ENABLED
         // Comprueba el terminal que indica la conexi?n USB al inicio o al reset
         if (USB_PLUGGED) {
+            // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
+            BSP_enablePLL();
             // Si no se ha activado el USB, lo activa
             if ((USBGetDeviceState() == DETACHED_STATE)) {
                 USBDeviceAttach();
             } else {
                 // Si ya se ha activado, realiza las tareas USB
                 USB_process();
+                // FIXME En la PCB no hay leds para el estado del USB, habrá que ponerlos??.
+                // AL usar low speed usb, los intervalos son muy largos
                 USB_blinkStatus();
             }
         } else {
@@ -106,59 +105,4 @@ void main(void) {
         InterruptHandler_handleActiveInterrupt();
 #endif
     }
-}
-
-/*...........................................................................*/
-
-/* FIXME To bsp package */
-static void BSP_initializeSystem(void) {
-    // Default all pins to digital
-    ADCON1 |= 0x0F;
-    //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-    {
-        unsigned int pll_startup_counter = 600;
-        OSCTUNEbits.PLLEN = 1;
-        while (pll_startup_counter--);
-    }
-
-    ANCON0 = 0xFF; // Default all pins to digital
-    ANCON1 = 0xFF; // Default all pins to digital
-
-
-    // Configura PORTC<0> como salida de test
-    TRISCbits.TRISC0 = 0;
-    // COnfigura PORTB<4> como entrada para el conector USB
-    TRISBbits.TRISB4 = 1;
-
-    //Initialize all of the LED pins
-    mInitAllLEDs();
-
-    //Initialize the pushbuttons
-    mInitAllSwitches();
-
-    // Initializes USB module SFRs and firmware variables to known states
-    USBDeviceInit();
-
-    // Initializes mote API
-    Service_initMote();
-}
-
-/*...........................................................................*/
-
-/* FIXME To bsp package */
-static void BSP_prepareSleep(void) {
-    // pre sleep actions
-    LATCbits.LATC0 = 0;
-    INTCONbits.GIEH = 1;
-    INTCONbits.GIEL = 1;
-}
-
-/* Install interrupts */
-static void BSP_installInterrupts(void) {
-    // Init interrupt vectors
-    InterruptHandler_initVectors();
-    // Install xbee ISR
-    XBee_installInterrupt();
-    // Install gps ISR
-    Gps_installInterrupt();
 }

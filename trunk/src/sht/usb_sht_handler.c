@@ -39,11 +39,9 @@
  * de interrupción y añadiéndola a la lista de handlers.
  */
 
-// Private
-static Sht11 shtData;
-
 // Measure sensor
 unsigned char USBShtHandler_sht11Test(char* usbBuffer) {
+    Sht11 shtData;
     Sht11_init();
     // Perform measures and calculations
     Sht11_measure(&shtData);

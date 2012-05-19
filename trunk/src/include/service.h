@@ -18,16 +18,17 @@
 #ifndef service_h
 #define service_h
 
-#include "mote.h"
-#include "digi.h"
 #include "hw_serial.h"
 #include "digi_proxy.h"
+#include "GenericTypeDefs.h"
+
+// FIXME A eliminar
 
 /* Mote* mote, Serial* serial, XBee* xbee, XBeeProxy* proxy */
-void Service_initMote();
+void Service_initMote(void);
 
-void Service_sendXbeePacket(XBeePacket* packet);
+void Service_parseXBeePacket(XBeePacket* xbeePacket);
 
-void Service_readGpsSignal();
+void Service_readGpsSignal(void);
 
 #endif  /* service_h */

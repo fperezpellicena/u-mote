@@ -16,21 +16,22 @@
  */
 
 #include <rtcc.h>
+
 #include "service.h"
-#include "bsp.h"
 #include "hw_adc.h"
-#include "hw_serial.h"
+#include "digi_api.h"
 #include "gps_proxy.h"
+
+// TODO A eliminar
 
 /*..........................................................................*/
 /* All this variables have External linkage and can be used in any file */
-#pragma udata mote_data
-Mote mote;
-Serial serial;
-XBee xbee;
-XBeePacket xbeePacket;
-XBeeProxy xbeeProxy;
-GpsProxy gpsProxy;
+#pragma udata serial1_data
+Serial serial1;
+#pragma
+
+#pragma udata serial2_data
+Serial serial2;
 #pragma
 /*..........................................................................*/
 
@@ -43,47 +44,38 @@ GpsProxy gpsProxy;
  * @param xbee		ponter to xbee struct
  * @param proxy		ponter to proxy struct
  */
-void Service_initMote() {
-    
-    /* BSP init */
-    BSP_init();
-
-    /* Create XBee */
-    XBee_create(&xbee);
-
-    /* Create Serial */
-    Serial_create(&serial, XBEE_SERIAL, DEFAULT_UART_CONFIG, 25);
-
-    /* Init serial */
-    Serial_init(&serial);
+void Service_initMote(void) {
 
     /* Create Proxy */
-    XBeeProxy_create(&xbeeProxy, &serial, &xbee);
+    XBeeProxy_create();
 
     /* Init ADC */
-    Adc_init(DEFAULT_ADC_CONFIG, DEFAULT_ADC_CONFIG2, 15);
+    //Adc_init(DEFAULT_ADC_CONFIG, DEFAULT_ADC_CONFIG2, 15);
 
     /* Create Mote */
-    Mote_create(&mote, &xbeeProxy);
-
+   // Mote_create(&mote, &xbeeProxy);
+    
     /* Enable RTCC */
     RTCCFGbits.RTCEN = 1; // enable RTCC module
 }
 
-/**
- * Send XBee packet using XBeeProxy internal instance
- *
- * @param packet packet to send
- */
-void Service_sendXbeePacket(XBeePacket* packet) {
-    XBeeProxy_sendPacket(&xbeeProxy, packet);
+void Service_parseXBeePacket(XBeePacket* xbeePacket) {
+    // Check frameId
+    if(xbeePacket->apiId == MODEM_STATUS) {
+        UINT8 status;
+        XBee_readModemStatusPacket(xbeePacket, &status);
+        // Si se ha despertado la red, envía una trama
+        if(status == MODEM_STATUS_NETWORK_WOKE_UP) {
+             LATDbits.LATD5 = !LATDbits.LATD5; // Test
+        }
+    }
+    // At the end, reset XBeePacket
+    XBee_resetPacket(xbeePacket);
 }
 
-boolean Service_readXbeePacket(XBeePacket* packet) {
-    return XBeeProxy_readPacket(&xbeeProxy, packet);
-}
 
-void Service_readGpsSignal() {
+
+void Service_readGpsSignal(void) {
 
     //    NMEAOutput nmeaOutput;
     //    XBeePacket packet;

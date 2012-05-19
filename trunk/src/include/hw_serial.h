@@ -18,29 +18,27 @@
 #ifndef hw_serial_h
 #define hw_serial_h
 
-#include "qep_port.h"
+#include "GenericTypeDefs.h"
 
 typedef struct Serial Serial;
 
 struct Serial {
-    uint8_t uart; /* Serial port: 1 or 2*/
-    uint8_t baudrate; /* Baudrate */
-    uint8_t config; /* Mask config */
+    UINT8 uart;
 };
 
-void Serial_create(Serial * const serial, uint8_t uart, uint8_t config,
-        uint8_t baudrate);
-
-void Serial_init(Serial * const serial);
+void Serial_create(Serial * const serial, UINT8 uart, UINT8 baudrate);
 
 void Serial_close(Serial * const serial);
 
-void Serial_send(Serial * const serial, uint8_t value);
+void Serial_send(Serial * const serial, UINT8 value);
 
-uint8_t Serial_read(Serial * const serial);
+UINT8 Serial_read(Serial * const serial);
 
-boolean Serial_available(Serial * const serial);
+BOOL Serial_available(Serial * const serial);
 
-boolean Serial_busy(Serial * const serial);
+/** Interrupt handler functions */
+BOOL Serial_checkInterrupt(Serial * const serial);
+
+void Serial_ackInterrupt(Serial * const serial);
 
 #endif          /* hw_serial_h */

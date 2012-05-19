@@ -23,7 +23,7 @@ void GpsProxy_create(GpsProxy * const proxy, Serial * const serial) {
 }
 
 BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
-     uint8_t data;
+     UINT8 data;
     while (Serial_available(proxy->serial)) {
         data = Serial_read(proxy->serial);
         switch(packet->rxState) {
@@ -49,9 +49,9 @@ BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
                 // Low chk byte
                 packet->chkRead += data;
                 if(packet->chkRead == packet->chkCalculated) {
-                    return true;
+                    return TRUE;
                 }
-                return false;
+                return FALSE;
                 break;
         }
     }

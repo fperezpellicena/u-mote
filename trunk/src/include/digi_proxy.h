@@ -18,22 +18,31 @@
 #ifndef digi_proxy_h
 #define digi_proxy_h
 
-#include "digi.h"
 #include "digi_api.h"
-#include "hw_serial.h"
+#include "GenericTypeDefs.h"
 
-typedef struct XBeeProxy XBeeProxy;
 
-struct XBeeProxy {
-    Serial* serial;                           /* Hardware physical interface */
-    XBee* xbee;                               /* Xbee firmware configuration */
-};
+void XBeeProxy_create(void);
 
-void XBeeProxy_create(XBeeProxy* const proxy, Serial* const serial, XBee* const xbee);
+BOOL XBeeProxy_sendPacket(XBeePacket * const packet);
 
-boolean XBeeProxy_readPacket(XBeeProxy* const proxy, XBeePacket* const packet);
+BOOL XBeeProxy_readPacket(XBeePacket* const packet);
 
-boolean XBeeProxy_sendPacket(XBeeProxy * const proxy, XBeePacket * const packet);
+BOOL XBeeProxy_read(void);
 
+/*..........................................................................*/
+/* Interrupt handler functions */
+
+void XBeeProxy_installInterrupt(void);
+
+/* Top halve interrupt handler */
+void XBeeProxy_handleTopHalveInterrupt(void);
+
+/* Bottom halve interrupt handler*/
+void XBeeProxy_handleBottomHalveInterrupt(void);
+
+BOOL XBeeProxy_checkInterrupt(void);
+
+void XBeeProxy_ackInterrupt(void);
 
 #endif     /* digi_proxy_h*/

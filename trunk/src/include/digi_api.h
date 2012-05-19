@@ -18,7 +18,7 @@
 #ifndef digi_api_h
 #define digi_api_h
 
-#include "qep_port.h"
+#include "GenericTypeDefs.h"
 
 /*..........................................................................*/
 
@@ -27,6 +27,7 @@
 #define START_DELIMITER                         0x7E
 #define MAC_ADDRESS_BYTES_LENGTH                0x08
 /*..........................................................................*/
+#define MIN_PACKET_SIZE                         0x06
 #define MAX_PACKET_SIZE                         0x64
 #define AT_COMMAND_MINLENGTH                    0x04
 #define TRANSMIT_REQUEST_COMMAND_MINLENGTH      0x0E
@@ -95,9 +96,9 @@ enum XBeePacketRxState {
 typedef struct AtCommand AtCommand;
 
 struct AtCommand {
-    uint8_t frameId; /* Frame id */
-    uint8_t command[2]; /* AT Command */
-    uint8_t value[97]; /* Command value(optional)*/
+    UINT8 frameId; /* Frame id */
+    UINT8 command[2]; /* AT Command */
+    UINT8 value[97]; /* Command value(optional)*/
 };
 
 /*..........................................................................*/
@@ -106,12 +107,12 @@ struct AtCommand {
 typedef struct TransmitRequest TransmitRequest;
 
 struct TransmitRequest {
-    uint8_t frameId; /* Frame id */
-    uint8_t destinationAddress[8]; /* 64 bit destination address */
-    uint8_t reserved[2];
-    uint8_t bcastRadious; /* Broadcast radious */
-    uint8_t options; /* Transmit options */
-    uint8_t payload[97]; /* Data sent to the destination device */
+    UINT8 frameId; /* Frame id */
+    UINT8 destinationAddress[8]; /* 64 bit destination address */
+    UINT8 reserved[2];
+    UINT8 bcastRadious; /* Broadcast radious */
+    UINT8 options; /* Transmit options */
+    UINT8 payload[97]; /* Data sent to the destination device */
 };
 
 /*..........................................................................*/
@@ -120,16 +121,16 @@ struct TransmitRequest {
 typedef struct ExplicitAddressing ExplicitAddressing;
 
 struct ExplicitAddressing {
-    uint8_t frameId; /* Frame id */
-    uint8_t destinationAddress[8]; /* 64 bit destination address */
-    uint8_t reserved[2];
-    uint8_t sourceEndpoint; /* Source endpoint for the transmission */
-    uint8_t destinationEndpoint; /* Destination endpoint for the transmission */
-    uint8_t clusterId[2]; /* Cluster ID used in the transmission */
-    uint8_t profileId[2]; /* Profile ID used in the transmission */
-    uint8_t bcastRadious; /* Broadcast radious */
-    uint8_t options; /* Transmit options */
-    uint8_t payload[97]; /* Data sent to the destination device */
+    UINT8 frameId; /* Frame id */
+    UINT8 destinationAddress[8]; /* 64 bit destination address */
+    UINT8 reserved[2];
+    UINT8 sourceEndpoint; /* Source endpoint for the transmission */
+    UINT8 destinationEndpoint; /* Destination endpoint for the transmission */
+    UINT8 clusterId[2]; /* Cluster ID used in the transmission */
+    UINT8 profileId[2]; /* Profile ID used in the transmission */
+    UINT8 bcastRadious; /* Broadcast radious */
+    UINT8 options; /* Transmit options */
+    UINT8 payload[97]; /* Data sent to the destination device */
 };
 
 /*..........................................................................*/
@@ -138,12 +139,12 @@ struct ExplicitAddressing {
 typedef struct RemoteAtCommand RemoteAtCommand;
 
 struct RemoteAtCommand {
-    uint8_t frameId; /* Frame id */
-    uint8_t destinationAddress[8]; /* 64 bit destination address */
-    uint8_t reserved[2];
-    uint8_t options; /* Remote command options */
-    uint8_t command[2]; /* AT command */
-    uint8_t parameter; /* Command parameter */
+    UINT8 frameId; /* Frame id */
+    UINT8 destinationAddress[8]; /* 64 bit destination address */
+    UINT8 reserved[2];
+    UINT8 options; /* Remote command options */
+    UINT8 command[2]; /* AT command */
+    UINT8 parameter; /* Command parameter */
 };
 
 /*..........................................................................*/
@@ -152,10 +153,10 @@ struct RemoteAtCommand {
 typedef struct AtCommandResponse AtCommandResponse;
 
 struct AtCommandResponse {
-    uint8_t frameId; /* Frame id */
-    uint8_t command[2]; /* AT command */
-    uint8_t status; /* Command status */
-    uint8_t value[97]; /* Command value(optional)*/
+    UINT8 frameId; /* Frame id */
+    UINT8 command[2]; /* AT command */
+    UINT8 status; /* Command status */
+    UINT8 value[97]; /* Command value(optional)*/
 };
 
 /*..........................................................................*/
@@ -164,7 +165,7 @@ struct AtCommandResponse {
 typedef struct ModemStatus ModemStatus;
 
 struct ModemStatus {
-    uint8_t status; /* Modem status */
+    UINT8 status; /* Modem status */
 };
 
 /*..........................................................................*/
@@ -173,11 +174,11 @@ struct ModemStatus {
 typedef struct TransmitStatus TransmitStatus;
 
 struct TransmitStatus {
-    uint8_t frameId; /* Frame ID */
-    uint8_t reserved[2]; /* Reserved */
-    uint8_t retryCount; /* Number of retransmissions */
-    uint8_t deliveryStatus; /* Delivery status */
-    uint8_t discoveryStatus; /* Discovery status */
+    UINT8 frameId; /* Frame ID */
+    UINT8 reserved[2]; /* Reserved */
+    UINT8 retryCount; /* Number of retransmissions */
+    UINT8 deliveryStatus; /* Delivery status */
+    UINT8 discoveryStatus; /* Discovery status */
 };
 
 /*..........................................................................*/
@@ -186,11 +187,11 @@ struct TransmitStatus {
 typedef struct ReceivePacket ReceivePacket;
 
 struct ReceivePacket {
-    uint8_t frameId; /* Frame id */
-    uint8_t sourceAddress[8]; /* 64 bit source address */
-    uint8_t reserved[2];
-    uint8_t options; /* Receive options */
-    uint8_t payload[97]; /* Data received */
+    UINT8 frameId; /* Frame id */
+    UINT8 sourceAddress[8]; /* 64 bit source address */
+    UINT8 reserved[2];
+    UINT8 options; /* Receive options */
+    UINT8 payload[97]; /* Data received */
 };
 
 /*..........................................................................*/
@@ -199,15 +200,15 @@ struct ReceivePacket {
 typedef struct ExplicitRxIndicator ExplicitRxIndicator;
 
 struct ExplicitRxIndicator {
-    uint8_t frameId; /* Frame id */
-    uint8_t sourceAddress[8]; /* 64 bit source address */
-    uint8_t reserved[2];
-    uint8_t sourceEndpoint; /* Source endpoint for the transmission */
-    uint8_t destinationEndpoint; /* Destination endpoint for the transmission */
-    uint8_t clusterId; /* Cluster ID used in the transmission */
-    uint8_t profileId; /* Profile ID used in the transmission */
-    uint8_t options; /* Receive options */
-    uint8_t payload[97]; /* Data received */
+    UINT8 frameId; /* Frame id */
+    UINT8 sourceAddress[8]; /* 64 bit source address */
+    UINT8 reserved[2];
+    UINT8 sourceEndpoint; /* Source endpoint for the transmission */
+    UINT8 destinationEndpoint; /* Destination endpoint for the transmission */
+    UINT8 clusterId; /* Cluster ID used in the transmission */
+    UINT8 profileId; /* Profile ID used in the transmission */
+    UINT8 options; /* Receive options */
+    UINT8 payload[97]; /* Data received */
 };
 
 /*..........................................................................*/
@@ -216,12 +217,12 @@ struct ExplicitRxIndicator {
 typedef struct RemoteCommandResponse RemoteCommandResponse;
 
 struct RemoteCommandResponse {
-    uint8_t frameId; /* Frame id */
-    uint8_t sourceAddress[8]; /* 64 bit source(remote) address */
-    uint8_t reserved[2];
-    uint8_t command[2]; /* AT command */
-    uint8_t status; /* AT command status */
-    uint8_t value[97]; /* Command data */
+    UINT8 frameId; /* Frame id */
+    UINT8 sourceAddress[8]; /* 64 bit source(remote) address */
+    UINT8 reserved[2];
+    UINT8 command[2]; /* AT command */
+    UINT8 status; /* AT command status */
+    UINT8 value[97]; /* Command data */
 };
 
 /*..........................................................................*/
@@ -230,9 +231,9 @@ struct RemoteCommandResponse {
 typedef struct XBeePacket XBeePacket;
 
 struct XBeePacket {
-    uint8_t apiId; /* Frame type identifier */
+    UINT8 apiId; /* Frame type identifier */
     union {
-        uint8_t payload[100];
+        UINT8 payload[100];
         AtCommand atCommand;
         TransmitRequest transmitRequest;
 	ExplicitAddressing explicitAddressing;
@@ -244,11 +245,12 @@ struct XBeePacket {
 	ExplicitRxIndicator explicitRxIndicator;
 	RemoteCommandResponse remoteCommandResponse;
     }frame;
-    uint16_t length; /* Number of bytes between the length and the checksum */
-    uint8_t checksum; /* Checksum calculated as FF - sum(fields)*/
-    uint8_t rxState; /* Reception state */
-    uint8_t *dataPtr; /* Ponter to structure itself */
-    uint8_t index;
+    UINT16 length; /* Number of bytes between the length and the checksum */
+    UINT8 checksum; /* Checksum calculated as FF - sum(fields)*/
+    UINT8 rxState; /* Reception state */
+    UINT8 *dataPtr; /* Ponter to structure itself */
+    UINT8 index;
+    UINT8 lastByte;
 };
 
 /*..........................................................................*/
@@ -260,41 +262,41 @@ void XBee_resetPacket(XBeePacket * const packet);
 
 /* TX METHODS */
 
-void XBee_createCompleteATCommandPacket(XBeePacket* packet, uint8_t frameId,
-	uint8_t* command,uint8_t* params, uint8_t paramsLength);
+void XBee_createCompleteATCommandPacket(XBeePacket* packet, UINT8 frameId,
+	UINT8* command,UINT8* params, UINT8 paramsLength);
 
-void XBee_createATCommandPacket(XBeePacket* packet, uint8_t frameId,
-		uint8_t* command);
+void XBee_createATCommandPacket(XBeePacket* packet, UINT8 frameId,
+		UINT8* command);
 
-void XBee_createTransmitRequestPacket(XBeePacket* packet, uint8_t frameId,
-	uint8_t* destinationAddress, uint8_t radious, uint8_t options,
-	uint8_t* payload, uint8_t dataLength);
+void XBee_createTransmitRequestPacket(XBeePacket* packet, UINT8 frameId,
+	UINT8* destinationAddress, UINT8 radious, UINT8 options,
+	UINT8* payload, UINT8 dataLength);
 
-void XBee_createExplicitAddressingPacket(XBeePacket* packet, uint8_t frameId,
-	uint8_t* destinationAddress, uint8_t sourceEndpoint,
-        uint8_t destinationEndpoint, uint8_t* clusterId, uint8_t* profileId,
-        uint8_t radious, uint8_t options,uint8_t* payload, uint8_t dataLength);
+void XBee_createExplicitAddressingPacket(XBeePacket* packet, UINT8 frameId,
+	UINT8* destinationAddress, UINT8 sourceEndpoint,
+        UINT8 destinationEndpoint, UINT8* clusterId, UINT8* profileId,
+        UINT8 radious, UINT8 options,UINT8* payload, UINT8 dataLength);
 
-void XBee_createRemoteAtCommandPacket(XBeePacket* packet, uint8_t frameId,
-	uint8_t* command, uint8_t param, uint8_t* destinationAddress,
-        uint8_t options);
+void XBee_createRemoteAtCommandPacket(XBeePacket* packet, UINT8 frameId,
+	UINT8* command, UINT8 param, UINT8* destinationAddress,
+        UINT8 options);
 
 /*..........................................................................*/
 
 /* RX METHODS */
-boolean XBee_readAtCommandResponsePacket(XBeePacket* packet, uint8_t* frameId,
-		uint8_t** command, uint8_t* status, uint8_t* value);
+BOOL XBee_readAtCommandResponsePacket(XBeePacket* packet, UINT8* frameId,
+		UINT8** command, UINT8* status, UINT8* value);
 
-boolean XBee_readModemStatusPacket(XBeePacket* packet, uint8_t* status);
+BOOL XBee_readModemStatusPacket(XBeePacket* packet, UINT8* status);
 
-boolean XBee_readTransmitStatusPacket(XBeePacket* packet, uint8_t* frameId,
-        uint8_t* retryCount, uint8_t* deliveryStatus, uint8_t* discoveryStatus);
+BOOL XBee_readTransmitStatusPacket(XBeePacket* packet, UINT8* frameId,
+        UINT8* retryCount, UINT8* deliveryStatus, UINT8* discoveryStatus);
 
-boolean XBee_readReceivePacket(XBeePacket* packet, uint8_t* frameId,
-        uint8_t** sourceAddress, uint8_t* options, uint8_t** payload,
-        uint8_t* length);
+BOOL XBee_readReceivePacket(XBeePacket* packet, UINT8* frameId,
+        UINT8** sourceAddress, UINT8* options, UINT8** payload,
+        UINT8* length);
 
-boolean XBee_readRemoteCommandResponsePacket(XBeePacket* packet,uint8_t* frameId,
-        uint8_t** sourceAddress,uint8_t** command, uint8_t* status, uint8_t* value);
+BOOL XBee_readRemoteCommandResponsePacket(XBeePacket* packet,UINT8* frameId,
+        UINT8** sourceAddress,UINT8** command, UINT8* status, UINT8* value);
 
 #endif

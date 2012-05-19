@@ -55,7 +55,7 @@ struct Sht11 {
 };
 
 /* Init pins and registers*/
-void Sht11_init();
+void Sht11_init(void);
 
 /**
  * Generates a transmission start
