@@ -176,8 +176,7 @@ BOOL XBeeProxy_read(void) {
 void XBeeProxy_installInterrupt(void) {
     // Install interrupt handler
     InterruptHandler_addHI(&XBeeProxy_handleTopHalveInterrupt,
-            &XBeeProxy_handleBottomHalveInterrupt, &XBeeProxy_checkInterrupt,
-            &XBeeProxy_ackInterrupt);
+            &XBeeProxy_handleBottomHalveInterrupt, &XBeeProxy_checkInterrupt);
 #if XBEE_INTERRUPT == ON_SLEEP_INTERRUPT
     // If ON_SLEEP_INTERRUPT enabled, configure pin interruption
     XBEE_ON_SLEEP_PIN();
@@ -194,9 +193,20 @@ void XBeeProxy_handleTopHalveInterrupt(void) {
     // and store it in lastByte field
     UINT8 byte = Serial_read(&xbeeProxySerial);
     xbeeProxyPacket.lastByte = byte;
+    // ACK
+    Serial_ackInterrupt(&xbeeProxySerial);
 #else
-    // If ON_SLEEP_INTERRUPT enabled, read full data from serial
-    XBeeProxy_readPacket(&xbeeProxyPacket);
+    // if ON_SLEEP_INTERRUPT enabled
+    //  if modem status enabled
+    //      read full data from serial
+    //  else
+    //      clear ON_SLEEP flag
+#   if SLEEP_STATUS_MESSAGES
+        XBeeProxy_readPacket(&xbeeProxyPacket);
+#   else
+        // ACK
+        XBEE_ON_SLEEP_CLEAR_FLAG();
+# endif
 #endif
 }
 
@@ -210,7 +220,8 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
         // Crea una trama y la envía
     }
 #else
-    // Crea una trama y la envía
+    // Envía la trama preparada
+    XBeeProxy_sendPacket(&xbeeProxyPacket);
 #endif
 }
 
@@ -221,15 +232,5 @@ BOOL XBeeProxy_checkInterrupt(void) {
 #else
     // If pin interrupt is enabled, check pin
     return XBEE_ON_SLEEP_FLAG;
-#endif
-}
-
-void XBeeProxy_ackInterrupt(void) {
-#if XBEE_INTERRUPT == SERIAL_INTERRUPT
-    // If serial interrupt is configured, clear serial IF
-    Serial_ackInterrupt(&xbeeProxySerial);
-#else
-    // If pin interrupt is enabled, clear pin IF
-    XBEE_ON_SLEEP_CLEAR_FLAG();
 #endif
 }

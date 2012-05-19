@@ -31,9 +31,6 @@ typedef void rom (*HandleInterrupt)(void);
 /* Check interrupt function prototype */
 typedef BOOL rom (*CheckInterrupt)(void);
 
-/* Check interrupt function prototype */
-typedef void rom (*AckInterrupt)(void);
-
 /*..........................................................................*/
 /* Interrupt handler class */
 typedef struct InterruptHandler InterruptHandler;
@@ -47,8 +44,6 @@ struct InterruptHandler {
     BOOL enabled;
     /* Check if interrupt has happened */
     CheckInterrupt isActive;
-    /* Clear interrupt flag */
-    AckInterrupt ackInterrupt; 
 };
 
 /*..........................................................................*/
@@ -63,20 +58,18 @@ struct InterruptHandlerVector {
 /*..........................................................................*/
 void InterruptHandler_create(InterruptHandler* handler,
         HandleInterrupt topHandleFunction, HandleInterrupt bottomHandleFunction,
-        CheckInterrupt checkFunction, AckInterrupt ackInterruptFunction);
+        CheckInterrupt checkFunction);
 
 /*..........................................................................*/
 void InterruptHandler_initVectors(void);
 
 /*..........................................................................*/
 void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
-        AckInterrupt ackInterruptFunction);
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction);
 
 /*..........................................................................*/
 void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
-        AckInterrupt ackInterruptFunction);
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction);
 
 /*..........................................................................*/
 void InterruptHandler_handleActiveInterrupt(void);

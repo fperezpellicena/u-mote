@@ -19,7 +19,6 @@
 #include "hw_profile.h"
 #include "usb_config.h"
 #include "usb_device.h"
-//#include "critical.h"
 
 /*..........................................................................*/
 /* Interrupt vectors */
@@ -49,8 +48,6 @@ void ISR_hi(void) {
                 activeInterrupt = &interruptVectorHI.handlers[index];
                 // Top halve function
                 activeInterrupt->handleTopHalveInterrupt();
-                // Ack interrupt
-                activeInterrupt->ackInterrupt();
                 break;
             }
         }
@@ -83,8 +80,6 @@ void ISR_lo(void) {
                 activeInterrupt = &interruptVectorLO.handlers[index];
                 // Top halve function
                 activeInterrupt->handleTopHalveInterrupt();
-                // Ack interrupt
-                activeInterrupt->ackInterrupt();
                 break;
             }
         }
@@ -118,11 +113,10 @@ void intVector_lo(void) {
 /*..........................................................................*/
 void InterruptHandler_create(InterruptHandler* handler,
         HandleInterrupt topHandleFunction, HandleInterrupt bottomHandleFunction,
-        CheckInterrupt checkFunction, AckInterrupt ackInterruptFunction) {
+        CheckInterrupt checkFunction) {
     handler->handleTopHalveInterrupt = topHandleFunction;
     handler->handleBottomHalveInterrupt = bottomHandleFunction;
     handler->isActive = checkFunction;
-    handler->ackInterrupt = ackInterruptFunction;
 }
 
 /*..........................................................................*/
@@ -138,26 +132,22 @@ void InterruptHandler_initVectors(void) {
 
 /*..........................................................................*/
 void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
-        AckInterrupt ackInterruptFunction) {
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction) {
     if (interruptVectorHI.size < MAX_INTERRUPT_HANDLERS) {
         interruptVectorHI.handlers[interruptVectorHI.size].handleTopHalveInterrupt = topHandleFunction;
         interruptVectorHI.handlers[interruptVectorHI.size].handleBottomHalveInterrupt = bottomHandleFunction;
         interruptVectorHI.handlers[interruptVectorHI.size].isActive = checkFunction;
-        interruptVectorHI.handlers[interruptVectorHI.size].ackInterrupt = ackInterruptFunction;
         interruptVectorHI.size++;
     }
 }
 
 /*..........................................................................*/
 void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction,
-        AckInterrupt ackInterruptFunction) {
+        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction) {
     if (interruptVectorLO.size < MAX_INTERRUPT_HANDLERS) {
         interruptVectorLO.handlers[interruptVectorLO.size].handleTopHalveInterrupt = topHandleFunction;
         interruptVectorLO.handlers[interruptVectorLO.size].handleBottomHalveInterrupt = bottomHandleFunction;
         interruptVectorLO.handlers[interruptVectorLO.size].isActive = checkFunction;
-        interruptVectorLO.handlers[interruptVectorLO.size].ackInterrupt = ackInterruptFunction;
         interruptVectorLO.size++;
     }
 }
@@ -174,4 +164,3 @@ void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
 void InterruptHandler_handleActiveInterrupt(void) {
     activeInterrupt->handleBottomHalveInterrupt();
 }
-
