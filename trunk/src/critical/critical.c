@@ -16,7 +16,7 @@
  */
 
 #include "critical.h"
-#include <p18f46j50.h>
+#include <p18cxxx.h>
 
 static unsigned char interruptSFR;
 

@@ -24,7 +24,6 @@
 
 /* Procesamiento de información USB */
 void USB_process(void);
-/* Gestión de estado de los led asociados a USB */
 void USB_blinkStatus(void);
 
 #endif /* usb_handler_h */

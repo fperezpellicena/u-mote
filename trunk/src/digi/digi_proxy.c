@@ -220,7 +220,8 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
         // Crea una trama y la envía
     }
 #else
-    // Envía la trama preparada
+    // Envía la trama preparada(hay que prepararla antes para optimizar
+    // el tiempo que está despierto el sistema)
     XBeeProxy_sendPacket(&xbeeProxyPacket);
 #endif
 }

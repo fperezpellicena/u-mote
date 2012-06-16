@@ -18,7 +18,13 @@
 #ifndef bsp_h
 #define bsp_h
 
-#include "GenericTypeDefs.h"
+#include <p18cxxx.h>
+
+/*..........................................................................*/
+/* IO PIN STATUS */
+
+#define INPUT_PIN 1
+#define OUTPUT_PIN 0
 
 
 /*..........................................................................*/
@@ -61,6 +67,7 @@
 #	define XBEE_ON_SLEEP_EDGE()	(INTCON2bits.INTEDG0 = 0)
 #	define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
 #	define XBEE_ON_SLEEP_CLEAR_FLAG()	(INTCONbits.INT0IF = 0)
+#       define XBEE_ON_SLEEP_WAKE()     (WDTCONbits.DS && DSWAKEHbits.DSINT0)
 #	if XBEE_SERIAL == EUSART1 
 #		define EUSART1_POLL
 #	else
@@ -72,10 +79,64 @@
 
 
 /*...........................................................................*/
+/* USB SECTION */
+
+#define USB_ENABLED
+
+/* USB attach detector */
+#define USB_PLUG_PIN      PORTBbits.RB4
+
+#ifdef USB_ENABLED
+#   ifdef USB_PLUG_PIN
+#       define USB_PLUGGED    USB_PLUG_PIN == 1
+#       define ENABLE_USB_ATTACH     TRISBbits.TRISB4 = 1
+#   else
+#       error "USB_PLUG_PIN not defined"
+#   endif
+#endif
+
+/*...........................................................................*/
+/* RTCC SECTION */
+
+#define RTCC_ENABLED
+
+#ifdef RTCC_ENABLED
+#   define ENABLE_RTCC    RTCCFGbits.RTCEN = 1
+#endif
+
+
+#define mInitAllLEDs()      LATE &= 0xFC; TRISE &= 0xFC;
+
+#define mLED_1              LATEbits.LATE0
+#define mLED_2              LATEbits.LATE1
+#define mLED_3
+#define mLED_4
+
+#define mGetLED_1()         mLED_1
+#define mGetLED_2()         mLED_2
+#define mGetLED_3()         1
+#define mGetLED_4()         1
+
+#define mLED_1_On()         mLED_1 = 1;
+#define mLED_2_On()         mLED_2 = 1;
+#define mLED_3_On()
+#define mLED_4_On()
+
+#define mLED_1_Off()        mLED_1 = 0;
+#define mLED_2_Off()        mLED_2 = 0;
+#define mLED_3_Off()
+#define mLED_4_Off()
+
+#define mLED_1_Toggle()     mLED_1 = !mLED_1;
+#define mLED_2_Toggle()     mLED_2 = !mLED_2;
+#define mLED_3_Toggle()
+#define mLED_4_Toggle()
+
+
+/*...........................................................................*/
 /* Prototypes */
 void BSP_init(void);
 void BSP_prepareSleep(void);
-void BSP_installInterrupts(void);
 void BSP_enablePLL(void);
 
 

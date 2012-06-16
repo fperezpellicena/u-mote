@@ -15,7 +15,7 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <p18f46j50.h>
+#include <p18cxxx.h>
 #include "gps_isr.h"
 #include "isr.h"
 
@@ -27,12 +27,12 @@ void Gps_disable(void);
 /* Capture Gps message via UART */
 void Gps_handleInterrupt(void) {
     Gps_disable();
-    LATDbits.LATD6 = !LATDbits.LATD6; // Test
+ //   LATDbits.LATD6 = !LATDbits.LATD6; // Test
 }
 
 /* Capture Gps message via UART */
 void Gps_handleTrackingInterrupt(void) {
-    LATDbits.LATD6 = !LATDbits.LATD6; // Test
+   // LATDbits.LATD6 = !LATDbits.LATD6; // Test
 }
 
 /* Check for valid gps signal */
@@ -47,9 +47,9 @@ void Gps_clearInterruptFlag(void) {
 
 static void Gps_configureInterrupt(void) {
     /* Output led */
-    TRISDbits.TRISD6 = 0;
+   // TRISDbits.TRISD6 = 0;
      /* Output led */
-    TRISDbits.TRISD7 = 0;
+   // TRISDbits.TRISD7 = 0;
     /* Falling edge */
     INTCON2bits.INTEDG2 = 0;
     /* Input interrupt enable */
@@ -62,12 +62,12 @@ static void Gps_configureInterrupt(void) {
 
 /* Enable VDD Gps module*/
 void Gps_enable(void) {
-    LATDbits.LATD7 = 1;
+  //  LATDbits.LATD7 = 1;
 }
 
 /* Disable VDD Gps module */
 void Gps_disable(void) {
-    LATDbits.LATD7 = 0;
+  //  LATDbits.LATD7 = 0;
 }
 
 /** Install interrupt */

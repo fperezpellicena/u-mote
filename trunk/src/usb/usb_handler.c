@@ -16,8 +16,8 @@
  */
 
 #include <string.h>
+#include "bsp.h"
 #include "GenericTypeDefs.h"
-#include "hw_profile.h"
 #include "usb_handler.h"
 #include "usb_config.h"
 #include "usb_device.h"
@@ -89,7 +89,6 @@ void USB_process(void) {
     CDCTxService();
 }
 
-//Blink the LEDs according to the USB device status
 
 void USB_blinkStatus(void) {
     static WORD led_count = 0;

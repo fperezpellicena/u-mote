@@ -16,7 +16,7 @@
  */
 
 #include "power.h"
-#include <p18f46j50.h>
+#include <p18cxxx.h>
 
 /*..........................................................................*/
 
@@ -243,9 +243,14 @@ void sleep(void) {
  *  code execution will resume at the device’s Reset vector.
  */
 void deepSleep(void) {
-    WDTCONbits.REGSLP = 1;
-    OSCCONbits.IDLEN = 0;
-    INTCONbits.GIE = 0;
+    INTCONbits.GIEH = 0;    /* Disable interrupts*/
+    WDTCONbits.SWDTEN = 1; /* turn on the watch dog timer */
+    DSCONLbits.ULPWDIS = 1; /* disable ULP wake up */
+    DSCONLbits.DSBOR = 0; /* disable Brownout wake up */
+    DSCONHbits.DSULPEN = 0; /* disable ULP pull up */
+    DSCONHbits.RTCWDIS = 1; /* disable RTCC wake up */
+    WDTCONbits.REGSLP = 1; /* turn off core regulator for deep sleep */
+    OSCCONbits.IDLEN = 0; /* enter sleep mode, not idle */
     DSCONHbits.DSEN = 1;
     Sleep();
     Nop();
