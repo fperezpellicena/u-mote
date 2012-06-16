@@ -16,7 +16,7 @@
  */
 
 #include "isr.h"
-#include "hw_profile.h"
+#include "bsp.h"
 #include "usb_config.h"
 #include "usb_device.h"
 
@@ -132,7 +132,7 @@ void InterruptHandler_initVectors(void) {
 
 /*..........................................................................*/
 void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction) {
+        HandleInterrupt bottomHandleFunction, CheckInterrupt checkFunction) {
     if (interruptVectorHI.size < MAX_INTERRUPT_HANDLERS) {
         interruptVectorHI.handlers[interruptVectorHI.size].handleTopHalveInterrupt = topHandleFunction;
         interruptVectorHI.handlers[interruptVectorHI.size].handleBottomHalveInterrupt = bottomHandleFunction;
@@ -143,7 +143,7 @@ void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
 
 /*..........................................................................*/
 void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction,CheckInterrupt checkFunction) {
+        HandleInterrupt bottomHandleFunction, CheckInterrupt checkFunction) {
     if (interruptVectorLO.size < MAX_INTERRUPT_HANDLERS) {
         interruptVectorLO.handlers[interruptVectorLO.size].handleTopHalveInterrupt = topHandleFunction;
         interruptVectorLO.handlers[interruptVectorLO.size].handleBottomHalveInterrupt = bottomHandleFunction;
@@ -162,5 +162,8 @@ void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
  * It also does not clear flag, because it must be done in interrupt context.
  */
 void InterruptHandler_handleActiveInterrupt(void) {
-    activeInterrupt->handleBottomHalveInterrupt();
+    // Check for a valid active interrupt
+    if(activeInterrupt) {
+        activeInterrupt->handleBottomHalveInterrupt();
+    }
 }

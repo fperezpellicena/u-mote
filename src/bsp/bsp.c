@@ -16,12 +16,8 @@
  */
 
 #include "bsp.h"
-#include "hw_profile.h"
 #include "usb_device.h"
-#include "service.h"
 #include "isr.h"
-#include "digi_proxy.h"
-#include <p18cxxx.h>
 
 
 /*...........................................................................*/
@@ -32,22 +28,18 @@ void BSP_init(void) {
     ANCON0 = 0xFF; // Default all pins to digital
     ANCON1 = 0xFF; // Default all pins to digital
 
-    // Configura PORTC<0> como salida de test
-    TRISCbits.TRISC0 = 0;
-    // COnfigura PORTB<4> como entrada para el conector USB
-    TRISBbits.TRISB4 = 1;
-
     //Initialize all of the LED pins
     mInitAllLEDs();
-
-    //Initialize the pushbuttons
-    mInitAllSwitches();
-
+    
+#ifdef USB_ENABLED
+    ENABLE_USB_ATTACH;
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
+#endif
 
-    // Initializes mote API
-    Service_initMote();
+#ifdef RTCC_ENABLED
+    ENABLE_RTCC;
+#endif
 }
 
 /*...........................................................................*/
@@ -66,20 +58,4 @@ void BSP_enablePLL(void) {
 void BSP_prepareSleep(void) {
     // Disable PLL
     OSCTUNEbits.PLLEN = 0;
-    // Pre-sleep actions
-    LATCbits.LATC0 = 0;
-    // Enable interrupts
-    INTCONbits.GIEH = 1;
-    INTCONbits.GIEL = 1;
-}
-
-/*...........................................................................*/
-/* Install interrupts */
-void BSP_installInterrupts(void) {
-    // Init interrupt vectors
-    InterruptHandler_initVectors();
-    // Install xbee ISR
-    XBeeProxy_installInterrupt();
-    // Install gps ISR
-    //Gps_installInterrupt();
 }

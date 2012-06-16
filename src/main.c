@@ -18,16 +18,12 @@
 /*...........................................................................*/
 /* Pragmas */
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
-//#pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
 #pragma config STVREN = ON          //stack overflow/underflow reset enabled
 #pragma config XINST = ON           //Extended instruction set disabled
 #pragma config CPUDIV = OSC1        //No CPU system clock divide
 #pragma config CP0 = OFF            //Program memory is not code-protected
-//#pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
-
 #pragma config OSC = INTOSCPLL      // Internal OSC(8mhz), PLL enabled by soft
 #pragma config PLLDIV = 2           // Divide By 2(4 Mhz) to generate 96Mhz
-
 #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
 #pragma config IESO = OFF           //Two-Speed Start-up disabled
 #pragma config WDTPS = 32768        //1:32768
@@ -48,13 +44,9 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "bsp.h"
-#include "hw_profile.h"
 #include "isr.h"
 
-// Fuentes de interrupción asíncronas
-#include "gps_isr.h"
-// Clase de servicio
-#include "service.h"
+#include "digi_proxy.h"
 
 #ifdef USB_ENABLED
 #   include "usb_device.h"
@@ -69,33 +61,38 @@
 void main(void) {
     // Init basic system
     BSP_init();
-    // Install all system interrupts
-    BSP_installInterrupts();
-
+    // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
+    BSP_enablePLL();
+    // Init interrupt vectors
+    InterruptHandler_initVectors();
+    // Initializes mote API
+    XBeeProxy_create();
     while (1) {
-#ifdef USB_ENABLED
+#ifdef USB_ENABLED 
         // Comprueba el terminal que indica la conexi?n USB al inicio o al reset
         if (USB_PLUGGED) {
-            // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
-            BSP_enablePLL();
             // Si no se ha activado el USB, lo activa
             if ((USBGetDeviceState() == DETACHED_STATE)) {
                 USBDeviceAttach();
             } else {
+                USB_blinkStatus();
                 // Si ya se ha activado, realiza las tareas USB
                 USB_process();
-                // FIXME En la PCB no hay leds para el estado del USB, habrá que ponerlos??.
-                USB_blinkStatus();
             }
         } else {
+            // Comprueba
+            //  1.- Si se ha despertado tras un estado de deep sleep
+            //  2.- Y ha sido causado por INT0 --> XBEE INT PIN
+            if(XBEE_ON_SLEEP_WAKE()) {
+                // Ejecuta la interrupción que ha despertado al sistema
+                InterruptHandler_handleActiveInterrupt();
+            }
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
             if ((USBGetDeviceState() == ATTACHED_STATE)) {
                 USBDeviceDetach();
             }
             BSP_prepareSleep();
-            sleep();
-            // Ejecuta la interrupción que ha despertado al sistema
-            InterruptHandler_handleActiveInterrupt();
+            deepSleep();
         }
 #else
         BSP_prepareSleep();

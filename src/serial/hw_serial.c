@@ -17,7 +17,7 @@
 
 #include "bsp.h"
 #include "hw_serial.h"
-#include <p18f46j50.h>
+#include <p18cxxx.h>
 
 /** Interrupt driven uart */
 

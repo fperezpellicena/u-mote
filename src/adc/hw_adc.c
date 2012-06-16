@@ -22,13 +22,13 @@
  * Configura el ADC
  */
 void Adc_init(UINT8 config, UINT8 config2, UINT8 channel) {
-	while(BusyADC());
-	CloseADC();
-	OpenADC(config, config2, channel);
+    while (BusyADC());
+    CloseADC();
+    OpenADC(config, config2, channel);
 }
 
 void Adc_close() {
-	CloseADC();
+    CloseADC();
 }
 
 static void Adc_dummy();
@@ -37,18 +37,18 @@ static void Adc_dummy();
  * Realiza una conversión dummy para compensar el ruido de las entradas.
  */
 static void Adc_dummy() {
-	ADCON1bits.ADCAL = 1;
-	ConvertADC();
-	while(BusyADC());
-	ADCON1bits.ADCAL = 0;
+    ADCON1bits.ADCAL = 1;
+    ConvertADC();
+    while (BusyADC());
+    ADCON1bits.ADCAL = 0;
 }
 
 /**
  * Inicia una conversión, precedida de una dummy.
  */
 void Adc_startConversion() {
-	Adc_dummy();
-	ConvertADC();
+    Adc_dummy();
+    ConvertADC();
 }
 
 /**
@@ -57,10 +57,9 @@ void Adc_startConversion() {
  * @return conversión
  */
 UINT16 Adc_readValue() {
-	while(BusyADC());
-	return ReadADC();
+    while (BusyADC());
+    return ReadADC();
 }
-
 
 /**
  * Devuelve una muestra sampleada del ADC
@@ -71,9 +70,9 @@ UINT16 Adc_readValue() {
  * @return muestra con ruido de entrada compensado
  */
 UINT16 Adc_getValue() {
-	Adc_dummy();
-	ConvertADC();
-	return Adc_readValue();
+    Adc_dummy();
+    ConvertADC();
+    return Adc_readValue();
 }
 
 /**
@@ -85,12 +84,12 @@ UINT16 Adc_getValue() {
  * @return conversión promediada y compensada en ruido
  */
 UINT16 Adc_getAveragedValue() {
-	UINT32 tmp = 0;
-	UINT8 i = AVERAGE_FACTOR;
-	Adc_dummy();
-	while(i--) {
-		ConvertADC();
-		tmp += Adc_readValue();
-	}
-	return tmp >> DIV_AVERAGE;
+    UINT32 tmp = 0;
+    UINT8 i = AVERAGE_FACTOR;
+    Adc_dummy();
+    while (i--) {
+        ConvertADC();
+        tmp += Adc_readValue();
+    }
+    return tmp >> DIV_AVERAGE;
 }

@@ -17,7 +17,7 @@
 
 #include "sht11.h"
 #include "power.h"
-#include <p18f46j50.h>
+#include <p18cxxx.h>
 #include <usart.h>
 #include <stdio.h>
 #include <delays.h>
@@ -30,8 +30,9 @@ void Sht11_init(void) {
     SHT_DATA = 1;
     SHT_SCK = 0;
 
-    TRISDbits.TRISD1 = 0;
-    LATDbits.LATD1 = 0;
+    // TODO Revisar esto
+    // TRISDbits.TRISD1 = 0;
+    // LATDbits.LATD1 = 0;
 
     ANCON1bits.PCFG10 = 1;
     ANCON1bits.PCFG8 = 1;

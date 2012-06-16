@@ -30,9 +30,7 @@ void USBXBeeHandler_join(char usbBuffer[]) {
     XBee_createATCommandPacket(&xbeePacket, 0x01, "ATCB1");
     XBeeProxy_sendPacket(&xbeePacket);
     // Wait for response
-    while(!XBeeProxy_readPacket(&xbeePacket)){
-        idleRcMode();
-    }
+    while(!XBeeProxy_readPacket(&xbeePacket));
     // Parse packet
     XBee_readModemStatusPacket(&xbeePacket,&status);
     if(xbeePacket.frame.modemStatus.status) {
