@@ -31,8 +31,8 @@ PushECOToAnnotationFile=1
 DItemRevisionGUID=
 
 [Document1]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\pic.SchDoc
-AnnotationEnabled=1
+DocumentPath=pic.SchDoc
+AnnotationEnabled=0
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
 AnnotateSuffix=
@@ -47,7 +47,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [Document2]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\power.SchDoc
+DocumentPath=power.SchDoc
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -63,7 +63,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [Document3]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\uMote.SchLib
+DocumentPath=uMote.SchLib
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -79,7 +79,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [Document4]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\uMote.PcbLib
+DocumentPath=uMote.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -111,7 +111,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [Document6]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\uMote.PcbDoc
+DocumentPath=uMote.PcbDoc
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -127,7 +127,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [Document7]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\KEMET Chip Capacitor.IntLib
+DocumentPath=KEMET Chip Capacitor.IntLib
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -143,7 +143,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [Document8]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\SEPIC FOOTPRINTS.PcbLib
+DocumentPath=SEPIC FOOTPRINTS.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
 AnnotationIndexControlEnabled=0
@@ -159,51 +159,51 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 
 [GeneratedDocument1]
-DocumentPath=Project Outputs for uMote\Design Rule Check - uMote.html
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\Design Rule Check - uMote.html
 DItemRevisionGUID=
 
 [GeneratedDocument2]
-DocumentPath=Project Outputs for uMote\pic.BOM
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\pic.BOM
 DItemRevisionGUID=
 
 [GeneratedDocument3]
-DocumentPath=Project Outputs for uMote\pic.CSV
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\pic.CSV
 DItemRevisionGUID=
 
 [GeneratedDocument4]
-DocumentPath=Project Outputs for uMote\uMote.DRL
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.DRL
 DItemRevisionGUID=
 
 [GeneratedDocument5]
-DocumentPath=Project Outputs for uMote\uMote.DRR
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.DRR
 DItemRevisionGUID=
 
 [GeneratedDocument6]
-DocumentPath=Project Outputs for uMote\uMote.EXTREP
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.EXTREP
 DItemRevisionGUID=
 
 [GeneratedDocument7]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\uMote.GBL
+DocumentPath=uMote.GBL
 DItemRevisionGUID=
 
 [GeneratedDocument8]
-DocumentPath=..\..\..\Documents and Settings\FRANCISCO\Escritorio\u-mote\hw\uMote.GTL
+DocumentPath=uMote.GTL
 DItemRevisionGUID=
 
 [GeneratedDocument9]
-DocumentPath=Project Outputs for uMote\uMote.LDP
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.LDP
 DItemRevisionGUID=
 
 [GeneratedDocument10]
-DocumentPath=Project Outputs for uMote\uMote.REP
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.REP
 DItemRevisionGUID=
 
 [GeneratedDocument11]
-DocumentPath=Project Outputs for uMote\uMote.RUL
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.RUL
 DItemRevisionGUID=
 
 [GeneratedDocument12]
-DocumentPath=Project Outputs for uMote\uMote.TXT
+DocumentPath=..\..\..\..\..\Archivos de programa\Altium Designer Summer 08\Examples\Project Outputs for uMote\uMote.TXT
 DItemRevisionGUID=
 
 [SearchPath1]
