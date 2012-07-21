@@ -243,7 +243,7 @@ void sleep(void) {
  *  code execution will resume at the device’s Reset vector.
  */
 void deepSleep(void) {
-    INTCONbits.GIEH = 0;    /* Disable interrupts*/
+    //INTCONbits.GIEH = 0;    /* Disable interrupts*/
     WDTCONbits.SWDTEN = 1; /* turn on the watch dog timer */
     DSCONLbits.ULPWDIS = 1; /* disable ULP wake up */
     DSCONLbits.DSBOR = 0; /* disable Brownout wake up */
@@ -253,5 +253,4 @@ void deepSleep(void) {
     OSCCONbits.IDLEN = 0; /* enter sleep mode, not idle */
     DSCONHbits.DSEN = 1;
     Sleep();
-    Nop();
 }

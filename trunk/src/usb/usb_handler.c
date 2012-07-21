@@ -40,14 +40,14 @@ char USB_Out_Buffer[64];
  */
 void USB_process(void) {
     unsigned char length;
-    char RTCC_CONF[] = "rtccconfig";
-    char RTCC_TEST[] = "rtcctest";
-    char SHT_TEST[] = "shttest";
-    char GPS_CONF[] = "gpsconfig";
-    char GPS_TEST[] = "gpsconfig";
+    static char RTCC_CONF[] = "rtccconfig";
+    static char RTCC_TEST[] = "rtcctest";
+    static char SHT_TEST[] = "shttest";
+    static char GPS_CONF[] = "gpsconfig";
+    static char GPS_TEST[] = "gpsconfig";
     //    char SENSOR_LIST[] = "sensorlist";
     //    char SENSOR_TEST[] = "sensortest";
-    char XBEE_JOIN[] = "xbeejoin";
+    static char XBEE_JOIN[] = "xbeejoin";
     BYTE numBytesRead;
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
@@ -77,7 +77,7 @@ void USB_process(void) {
         } */ else {
             // Si el comando es erróneo, muestra un mensaje de error
             length = USB_ERROR_MSG_LEN;
-            Util_str2ram(USB_ERROR_MSG, USB_In_Buffer);
+            Util_str2ram((UINT8 rom*)USB_ERROR_MSG, (UINT8*)USB_In_Buffer);
         }
         // Si está preparado para enviar datos
         if (USBUSARTIsTxTrfReady() && length != 0) {
@@ -88,52 +88,3 @@ void USB_process(void) {
 
     CDCTxService();
 }
-
-
-void USB_blinkStatus(void) {
-    static WORD led_count = 0;
-
-    if (led_count == 0)led_count = 100U;    // Ajustado para USB low speed
-    led_count--;
-
-#define mLED_Both_Off()         {mLED_1_Off();mLED_2_Off();}
-#define mLED_Both_On()          {mLED_1_On();mLED_2_On();}
-#define mLED_Only_1_On()        {mLED_1_On();mLED_2_Off();}
-#define mLED_Only_2_On()        {mLED_1_Off();mLED_2_On();}
-
-    if (USBSuspendControl == 1) {
-        if (led_count == 0) {
-            mLED_1_Toggle();
-            if (mGetLED_1()) {
-                mLED_2_On();
-            } else {
-                mLED_2_Off();
-            }
-        }//end if
-    } else {
-        if (USBDeviceState == DETACHED_STATE) {
-            mLED_Both_Off();
-        } else if (USBDeviceState == ATTACHED_STATE) {
-            mLED_Both_On();
-        } else if (USBDeviceState == POWERED_STATE) {
-            mLED_Only_1_On();
-        } else if (USBDeviceState == DEFAULT_STATE) {
-            mLED_Only_2_On();
-        } else if (USBDeviceState == ADDRESS_STATE) {
-            if (led_count == 0) {
-                mLED_1_Toggle();
-                mLED_2_Off();
-            }//end if
-        } else if (USBDeviceState == CONFIGURED_STATE) {
-            if (led_count == 0) {
-                mLED_1_Toggle();
-                if (mGetLED_1()) {
-                    mLED_2_Off();
-                } else {
-                    mLED_2_On();
-                }
-            }//end if
-        }//end if(...)
-    }//end if(UCONbits.SUSPND...)
-
-}//end BlinkUSBStatus

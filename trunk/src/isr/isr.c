@@ -22,10 +22,10 @@
 
 /*..........................................................................*/
 /* Interrupt vectors */
-InterruptHandlerVector interruptVectorHI;
-InterruptHandlerVector interruptVectorLO;
+static InterruptHandlerVector interruptVectorHI;
+static InterruptHandlerVector interruptVectorLO;
 /* Current active interrupt to dispatch */
-InterruptHandler* activeInterrupt;
+static InterruptHandler* activeInterrupt;
 
 
 /*..........................................................................*/

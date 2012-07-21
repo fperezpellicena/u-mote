@@ -15,26 +15,12 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_adc_h
-#define hw_adc_h
+#include "sensor.h"
 
-#include "GenericTypeDefs.h"
 
-#ifndef AVERAGE_FACTOR
-    #define AVERAGE_FACTOR  16
-    #define DIV_AVERAGE     4
-#endif
-
-void Adc_init(void);
-
-void Adc_close(void);
-
-void Adc_startConversion(UINT8 channel);
-
-UINT16 Adc_readValue(void);
-
-UINT16 Adc_convert(UINT8 channel);
-
-UINT16 Adc_convertAveragedValue(UINT8 channel);
-
-#endif  /* hw_adc_h*/
+/*..........................................................................*/
+void Sensor_create(Sensor* sensor, Sense senseFunction,
+        CheckAlert checkAlertFunction) {
+    sensor->sense = senseFunction;
+    sensor->checkAlert = checkAlertFunction;
+}

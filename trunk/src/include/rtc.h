@@ -15,26 +15,25 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_adc_h
-#define hw_adc_h
+#ifndef rtc_h
+#define rtc_h
 
-#include "GenericTypeDefs.h"
+#include <rtcc.h>
+#include "list.h"
 
-#ifndef AVERAGE_FACTOR
-    #define AVERAGE_FACTOR  16
-    #define DIV_AVERAGE     4
+/* Init and enable RTC*/
+void Rtc_init(void);
+
+/* Enable Rtc */
+void Rtc_enable(void);
+
+/* Read Rtc data into parameter */
+void Rtc_read(rtccTimeDate* timestamp);
+
+/* Read Rtc data into list */
+void Rtc_readToList(List* list);
+
+/* Set Rtc data from parameter */
+void Rtc_write(rtccTimeDate* timestamp);
+
 #endif
-
-void Adc_init(void);
-
-void Adc_close(void);
-
-void Adc_startConversion(UINT8 channel);
-
-UINT16 Adc_readValue(void);
-
-UINT16 Adc_convert(UINT8 channel);
-
-UINT16 Adc_convertAveragedValue(UINT8 channel);
-
-#endif  /* hw_adc_h*/

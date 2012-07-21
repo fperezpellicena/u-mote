@@ -15,26 +15,29 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_adc_h
-#define hw_adc_h
+#ifndef list_h
+#define list_h
 
-#include "GenericTypeDefs.h"
+#include "bsp.h"
 
-#ifndef AVERAGE_FACTOR
-    #define AVERAGE_FACTOR  16
-    #define DIV_AVERAGE     4
-#endif
+/* Static List struct */
+typedef struct List List;
 
-void Adc_init(void);
+struct List {
+    UINT8 data[MAX_LIST_SIZE];
+    UINT8 size;
+};
 
-void Adc_close(void);
+/* Init list */
+void List_init(List* list);
 
-void Adc_startConversion(UINT8 channel);
+/* Add one element to the list */
+void List_add(List* list, UINT8 element);
 
-UINT16 Adc_readValue(void);
+/* Delete all elements of the list */
+void List_empty(List* list);
 
-UINT16 Adc_convert(UINT8 channel);
+/* Append */
+void List_append(List* list, List* elements);
 
-UINT16 Adc_convertAveragedValue(UINT8 channel);
-
-#endif  /* hw_adc_h*/
+#endif /* list_H*/

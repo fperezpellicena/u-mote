@@ -17,8 +17,8 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <rtcc.h>
 #include "usb_rtcc_handler.h"
+#include "rtc.h"
 
 rom const char* SEPARATOR = "#";
 
@@ -69,10 +69,7 @@ void USBRtccHandler_parseRTCCData(char* usbBuffer) {
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.sec = atoi(result);
     // Write rtcc
-    EECON2 = 0x55;
-    EECON2 = 0xAA;
-    RTCCFGbits.RTCWREN = 1;
-    RtccWriteTimeDate(&timestamp, TRUE);
+    Rtc_write(&timestamp);
     RTCCFGbits.RTCEN = 1;
 }
 
@@ -85,11 +82,7 @@ unsigned char USBRtccHandler_testRTCC(char* usbBuffer) {
     unsigned char i = 0;
     // Lee la fecha/hora
     rtccTimeDate timestamp;
-    // if already in the middle of SYNC, wait for next period
-    while (RTCCFGbits.RTCSYNC != 1);
-    // wait while RTCC registers are unsafe to read
-    while (RTCCFGbits.RTCSYNC == 1);
-    RtccReadTimeDate(&timestamp);
+    Rtc_read(&timestamp);
     // Pone dd/mm/yy en el buffer
     usbBuffer[i++] = timestamp.f.mday;
     usbBuffer[i++] = timestamp.f.mon;

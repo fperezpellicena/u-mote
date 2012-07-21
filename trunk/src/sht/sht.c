@@ -15,31 +15,19 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sht11.h"
-#include "power.h"
-#include <p18cxxx.h>
-#include <usart.h>
-#include <stdio.h>
+#include "sht.h"
 #include <delays.h>
-#include <math.h>
-#include <stdlib.h>
+
 
 void Sht11_init(void) {
     SHT_DATA_DDR = 0;
     SHT_SCK_DDR = 0;
     SHT_DATA = 1;
     SHT_SCK = 0;
-
-    // TODO Revisar esto
-    // TRISDbits.TRISD1 = 0;
-    // LATDbits.LATD1 = 0;
-
-    ANCON1bits.PCFG10 = 1;
-    ANCON1bits.PCFG8 = 1;
 }
 
-char Sht11_write(unsigned char value) {
-    unsigned char i, error = 0;
+UINT8 Sht11_write(UINT8 value) {
+    UINT8 i, error = 0;
     //shift bit for masking
     for (i = 0x80; i > 0; i /= 2) {
         if (i & value) {
@@ -60,20 +48,20 @@ char Sht11_write(unsigned char value) {
     // To read SHT ack(low), change pin direction
     SHT_DATA_DDR = 1;
     // Read pin
-    error = PORTBbits.RB1; //check ack (SHT_DATA will be pulled down by SHT11)
+    error = SHT_DATA_PIN; //check ack (SHT_DATA will be pulled down by SHT11)
     SHT_SCK = 0;
     return error; //error=1 in case of no acknowledge
 }
 
-unsigned char Sht11_read(unsigned char ack) {
-    unsigned char i, val = 0;
+UINT8 Sht11_read(UINT8 ack) {
+    UINT8 i, val = 0;
     SHT_DATA_DDR = 1;
     SHT_DATA = 1;
     for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
         Delay1KTCYx(3);
         SHT_SCK = 1; //clk for SENSI-BUS
-        if (PORTBbits.RB1) {
+        if (SHT_DATA_PIN) {
             val = (val | i); //read bit
         }
         Delay1KTCYx(3);
@@ -112,11 +100,11 @@ void Sht11_start(void) {
 }
 
 void Sht11_reset(void) {
-    unsigned char i;
+    UINT8 i;
     SHT_DATA = 1;
     SHT_SCK = 0; //Initial state
-    for (i = 0; i < 9; i++) //9 SHT_SCK cycles
-    {
+    //9 SHT_SCK cycles
+    for (i = 0; i < 9; i++) {
         SHT_SCK = 1;
         Delay1KTCYx(1);
         SHT_SCK = 0;
@@ -124,15 +112,15 @@ void Sht11_reset(void) {
     Sht11_start(); //transmission start
 }
 
-char Sht11_softReset(void) {
-    unsigned char error = 0;
+UINT8 Sht11_softReset(void) {
+    UINT8 error = 0;
     Sht11_reset(); //reset communication
     error += Sht11_write(SHT_RESET); //send SHT_RESET-command to sensor
     return error; //error=1 in case of no response form the sensor
 }
 
-char Sht11_readStatusRegister(unsigned char *p_value, unsigned char *p_checksum) {
-    unsigned char error = 0;
+UINT8 Sht11_readStatusRegister(UINT8 *p_value, UINT8 *p_checksum) {
+    UINT8 error = 0;
     Sht11_start(); //transmission start
     error = Sht11_write(SHT_STAT_REG_R); //send command to sensor
     *p_value = Sht11_read(SHT_ACK); //read status register (8-bit)
@@ -140,28 +128,38 @@ char Sht11_readStatusRegister(unsigned char *p_value, unsigned char *p_checksum)
     return error; //error=1 in case of no response form the sensor
 }
 
-char Sht11_writeStatusRegister(unsigned char *p_value) {
-    unsigned char error = 0;
+UINT8 Sht11_writeStatusRegister(UINT8 *p_value) {
+    UINT8 error = 0;
     Sht11_start(); //transmission start
     error += Sht11_write(SHT_STAT_REG_W); //send command to sensor
     error += Sht11_write(*p_value); //send value of status register
     return error; //error>=1 in case of no response form the sensor
 }
 
-char Sht11_measure(Sht11* shtData) {
-    unsigned char error = 0;
-    // Get measures
-    error += Sht11_measureParam((int*) &shtData->temperature.i, &shtData->temp_chk, SHT_MEASURE_TEMP);
-    error += Sht11_measureParam((int*) &shtData->humidity.i, &shtData->humi_chk, SHT_MEASURE_HUMI);
+UINT8 Sht11_measureAndCalculate(Sht* sht) {
+    UINT8 error = Sht11_measure(sht);
     // Calculate compensated values
-    shtData->temperature.f = (float) shtData->temperature.i; //converts integer to float
-    shtData->humidity.f = (float) shtData->humidity.i; //converts integer to float
-    Sht11_calculate(&shtData->humidity.f, &shtData->temperature.f); //calculate humidity,temperature
+    //converts integer to float
+    sht->data.temperature.f = (float) sht->data.temperature.i;
+    //converts integer to float
+    sht->data.humidity.f = (float) sht->data.humidity.i;
+    //calculate humidity,temperature
+    Sht11_calculate(&sht->data.humidity.f, &sht->data.temperature.f); 
     return error;
 }
 
-char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char mode) {
-    unsigned char error = 0;
+UINT8 Sht11_measure(Sht* sht) {
+    UINT8 error = 0;
+    // Get measures
+    error += Sht11_measureParam((int*) &sht->data.temperature.i,
+            &sht->data.temp_chk, SHT_MEASURE_TEMP);
+    error += Sht11_measureParam((int*) &sht->data.humidity.i,
+            &sht->data.humi_chk, SHT_MEASURE_HUMI);
+    return error;
+}
+
+UINT8 Sht11_measureParam(int *p_value, UINT8 *p_checksum, UINT8 mode) {
+    UINT8 error = 0;
     Sht11_start(); //transmission start
     switch (mode) { //send command to sensor
         case SHT_MEASURE_TEMP: error += Sht11_write(SHT_MEASURE_TEMP);
@@ -173,7 +171,7 @@ char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char m
     Delay1KTCYx(5);
     SHT_DATA_DDR = 1;
     // Long busy wait can block usb
-    while (PORTBbits.RB1 == 1);
+    while (SHT_DATA_PIN == 1);
     // Read two bytes response
     // FIXME No es crítico: No funciona con usb, intentar habilitar una interrupción de pin
     // y encapsular las siguientes líneas dentro de la ISR.

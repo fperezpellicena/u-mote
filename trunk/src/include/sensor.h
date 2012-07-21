@@ -15,34 +15,34 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef digi_proxy_h
-#define digi_proxy_h
+#ifndef sensor_h
+#define sensor_h
 
-#include "digi_api.h"
 #include "GenericTypeDefs.h"
-
-
-void XBeeProxy_init(void);
-
-BOOL XBeeProxy_sendPacket(XBeePacket * const packet);
-
-BOOL XBeeProxy_readPacket(XBeePacket* const packet);
-
-BOOL XBeeProxy_read(void);
-
-BOOL XBeeProxy_join(void);
+#include "bsp.h"
+#include "list.h"
 
 /*..........................................................................*/
-/* Interrupt handler functions */
+/* Sense function prototype */
+typedef UINT8 rom (*Sense)(List* list);
 
-void XBeeProxy_installInterrupt(void);
+/*..........................................................................*/
+/* Check alert function prototype */
+typedef BOOL rom (*CheckAlert)(List* list);
 
-/* Top halve interrupt handler */
-void XBeeProxy_handleTopHalveInterrupt(void);
+/*..........................................................................*/
+/* Sensor class */
+typedef struct Sensor Sensor;
 
-/* Bottom halve interrupt handler*/
-void XBeeProxy_handleBottomHalveInterrupt(void);
+struct Sensor {
+    /* Sense function */
+    Sense sense;
+    /* Check alert function */
+    CheckAlert checkAlert;
+};
 
-BOOL XBeeProxy_checkInterrupt(void);
+/*..........................................................................*/
+void Sensor_create(Sensor* sensor, Sense senseFunction,
+        CheckAlert checkAlertFunction);
 
-#endif     /* digi_proxy_h*/
+#endif /* sensor_h */

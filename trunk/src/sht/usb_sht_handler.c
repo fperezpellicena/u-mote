@@ -16,7 +16,7 @@
  */
 
 #include "usb_sht_handler.h"
-#include "sht11.h"
+#include "sht.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -41,16 +41,16 @@
 
 // Measure sensor
 unsigned char USBShtHandler_sht11Test(char* usbBuffer) {
-    Sht11 shtData;
+    Sht shtData;
     Sht11_init();
     // Perform measures and calculations
     Sht11_measure(&shtData);
     // Put info into buffer
-    sprintf(usbBuffer,"Relative temperature:%d.%2u % \n\r Relative humidity:%d.%2u % \n\r",
-            (int) shtData.temperature.f / 100,
-            fabs(((shtData.temperature.f - (int) shtData.temperature.f)*100)),
-            (int) shtData.humidity.f / 100,
-            fabs(((shtData.humidity.f - (int) shtData.humidity.f)*100)));
+    sprintf(usbBuffer,(const rom far char*)"Relative temperature:%d.%2u % \n\r Relative humidity:%d.%2u % \n\r",
+            (int) shtData.data.temperature.f / 100,
+            fabs(((shtData.data.temperature.f - (int) shtData.data.temperature.f)*100)),
+            (int) shtData.data.humidity.f / 100,
+            fabs(((shtData.data.humidity.f - (int) shtData.data.humidity.f)*100)));
     // Return length
     return 60;
 }

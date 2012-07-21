@@ -73,7 +73,7 @@ static void Serial_2_init(UINT8 baudrate) {
 #endif
 }
 
-void Serial_create(Serial * const serial, UINT8 uart, UINT8 baudrate) {
+void Serial_init(Serial * const serial, UINT8 uart, UINT8 baudrate) {
     serial->uart = uart;
     if (uart == EUSART1) {
         Serial_1_init(baudrate);
@@ -83,12 +83,21 @@ void Serial_create(Serial * const serial, UINT8 uart, UINT8 baudrate) {
 }
 
 void Serial_send(Serial * const serial, UINT8 value) {
-    while (!TXSTA1bits.TRMT);
     if (serial->uart == EUSART1) {
+        while (!TXSTA1bits.TRMT);
         TXREG1 = value;
     } else {
+        while (!TXSTA2bits.TRMT);
         TXREG2 = value;
     }
+}
+
+void Serial_sendArray(Serial * const serial, UINT8* values, UINT8 size) {
+    UINT8 i = 0;
+    while(i < size) {
+        Serial_send(serial, values[i++]);
+    }
+    Serial_send(serial, NULL);
 }
 
 UINT8 Serial_read(Serial * const serial) {

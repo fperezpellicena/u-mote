@@ -16,62 +16,73 @@
  */
 
 #include "hw_adc.h"
-#include <adc.h>
+#include "bsp.h"
 
 /**
  * Configura el ADC
  */
-void Adc_init(UINT8 config, UINT8 config2, UINT8 channel) {
-    while (BusyADC());
-    CloseADC();
-    OpenADC(config, config2, channel);
+void Adc_init(void) {
+    ADCON0bits.VCFG = 0;
+    ADCON1bits.ADFM = 0; /* Left adjust */
+    ADCON1bits.ACQT = 0; /* Automatic acquisition time */
+    ADCON1bits.ADCS = 0; /* Clk Fosc/2 */
+#if ADC_INT_ENABLED
+    PIR1bits.ADIF = 0;
+    PIE1bits.ADIE = 1;
+    INTCONbits.PEIE = 1;
+#endif
+    ADCON0bits.ADON = 0; /* Start power off */
 }
 
-void Adc_close() {
-    CloseADC();
+void Adc_close(void) {
+    ADCON0bits.ADON = 0; /* Power off */
 }
 
-static void Adc_dummy();
+static void Adc_dummy(void);
 
 /**
- * Realiza una conversi贸n dummy para compensar el ruido de las entradas.
+ * Realiza una conversi髇 dummy para compensar el ruido de las entradas.
  */
-static void Adc_dummy() {
+static void Adc_dummy(void) {
     ADCON1bits.ADCAL = 1;
-    ConvertADC();
-    while (BusyADC());
+    ADCON0bits.GO = 1;
+    while (ADCON0bits.GO);
     ADCON1bits.ADCAL = 0;
 }
 
 /**
- * Inicia una conversi贸n, precedida de una dummy.
+ * Inicia una conversi髇, precedida de una dummy.
  */
-void Adc_startConversion() {
+void Adc_startConversion(UINT8 channel) {
+    ANCON0 = channel >> 8;  /* VBG Selection and port configuration */
+    ANCON1 = channel;       /* Port configuration */
     Adc_dummy();
-    ConvertADC();
+    ADCON0bits.GO = 1;
 }
 
 /**
  * Lee el valor del conversor.
  *
- * @return conversi贸n
+ * @return conversi髇
  */
-UINT16 Adc_readValue() {
-    while (BusyADC());
-    return ReadADC();
+UINT16 Adc_readValue(void) {
+    while (ADCON0bits.GO);
+    return (((UINT16) ADRESH) << 8) | (ADRESL);
 }
 
 /**
  * Devuelve una muestra sampleada del ADC
  * Inicia el proceso tomando una muestra dummy para compensar el efecto del ruido
  * de las entradas.
- * A continuaci贸n, toma una muestra
+ * A continuaci髇, toma una muestra
  *
  * @return muestra con ruido de entrada compensado
  */
-UINT16 Adc_getValue() {
+UINT16 Adc_convert(UINT8 channel) {
+    ANCON0 = channel >> 8;  /* VBG Selection and port configuration */
+    ANCON1 = channel;       /* Port configuration */
     Adc_dummy();
-    ConvertADC();
+    ADCON0bits.GO = 1;
     return Adc_readValue();
 }
 
@@ -79,16 +90,18 @@ UINT16 Adc_getValue() {
  * Devuelve una muestra promedio de AVERAGE_FACTOR muestras.
  * Inicia el proceso tomando una muestra dummy para compensar el efecto del ruido
  * de las entradas.
- * A continuaci贸n, promedia tantas muestras como indica el factor de conversi贸n.
+ * A continuaci髇, promedia tantas muestras como indica el factor de conversi髇.
  *
- * @return conversi贸n promediada y compensada en ruido
+ * @return conversi髇 promediada y compensada en ruido
  */
-UINT16 Adc_getAveragedValue() {
+UINT16 Adc_convertAveragedValue(UINT8 channel) {
     UINT32 tmp = 0;
     UINT8 i = AVERAGE_FACTOR;
+    ANCON0 = channel >> 8;  /* VBG Selection and port configuration */
+    ANCON1 = channel;       /* Port configuration */
     Adc_dummy();
     while (i--) {
-        ConvertADC();
+        ADCON0bits.GO = 1;
         tmp += Adc_readValue();
     }
     return tmp >> DIV_AVERAGE;
