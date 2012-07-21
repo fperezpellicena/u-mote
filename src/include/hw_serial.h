@@ -26,11 +26,13 @@ struct Serial {
     UINT8 uart;
 };
 
-void Serial_create(Serial * const serial, UINT8 uart, UINT8 baudrate);
+void Serial_init(Serial * const serial, UINT8 uart, UINT8 baudrate);
 
 void Serial_close(Serial * const serial);
 
 void Serial_send(Serial * const serial, UINT8 value);
+
+void Serial_sendArray(Serial * const serial, UINT8* values, UINT8 size);
 
 UINT8 Serial_read(Serial * const serial);
 

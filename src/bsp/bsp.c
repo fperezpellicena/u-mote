@@ -17,7 +17,10 @@
 
 #include "bsp.h"
 #include "usb_device.h"
+#include "sensor_proxy.h"
+#include "sht_proxy.h"
 #include "isr.h"
+#include "rtc.h"
 
 
 /*...........................................................................*/
@@ -25,12 +28,25 @@ void BSP_init(void) {
     // Default all pins to digital
     ADCON1 |= 0x0F;
 
+    // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
+    BSP_enablePLL();
+
     ANCON0 = 0xFF; // Default all pins to digital
     ANCON1 = 0xFF; // Default all pins to digital
 
     //Initialize all of the LED pins
-    mInitAllLEDs();
+    //mInitAllLEDs();
     
+    // Init interrupt vectors
+    InterruptHandler_initVectors();
+    
+    // Initializes mote API
+    XBeeProxy_init();
+#if AUTO_JOIN_ON_POWER_UP == TRUE
+    XBeeProxy_join();
+#endif
+    SensorProxy_init();
+
 #ifdef USB_ENABLED
     ENABLE_USB_ATTACH;
     // Initializes USB module SFRs and firmware variables to known states
@@ -38,7 +54,11 @@ void BSP_init(void) {
 #endif
 
 #ifdef RTCC_ENABLED
-    ENABLE_RTCC;
+    Rtc_init();
+#endif
+
+#ifdef SHT11_ENABLED
+    ShtProxy_init();
 #endif
 }
 

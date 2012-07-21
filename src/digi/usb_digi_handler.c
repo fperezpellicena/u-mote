@@ -16,26 +16,14 @@
  */
 
 #include "usb_digi_handler.h"
-#include "digi_api.h"
 #include "digi_proxy.h"
-#include "power.h"
+#include "util.h"
 
-#pragma udata usbXbeeHandler
-XBeePacket xbeePacket;
-#pragma udata
+#define USB_JOINED_MSG "Mote joined\0"
+#define USB_JOINED_ERROR_MSG "Mote not joined\0"
 
 void USBXBeeHandler_join(char usbBuffer[]) {
-    unsigned int status;
-    // Send ATCB1
-    XBee_createATCommandPacket(&xbeePacket, 0x01, "ATCB1");
-    XBeeProxy_sendPacket(&xbeePacket);
-    // Wait for response
-    while(!XBeeProxy_readPacket(&xbeePacket));
-    // Parse packet
-    XBee_readModemStatusPacket(&xbeePacket,&status);
-    if(xbeePacket.frame.modemStatus.status) {
-        // Send ATSM8
-        XBee_createATCommandPacket(&xbeePacket, 0x02, "ATSM8");
-        XBeeProxy_sendPacket(&xbeePacket);
-    }
+    if(XBeeProxy_join())
+        Util_str2ram((UINT8 rom*)USB_JOINED_MSG, (UINT8*)usbBuffer);
+    Util_str2ram((UINT8 rom*)USB_JOINED_MSG, (UINT8*)usbBuffer);
 }

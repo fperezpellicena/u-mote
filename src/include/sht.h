@@ -18,40 +18,47 @@
 #ifndef sht11_h
 #define sht11_h
 
+#include "GenericTypeDefs.h"
+#include "bsp.h"
+#include "sensor.h"
+
 #define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
 #define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
 #define SHT_STAT_REG_R      0x07    		/* Read status register command */
 #define SHT_STAT_REG_W      0x06    		/* Write status register command */
 #define SHT_RESET           0x1E    		/* Reset */
 
-#define SHT_ACK 1					/* Send ACK */
-#define SHT_NACK 0					/* Not send ACK */
-
-#define SHT_DATA        TRISBbits.TRISB1            /* Data tx/rx pin */
-#define SHT_DATA_DDR    LATBbits.LATB1		/* Data direction register */
-#define SHT_SCK         LATBbits.LATB2		/* Clk pin */
-#define SHT_SCK_DDR     TRISBbits.TRISB2            /* Clk direction register */
+#define SHT_ACK             1			/* Send ACK */
+#define SHT_NACK            0                   /* Not send ACK */
 
 /* Sensor measures temperature and humidity */
 enum Modes {
     SHT_TEMP, SHT_HUMI
 };
 
-/* Sht11 class */
-typedef struct Sht11 Sht11;
+/* Sht data class */
+typedef struct ShtData ShtData;
 
-struct Sht11 {
-
+struct ShtData {
     union {
-        unsigned int i;
+        UINT8 i;
         float f;
     } temperature;
+
     union {
-        unsigned int i;
+        UINT8 i;
         float f;
     } humidity;
-    unsigned char temp_chk;
-    unsigned char humi_chk;
+    UINT8 temp_chk;
+    UINT8 humi_chk;
+};
+
+/* Sht11 class */
+typedef struct Sht Sht;
+
+struct Sht {
+    Sensor sensor;
+    ShtData data;
 };
 
 /* Init pins and registers*/
@@ -77,25 +84,28 @@ void Sht11_start(void);
 void Sht11_reset(void);
 
 /* Resets the sensor by a softreset */
-char Sht11_softReset(void);
+UINT8 Sht11_softReset(void);
 
 /* Reads a byte form the Sensibus and gives an acknowledge in case of "ack=1" */
-unsigned char Sht11_read(unsigned char ack);
+UINT8 Sht11_read(UINT8 ack);
 
 /* Writes a byte on the Sensibus and checks the acknowledge */
-char Sht11_write(unsigned char value);
+UINT8 Sht11_write(UINT8 value);
 
 /* Reads the status register with checksum (8-bit) */
-char Sht11_readStatusRegister(unsigned char *p_value, unsigned char *p_checksum);
+UINT8 Sht11_readStatusRegister(UINT8 *p_value, UINT8 *p_checksum);
 
 /* Writes the status register with checksum (8-bit) */
-char Sht11_writeStatusRegister(unsigned char *p_value);
+UINT8 Sht11_writeStatusRegister(UINT8 *p_value);
 
 /* Makes a measurement (humidity/temperature) with checksum */
-char Sht11_measureParam(int *p_value, unsigned char *p_checksum, unsigned char mode);
+UINT8 Sht11_measureParam(INT *p_value, UINT8 *p_checksum, UINT8 mode);
 
 /* Measures temperature and humidity */
-char Sht11_measure(Sht11* shtData);
+UINT8 Sht11_measure(Sht* sht);
+
+/* Measures temperature and humidity */
+UINT8 Sht11_measureAndCalculate(Sht* sht);
 
 /* 
  * Calculates temperature [°C] and humidity [%RH]

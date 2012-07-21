@@ -19,39 +19,54 @@
 #include "hw_serial.h"
 #include "digi_proxy.h"
 #include "isr.h"
+#include "sensor_proxy.h"
+#include "list.h"
 #include <rtcc.h>
 
 #ifdef SHT_ENABLED
-    #include "sht11.h"
+#include "sht11.h"
 #endif
 
 #ifdef GPS_ENABLED
-    #include "gps_isr.h"
-    #include "gps_api.h"
+#include "gps_isr.h"
+#include "gps_api.h"
+#endif
+
+#ifdef RTCC_ENABLED
+#include "rtc.h"
 #endif
 
 #pragma udata digi_isr_data
-static rtccTimeDate timestampData;  /* Timestamp data */
+static rtccTimeDate timestampData; /* Timestamp data */
 
 #ifdef SHT_ENABLED
-    static Sht11 shtData;           /* SHT11 sensor data */
+static Sht11 shtData; /* SHT11 sensor data */
 #endif
 
 #ifdef GPS_ENABLED
-    static NMEAOutput gpsData;      /* GPS data */
+static NMEAOutput gpsData; /* GPS data */
 #endif
+
+
 
 #pragma udata
 
-
+static List list;
 static Serial xbeeProxySerial;
 static XBeePacket xbeeProxyPacket;
+#if MODE == TEST
+static UINT8 payload[11] = {'H', 'O', 'L', 'A', ' ', 'M', 'U', 'N', 'D', 'O', '\0'};
+#else
+static UINT8 payload[100];
+#endif
+static UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0xCF, 0x56};
 
 /*..........................................................................*/
 
 /* XBee proxy constructor */
-void XBeeProxy_create(void) {
-    Serial_create(&xbeeProxySerial, XBEE_SERIAL, EUSART_9600);
+void XBeeProxy_init(void) {
+    List_init(&list);
+    Serial_init(&xbeeProxySerial, XBEE_SERIAL, EUSART_9600);
     XBeeProxy_installInterrupt();
 }
 
@@ -74,6 +89,7 @@ BOOL XBeeProxy_sendPacket(XBeePacket * const packet) {
         packet->checksum += *p++;
     }
     Serial_send(&xbeeProxySerial, (0xFF - packet->checksum));
+    Serial_send(&xbeeProxySerial, NULL);
     return TRUE;
 }
 
@@ -126,7 +142,6 @@ BOOL XBeeProxy_readPacket(XBeePacket * const packet) {
     return FALSE;
 }
 
-
 /* Read XBee packet(generalized)*/
 BOOL XBeeProxy_read(void) {
     UINT8 data = xbeeProxyPacket.lastByte;
@@ -170,18 +185,47 @@ BOOL XBeeProxy_read(void) {
     return FALSE;
 }
 
+/* Join mote */
+BOOL XBeeProxy_join(void) {
+    static UINT8 command[3];
+    static UINT8 params[2];
+    // Send ATCB1
+    command[0] = 'C';
+    command[1] = 'B';
+    command[2] = '\0';
+    params[0] = 0x01;
+    params[1] = '\0';
+    XBee_createCompleteATCommandPacket(&xbeeProxyPacket, 0x01, command, params, 0x01);
+    XBeeProxy_sendPacket(&xbeeProxyPacket);
+    // Send ATSM8
+    command[0] = 'S';
+    command[1] = 'M';
+    command[2] = '\0';
+    params[0] = 0x08;
+    params[1] = '\0';
+    XBee_createCompleteATCommandPacket(&xbeeProxyPacket, 0x02, command, params, 0x01);
+    XBeeProxy_sendPacket(&xbeeProxyPacket);
+    XBee_resetPacket(&xbeeProxyPacket);
+}
+
 /*..........................................................................*/
+
 /** Interrupt handler section */
-    
+
 void XBeeProxy_installInterrupt(void) {
+#if SLEEP_MODE == SLEEP
+    // En Deep sleep no se ejecutan las interrupciones
     // Install interrupt handler
-    InterruptHandler_addHI(&XBeeProxy_handleTopHalveInterrupt,
-            &XBeeProxy_handleBottomHalveInterrupt, &XBeeProxy_checkInterrupt);
+    InterruptHandler_addHI((HandleInterrupt) & XBeeProxy_handleTopHalveInterrupt,
+            (HandleInterrupt) & XBeeProxy_handleBottomHalveInterrupt,
+            (CheckInterrupt) & XBeeProxy_checkInterrupt);
+#endif
 #if XBEE_INTERRUPT == ON_SLEEP_INTERRUPT
     // If ON_SLEEP_INTERRUPT enabled, configure pin interruption
-    XBEE_ON_SLEEP_PIN();
-    XBEE_ON_SLEEP_INT();     // Enable interrupt
-    XBEE_ON_SLEEP_EDGE();    // Falling edge
+    XBEE_ON_SLEEP_PIN;
+    XBEE_ON_SLEEP_EDGE; // Rising edge
+    XBEE_ON_SLEEP_CLEAR_FLAG; // Clear flag
+    XBEE_ON_SLEEP_INT; // Enable interrupt
     // INT0 has always high priority
 #endif
 }
@@ -201,12 +245,12 @@ void XBeeProxy_handleTopHalveInterrupt(void) {
     //      read full data from serial
     //  else
     //      clear ON_SLEEP flag
-#   if SLEEP_STATUS_MESSAGES
-        XBeeProxy_readPacket(&xbeeProxyPacket);
-#   else
-        // ACK
-        XBEE_ON_SLEEP_CLEAR_FLAG();
-# endif
+#if SLEEP_STATUS_MESSAGES
+    XBeeProxy_readPacket(&xbeeProxyPacket);
+#else
+    // ACK
+    XBEE_ON_SLEEP_CLEAR_FLAG;
+#endif
 #endif
 }
 
@@ -216,19 +260,46 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
     // If serial interrupt is configured, process last received byte
     // and check for valid frame
     // If valid frame received, create new data frame and send
-    if(XBeeProxy_read() == TRUE) {
+    if (XBeeProxy_read() == TRUE) {
         // Crea una trama y la envía
     }
 #else
-    // Envía la trama preparada(hay que prepararla antes para optimizar
+#   if SENSING_MODE == ALERT_DRIVEN
+    // Send frame only on alert condition or on monitoring mode
+    if (SensorProxy_alert()) {
+        // Prepara la nueva trama
+        List_init(&list);
+        // Read datetime and put into buffer
+        Rtc_readToList(&list);
+        // Put sensor payload into buffer
+         List_append(&list, (List*)SensorProxy_getMeasures());
+        // Send prepared request (hay que prepararla antes para optimizar
+        // el tiempo que está despierto el sistema)
+        XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
+                XBEE_RADIOUS, XBEE_OPTIONS, list.data, list.size);
+        XBeeProxy_sendPacket(&xbeeProxyPacket);
+    }
+#   else
+    // Prepara la nueva trama
+    List_init(&list);
+    // Read datetime and put into buffer
+    Rtc_readToList(&list);
+    // Sense installed sensors
+    SensorProxy_sense();
+    // Put sensor payload into buffer
+    List_append(&list, (List*)SensorProxy_getMeasures());
+    // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
+    XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
+            XBEE_RADIOUS, XBEE_OPTIONS, list.data, list.size);
     XBeeProxy_sendPacket(&xbeeProxyPacket);
+#   endif
 #endif
 }
 
 BOOL XBeeProxy_checkInterrupt(void) {
 #if XBEE_INTERRUPT == SERIAL_INTERRUPT
-     // If serial interrupt is configured, check serial
+    // If serial interrupt is configured, check serial
     return Serial_checkInterrupt(&xbeeProxySerial);
 #else
     // If pin interrupt is enabled, check pin

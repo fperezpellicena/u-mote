@@ -19,6 +19,19 @@
 #define bsp_h
 
 #include <p18cxxx.h>
+#include "GenericTypeDefs.h"
+
+/*..........................................................................*/
+/* Operating mode */
+#define TEST    0
+#define NORMAL  1
+#define MODE    TEST
+
+/*..........................................................................*/
+/* Sleep mode */
+#define SLEEP           0
+#define DEEP_SLEEP      1
+#define SLEEP_MODE      DEEP_SLEEP
 
 /*..........................................................................*/
 /* IO PIN STATUS */
@@ -30,7 +43,7 @@
 /*..........................................................................*/
 /* UART SECTION */
 
-#define EUSART_9600			25	// EUSART 9600 baudrate
+#define EUSART_9600			12	// EUSART 9600 baudrate
 
 /* EUSART1 */
 #define EUSART1    			0	// EUSART 1
@@ -41,6 +54,9 @@
 
 /*..........................................................................*/
 /* XBEE SECTION */
+
+#define XBEE_RADIOUS                            0x00
+#define XBEE_OPTIONS                            0x00
 
 #define XBEE_SERIAL     			EUSART1	// Xbee serial port
 
@@ -62,12 +78,12 @@
 #		define EUSART2_INTERRUPT
 #	endif
 #else
-#	define XBEE_ON_SLEEP_PIN()	(TRISBbits.TRISB0 = 1)
-#	define XBEE_ON_SLEEP_INT()	(INTCONbits.INT0IE = 1)
-#	define XBEE_ON_SLEEP_EDGE()	(INTCON2bits.INTEDG0 = 0)
+#	define XBEE_ON_SLEEP_PIN	TRISBbits.TRISB0 = 1
+#	define XBEE_ON_SLEEP_INT	INTCONbits.INT0IE = 1
+#	define XBEE_ON_SLEEP_EDGE	INTCON2bits.INTEDG0 = 1
 #	define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
-#	define XBEE_ON_SLEEP_CLEAR_FLAG()	(INTCONbits.INT0IF = 0)
-#       define XBEE_ON_SLEEP_WAKE()     (WDTCONbits.DS && DSWAKEHbits.DSINT0)
+#	define XBEE_ON_SLEEP_CLEAR_FLAG	INTCONbits.INT0IF = 0
+#       define XBEE_ON_SLEEP_WAKE       WDTCONbits.DS //&& DSWAKEHbits.DSINT0
 #	if XBEE_SERIAL == EUSART1 
 #		define EUSART1_POLL
 #	else
@@ -76,6 +92,8 @@
 #endif
 
 #define XBEE_BAUDRATE   EUSART_9600		// Xbee serial baudrate
+
+#define AUTO_JOIN_ON_POWER_UP   TRUE           // Join on power
 
 
 /*...........................................................................*/
@@ -100,38 +118,66 @@
 
 #define RTCC_ENABLED
 
-#ifdef RTCC_ENABLED
-#   define ENABLE_RTCC    RTCCFGbits.RTCEN = 1
+
+/*...........................................................................*/
+/* ADC SECTION */
+
+#define ADC_INT_ENABLED     0
+
+/*..........................................................................*/
+/* SHT11 section */
+
+#define SHT11_ENABLED
+
+#define SHT11_TMP_THR     20      // Umbral 80ºC
+
+#ifdef SHT11_ENABLED
+#   define SHT_DATA_PIN     PORTBbits.RB1
+#   define SHT_DATA         TRISBbits.TRISB1    /* Data tx/rx pin */
+#   define SHT_DATA_DDR     LATBbits.LATB1	/* Data direction register */
+#   define SHT_SCK          LATBbits.LATB2	/* Clk pin */
+#   define SHT_SCK_DDR      TRISBbits.TRISB2    /* Clk direction register */
+#endif
+
+/*...........................................................................*/
+/* IRC-A1 section */
+
+#define IRCA1_ENABLED
+
+#define IRC_A1_SAFE     0
+#define IRC_A1_COMB     1
+#define IRC_A1_INDU     2
+
+#define IRCA1_MODEL     IRC_A1_COMB
+
+#define IRCA1_CAL_TMP   295
+
+#define IRCA1_X_THR     20      // Umbral 20%
+
+#ifdef IRCA1_ENABLED
+#   define IRCA1_REF        ANCON0bits.PCFG0  /* AN0 */
+#   define IRCA1_REF_DDR    TRISAbits.TRISA0
+#   define IRCA1_ACT        ANCON0bits.PCFG1  /* AN1 */
+#   define IRCA1_ACT_DDR    TRISAbits.TRISA1
+#   define IRCA1_TMP        ANCON0bits.PCFG2  /* AN2 */
+#   define IRCA1_TMP_DDR    TRISAbits.TRISA2
+#   define IRCA1_CLK        
+#   define IRCA1_CLK_DDR
 #endif
 
 
-#define mInitAllLEDs()      LATE &= 0xFC; TRISE &= 0xFC;
+/*..........................................................................*/
 
-#define mLED_1              LATEbits.LATE0
-#define mLED_2              LATEbits.LATE1
-#define mLED_3
-#define mLED_4
+#define MONITORING                  0           /* Continuous sensing mode */
+#define ALERT_DRIVEN                1           /* Alert only sensing mode */
+#define SENSING_MODE                ALERT_DRIVEN
 
-#define mGetLED_1()         mLED_1
-#define mGetLED_2()         mLED_2
-#define mGetLED_3()         1
-#define mGetLED_4()         1
+#define MAX_SENSORS                 5                       /* Max sensors */
+#define SENSORS_PWR                 LATBbits.LATB3      /* Power on/off pin*/
+#define SENSORS_PWR_DDR             TRISBbits.TRISB3
 
-#define mLED_1_On()         mLED_1 = 1;
-#define mLED_2_On()         mLED_2 = 1;
-#define mLED_3_On()
-#define mLED_4_On()
-
-#define mLED_1_Off()        mLED_1 = 0;
-#define mLED_2_Off()        mLED_2 = 0;
-#define mLED_3_Off()
-#define mLED_4_Off()
-
-#define mLED_1_Toggle()     mLED_1 = !mLED_1;
-#define mLED_2_Toggle()     mLED_2 = !mLED_2;
-#define mLED_3_Toggle()
-#define mLED_4_Toggle()
-
+#define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
+#define MAX_LIST_SIZE               100
 
 /*...........................................................................*/
 /* Prototypes */

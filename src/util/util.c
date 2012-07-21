@@ -22,11 +22,11 @@
  * @param src   rom char* string
  * @param dest  ram char* string
  */
-void Util_str2ram(unsigned char rom* src, unsigned char* dest) {
+void Util_str2ram(UINT8 rom* src, UINT8* dest) {
     while ((*dest++ = *src++) != '\0');
 }
 
-void Util_strCopy(unsigned char* src, unsigned char* dest, unsigned char length) {
+void Util_strCopy(UINT8* src, UINT8* dest, UINT8 length) {
     while (length--) {
         *dest++ = *src++;
     }

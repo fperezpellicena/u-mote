@@ -15,26 +15,19 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_adc_h
-#define hw_adc_h
+#ifndef sht_proxy_h
+#define sht_proxy_h
 
 #include "GenericTypeDefs.h"
+#include "list.h"
 
-#ifndef AVERAGE_FACTOR
-    #define AVERAGE_FACTOR  16
-    #define DIV_AVERAGE     4
-#endif
+/*...........................................................................*/
+void ShtProxy_init(void);
 
-void Adc_init(void);
+/*...........................................................................*/
+void ShtProxy_sense(List* measures);
 
-void Adc_close(void);
+/*...........................................................................*/
+BOOL ShtProxy_checkAlert(List* measures) ;
 
-void Adc_startConversion(UINT8 channel);
-
-UINT16 Adc_readValue(void);
-
-UINT16 Adc_convert(UINT8 channel);
-
-UINT16 Adc_convertAveragedValue(UINT8 channel);
-
-#endif  /* hw_adc_h*/
+#endif /*sht_proxy_h*/

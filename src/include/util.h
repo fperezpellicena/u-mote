@@ -18,8 +18,10 @@
 #ifndef util_h
 #define util_h
 
-void Util_str2ram(unsigned char rom* src, unsigned char* dest);
+#include "GenericTypeDefs.h"
 
-void Util_strCopy(unsigned char* src, unsigned char* dest, unsigned char length);
+void Util_str2ram(UINT8 rom* src, UINT8* dest);
+
+void Util_strCopy(UINT8* src, UINT8* dest, UINT8 length);
 
 #endif /* util_h*/

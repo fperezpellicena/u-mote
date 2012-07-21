@@ -15,34 +15,27 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef digi_proxy_h
-#define digi_proxy_h
+#ifndef ircA1_proxy_h
+#define ircA1_proxy_h
 
-#include "digi_api.h"
-#include "GenericTypeDefs.h"
-
-
-void XBeeProxy_init(void);
-
-BOOL XBeeProxy_sendPacket(XBeePacket * const packet);
-
-BOOL XBeeProxy_readPacket(XBeePacket* const packet);
-
-BOOL XBeeProxy_read(void);
-
-BOOL XBeeProxy_join(void);
+#include "irca1.h"
 
 /*..........................................................................*/
-/* Interrupt handler functions */
+void IrcA1Proxy_init(void);
 
-void XBeeProxy_installInterrupt(void);
+/*..........................................................................*/
+void IrcA1Proxy_calibrateZero(void);
 
-/* Top halve interrupt handler */
-void XBeeProxy_handleTopHalveInterrupt(void);
+/*..........................................................................*/
+void IrcA1Proxy_calibrateSpan(void);
 
-/* Bottom halve interrupt handler*/
-void XBeeProxy_handleBottomHalveInterrupt(void);
+/*..........................................................................*/
+void IrcA1Proxy_measure(void);
 
-BOOL XBeeProxy_checkInterrupt(void);
+/*..........................................................................*/
+void IrcA1Proxy_sense(List* measures);
 
-#endif     /* digi_proxy_h*/
+/*..........................................................................*/
+BOOL IrcA1Proxy_checkAlert(List* measures);
+
+#endif /* ircA1_proxy_h */

@@ -20,9 +20,7 @@
 
 #include "GenericTypeDefs.h"
 #include "digi_proxy.h"
-
-/*..........................................................................*/
-#define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
+#include "bsp.h"
 
 /*..........................................................................*/
 /* Handler function prototype */
@@ -52,7 +50,7 @@ typedef struct InterruptHandlerVector InterruptHandlerVector;
 
 struct InterruptHandlerVector {
     InterruptHandler handlers[MAX_INTERRUPT_HANDLERS];
-    unsigned char size;
+    UINT8 size;
 };
 
 /*..........................................................................*/
