@@ -226,7 +226,6 @@ void XBeeProxy_installInterrupt(void) {
     XBEE_ON_SLEEP_EDGE; // Rising edge
     XBEE_ON_SLEEP_CLEAR_FLAG; // Clear flag
     XBEE_ON_SLEEP_INT; // Enable interrupt
-    // INT0 has always high priority
 #endif
 }
 
@@ -271,8 +270,10 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
         List_init(&list);
         // Read datetime and put into buffer
         Rtc_readToList(&list);
+        // Put sensor ids
+        List_add(&list, SensorProxy_getSensorByte());
         // Put sensor payload into buffer
-         List_append(&list, (List*)SensorProxy_getMeasures());
+        List_append(&list, (List*)SensorProxy_getMeasures());
         // Send prepared request (hay que prepararla antes para optimizar
         // el tiempo que está despierto el sistema)
         XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
@@ -284,6 +285,8 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
     List_init(&list);
     // Read datetime and put into buffer
     Rtc_readToList(&list);
+    // Put sensor ids
+    List_add(&list, SensorProxy_getSensorByte());
     // Sense installed sensors
     SensorProxy_sense();
     // Put sensor payload into buffer

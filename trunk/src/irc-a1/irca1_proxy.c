@@ -20,6 +20,7 @@
 #include "sensor_proxy.h"
 #include "bsp.h"
 #include "hw_adc.h"
+#include "util.h"
 
 static float ircaExpCal[] = {-0.058, -0.199, -0.698};  // e^(-b*x^c)
 
@@ -28,7 +29,7 @@ static IrcA1 ircA1;
 /*...........................................................................*/
 /* Init ADC and I/O */
 void IrcA1Proxy_init(void) {
-    Sensor_create(&ircA1.sensor, (Sense)&IrcA1Proxy_sense,
+    Sensor_create(IRCA1_ID, &ircA1.sensor, (Sense)&IrcA1Proxy_sense,
             (CheckAlert)&IrcA1Proxy_checkAlert);
     SensorProxy_add(&ircA1.sensor);
     Adc_init();
@@ -69,7 +70,7 @@ void IrcA1Proxy_sense(List* measures) {
     // Calculate CO2
     IrcA1_calculate(&ircA1);
     // Put data into measures
-    List_add(measures, (UINT8)ircA1.data.x);   // FIXME float to int routine
+    List_add(measures, round(ircA1.data.x));   // Float to int routine
 }
 
 /*...........................................................................*/

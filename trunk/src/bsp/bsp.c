@@ -22,29 +22,21 @@
 #include "isr.h"
 #include "rtc.h"
 
-
 /*...........................................................................*/
 void BSP_init(void) {
-    // Default all pins to digital
-    ADCON1 |= 0x0F;
-
     // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
     BSP_enablePLL();
-
-    ANCON0 = 0xFF; // Default all pins to digital
-    ANCON1 = 0xFF; // Default all pins to digital
-
-    //Initialize all of the LED pins
-    //mInitAllLEDs();
-    
+    // Default all pins to digital
+    ADCON1 |= 0x0F;
+    // Default all pins to digital
+    ANCON0 = 0xFF;
+    ANCON1 = 0xFF;
     // Init interrupt vectors
     InterruptHandler_initVectors();
-    
     // Initializes mote API
     XBeeProxy_init();
-#if AUTO_JOIN_ON_POWER_UP == TRUE
-    XBeeProxy_join();
-#endif
+    
+    // Enable sensor board
     SensorProxy_init();
 
 #ifdef USB_ENABLED
@@ -53,24 +45,21 @@ void BSP_init(void) {
     USBDeviceInit();
 #endif
 
-#ifdef RTCC_ENABLED
-    Rtc_init();
-#endif
-
-#ifdef SHT11_ENABLED
-    ShtProxy_init();
-#endif
+    //#ifdef SHT11_ENABLED
+    //    ShtProxy_init();
+    //#endif
 }
 
 /*...........................................................................*/
 // FIXME Corregido pero no probado:
 //      Enable PLL on USB PLUGIN (power saving)
+
 void BSP_enablePLL(void) {
     //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
     {
-    unsigned int pll_startup_counter = 600;
-    OSCTUNEbits.PLLEN = 1;
-    while (pll_startup_counter--);
+        unsigned int pll_startup_counter = 600;
+        OSCTUNEbits.PLLEN = 1;
+        while (pll_startup_counter--);
     }
 }
 
@@ -78,4 +67,5 @@ void BSP_enablePLL(void) {
 void BSP_prepareSleep(void) {
     // Disable PLL
     OSCTUNEbits.PLLEN = 0;
+    Rtc_enable();
 }

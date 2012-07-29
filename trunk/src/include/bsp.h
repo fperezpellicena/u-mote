@@ -83,7 +83,7 @@
 #	define XBEE_ON_SLEEP_EDGE	INTCON2bits.INTEDG0 = 1
 #	define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
 #	define XBEE_ON_SLEEP_CLEAR_FLAG	INTCONbits.INT0IF = 0
-#       define XBEE_ON_SLEEP_WAKE       WDTCONbits.DS //&& DSWAKEHbits.DSINT0
+#       define XBEE_ON_SLEEP_AWAKE      WDTCONbits.DS && DSWAKEHbits.DSINT0
 #	if XBEE_SERIAL == EUSART1 
 #		define EUSART1_POLL
 #	else
@@ -94,6 +94,7 @@
 #define XBEE_BAUDRATE   EUSART_9600		// Xbee serial baudrate
 
 #define AUTO_JOIN_ON_POWER_UP   TRUE           // Join on power
+#define ON_MCLR                 DSWAKELbits.DSMCLR == 1
 
 
 /*...........................................................................*/
@@ -128,8 +129,9 @@
 /* SHT11 section */
 
 #define SHT11_ENABLED
+#define SHT11_ID            1
 
-#define SHT11_TMP_THR     20      // Umbral 80ºC
+#define SHT11_TMP_THR       20      // Umbral 80ºC
 
 #ifdef SHT11_ENABLED
 #   define SHT_DATA_PIN     PORTBbits.RB1
@@ -143,6 +145,7 @@
 /* IRC-A1 section */
 
 #define IRCA1_ENABLED
+#define IRCA1_ID        2
 
 #define IRC_A1_SAFE     0
 #define IRC_A1_COMB     1
@@ -170,7 +173,7 @@
 
 #define MONITORING                  0           /* Continuous sensing mode */
 #define ALERT_DRIVEN                1           /* Alert only sensing mode */
-#define SENSING_MODE                ALERT_DRIVEN
+#define SENSING_MODE                MONITORING
 
 #define MAX_SENSORS                 5                       /* Max sensors */
 #define SENSORS_PWR                 LATBbits.LATB3      /* Power on/off pin*/

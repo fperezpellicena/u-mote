@@ -19,7 +19,7 @@
 /* Pragmas */
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
 #pragma config STVREN = ON          //stack overflow/underflow reset enabled
-#pragma config XINST = ON           //Extended instruction set disabled
+#pragma config XINST = OFF           //Extended instruction set disabled
 #pragma config CPUDIV = OSC4_PLL6   //CPU system clock divide 6
 #pragma config CP0 = OFF            //Program memory is not code-protected
 #pragma config OSC = INTOSCPLL      //Internal OSC(8mhz), PLL enabled by soft
@@ -49,9 +49,9 @@
 #include "digi_proxy.h"
 
 #ifdef USB_ENABLED
-#   include "usb_device.h"
-#   include "usb_handler.h"
-#   include "power.h"
+#include "usb_device.h"
+#include "usb_handler.h"
+#include "power.h"
 #endif
 
 /*...........................................................................*/
@@ -61,7 +61,6 @@
 void main(void) {
     // Init basic system
     BSP_init();
-    
     while (1) {
 #ifdef USB_ENABLED
         // Comprueba el terminal que indica la conexi?n USB al inicio o al reset
@@ -75,17 +74,26 @@ void main(void) {
                 //USB_blinkStatus();
             }
         } else {
-#   if SLEEP_MODE == DEEP_SLEEP
+#if SLEEP_MODE == DEEP_SLEEP
             // Comprueba
             //  1.- Si se ha despertado tras un estado de deep sleep
             //  2.- Y ha sido causado por INT0 --> XBEE INT PIN
-            if(XBEE_ON_SLEEP_WAKE) {
+            if (XBEE_ON_SLEEP_AWAKE) {
                 TRISEbits.TRISE0 = 0;
                 LATEbits.LATE0 = !LATEbits.LATE0;
                 WDTCONbits.DS = 0;
+                DSWAKEHbits.DSINT0 = 0;
                 DSCONLbits.RELEASE = 0;
                 // Ejecuta la interrupción que ha despertado al sistema
                 XBeeProxy_handleBottomHalveInterrupt();
+            } else if (ON_MCLR) {
+                // On reset push, join xbee
+                DSWAKELbits.DSMCLR = 0;
+                DSCONLbits.RELEASE = 0;
+                XBeeProxy_join();
+            } else {
+                // Enable RTCC
+                Rtc_init();
             }
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
             if ((USBGetDeviceState() == ATTACHED_STATE)) {
@@ -93,7 +101,7 @@ void main(void) {
             }
             BSP_prepareSleep();
             deepSleep();
-#   elif SLEEP_MODE == SLEEP
+#elif SLEEP_MODE == SLEEP
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
             if ((USBGetDeviceState() == ATTACHED_STATE)) {
                 USBDeviceDetach();
@@ -102,37 +110,37 @@ void main(void) {
             sleep();
             InterruptHandler_handleActiveInterrupt();
 
-#   endif
+#endif
         }
 #else
-#   if SLEEP_MODE == DEEP_SLEEP
-            // Comprueba
-            //  1.- Si se ha despertado tras un estado de deep sleep
-            //  2.- Y ha sido causado por INT0 --> XBEE INT PIN
-            if(XBEE_ON_SLEEP_WAKE) {
-                TRISEbits.TRISE0 = 0;
-                LATEbits.LATE0 = !LATEbits.LATE0;
-                WDTCONbits.DS = 0;
-                DSCONLbits.RELEASE = 0;
-                // Ejecuta la interrupción que ha despertado al sistema
-                XBeeProxy_handleBottomHalveInterrupt();
-            }
-            // Si no está conectado el terminal USB, entra en modo de bajo consumo
-            if ((USBGetDeviceState() == ATTACHED_STATE)) {
-                USBDeviceDetach();
-            }
-            BSP_prepareSleep();
-            deepSleep();
-#   elif SLEEP_MODE == SLEEP
-            // Si no está conectado el terminal USB, entra en modo de bajo consumo
-            if ((USBGetDeviceState() == ATTACHED_STATE)) {
-                USBDeviceDetach();
-            }
-            BSP_prepareSleep();
-            sleep();
-            InterruptHandler_handleActiveInterrupt();
+#if SLEEP_MODE == DEEP_SLEEP
+        // Comprueba
+        //  1.- Si se ha despertado tras un estado de deep sleep
+        //  2.- Y ha sido causado por INT0 --> XBEE INT PIN
+        if (XBEE_ON_SLEEP_AWAKE) {
+            TRISEbits.TRISE0 = 0;
+            LATEbits.LATE0 = !LATEbits.LATE0;
+            WDTCONbits.DS = 0;
+            DSCONLbits.RELEASE = 0;
+            // Ejecuta la interrupción que ha despertado al sistema
+            XBeeProxy_handleBottomHalveInterrupt();
+        }
+        // Si no está conectado el terminal USB, entra en modo de bajo consumo
+        if ((USBGetDeviceState() == ATTACHED_STATE)) {
+            USBDeviceDetach();
+        }
+        BSP_prepareSleep();
+        deepSleep();
+#elif SLEEP_MODE == SLEEP
+        // Si no está conectado el terminal USB, entra en modo de bajo consumo
+        if ((USBGetDeviceState() == ATTACHED_STATE)) {
+            USBDeviceDetach();
+        }
+        BSP_prepareSleep();
+        sleep();
+        InterruptHandler_handleActiveInterrupt();
 
-#   endif
+#endif
 #endif
     }
 }

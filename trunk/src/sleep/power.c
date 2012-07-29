@@ -244,6 +244,8 @@ void sleep(void) {
  */
 void deepSleep(void) {
     //INTCONbits.GIEH = 0;    /* Disable interrupts*/
+    DSWAKEL = 0;
+    DSWAKEH = 0;
     WDTCONbits.SWDTEN = 1; /* turn on the watch dog timer */
     DSCONLbits.ULPWDIS = 1; /* disable ULP wake up */
     DSCONLbits.DSBOR = 0; /* disable Brownout wake up */

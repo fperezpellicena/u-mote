@@ -19,6 +19,10 @@
 #define util_h
 
 #include "GenericTypeDefs.h"
+#include <limits.h>
+
+#define round(x) ((x) < CHAR_MIN - 0.5 || (x) > CHAR_MAX + 0.5 ?\
+            (UINT8)x : ((x) >= 0 ? (UINT8)((x) + 0.5) : (UINT8)((x) - 0.5)))
 
 void Util_str2ram(UINT8 rom* src, UINT8* dest);
 
