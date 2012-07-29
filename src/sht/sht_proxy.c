@@ -23,7 +23,7 @@ static Sht sht;
 
 /*...........................................................................*/
 void ShtProxy_init(void) {
-    Sensor_create(&sht.sensor, (Sense)&ShtProxy_sense,
+    Sensor_create(SHT11_ID, &sht.sensor, (Sense)&ShtProxy_sense,
             (CheckAlert)&ShtProxy_checkAlert);
     SensorProxy_add(&sht.sensor);
     Sht11_init();

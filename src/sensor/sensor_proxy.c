@@ -25,10 +25,11 @@ static List measures;
 void SensorProxy_init(void) {
     List_init(&measures);
     sensorVector.size = 0;
-    SENSORS_PWR_DDR = 0;               /* Sensor power on/off pin as output */
+    SENSORS_PWR_DDR = 0; /* Sensor power on/off pin as output */
 }
 
 /*..........................................................................*/
+
 /* Adds a sensor to board */
 void SensorProxy_add(Sensor* sensor) {
     if (sensorVector.size < MAX_SENSORS) {
@@ -39,6 +40,7 @@ void SensorProxy_add(Sensor* sensor) {
 }
 
 /*..........................................................................*/
+
 /* Turns on sensor board, sense every sensor installed and turns off */
 void SensorProxy_sense(void) {
     UINT8 i;
@@ -47,7 +49,7 @@ void SensorProxy_sense(void) {
     // Empty previous measures
     List_empty(&measures);
     // For each sensor installed, put measures into payload
-    for(i = 0; i < MAX_SENSORS; i++) {
+    for (i = 0; i < sensorVector.size; i++) {
         sensorVector.sensors[i].sense(&measures);
     }
     // Turn off sensor board
@@ -55,16 +57,20 @@ void SensorProxy_sense(void) {
 }
 
 /*..........................................................................*/
+
 /* Measure sensor board and check for alert condition */
 BOOL SensorProxy_alert(void) {
     UINT8 i;
     BOOL alert = FALSE;
-     // Turn on sensor board
+    if(sensorVector.size == 0) {
+        return FALSE;
+    }
+    // Turn on sensor board
     SensorProxy_powerOn();
     // Empty previous measures
     List_empty(&measures);
-    for(i = 0; i < MAX_SENSORS; i++) {
-        if(sensorVector.sensors[i].checkAlert(&measures) == TRUE) {
+    for (i = 0; i < sensorVector.size; i++) {
+        if (sensorVector.sensors[i].checkAlert(&measures) == TRUE) {
             alert = TRUE;
         }
     }
@@ -74,18 +80,35 @@ BOOL SensorProxy_alert(void) {
 }
 
 /*..........................................................................*/
+/* Returns sensor byte identification based on sensor id attribute */
+UINT8 SensorProxy_getSensorByte(void) {
+    UINT8 byte = 0;
+    UINT8 i;
+    if(sensorVector.size == 0) {
+        return 0;
+    }
+    for (i = 0; i < sensorVector.size; i++) {
+        byte |= sensorVector.sensors[i].id; // Sensor id's OR'ed
+    }
+    return byte;
+}
+
+/*..........................................................................*/
+
 /* Return measures */
 List* SensorProxy_getMeasures(void) {
     return &measures;
 }
 
 /*...........................................................................*/
+
 /* Power on sensor board */
 void SensorProxy_powerOn(void) {
     SENSORS_PWR = 1;
 }
 
 /*...........................................................................*/
+
 /* Power off sensor board */
 void SensorProxy_powerOff(void) {
     SENSORS_PWR = 0;

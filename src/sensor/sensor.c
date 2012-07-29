@@ -19,8 +19,9 @@
 
 
 /*..........................................................................*/
-void Sensor_create(Sensor* sensor, Sense senseFunction,
+void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction,
         CheckAlert checkAlertFunction) {
+    sensor->id = id;
     sensor->sense = senseFunction;
     sensor->checkAlert = checkAlertFunction;
 }

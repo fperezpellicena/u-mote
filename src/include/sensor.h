@@ -35,6 +35,7 @@ typedef BOOL rom (*CheckAlert)(List* list);
 typedef struct Sensor Sensor;
 
 struct Sensor {
+    UINT8 id;
     /* Sense function */
     Sense sense;
     /* Check alert function */
@@ -42,7 +43,7 @@ struct Sensor {
 };
 
 /*..........................................................................*/
-void Sensor_create(Sensor* sensor, Sense senseFunction,
+void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction,
         CheckAlert checkAlertFunction);
 
 #endif /* sensor_h */

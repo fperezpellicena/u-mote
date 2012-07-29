@@ -21,7 +21,7 @@
 /* Init list, set size equals zero */
 void List_init(List* list) {
     list->size = 0;
-    List_empty(list);
+    //List_empty(list);
 }
 
 /*..........................................................................*/
