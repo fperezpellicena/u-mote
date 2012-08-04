@@ -6,57 +6,46 @@
 #pragma config XINST = OFF          //Extended instruction set disabled
 
 #pragma udata mf
-MembershipFunction lowTemp = {-40, 0, 20};
-MembershipFunction midTemp = {0, 20, 40};
-MembershipFunction highTemp = {30, 40, 125};
+DECLARE_MF(lowTemp, -40, 0, 20);
+DECLARE_MF(midTemp, 0, 20, 40);
+DECLARE_MF(highTemp, 30, 40, 125);
 
-MembershipFunction lowCo2 = {0, 0, 50};
-MembershipFunction midCo2 = {0, 50, 100};
-MembershipFunction highCo2 = {50, 100, 100};
+DECLARE_MF(lowCo2, 0, 0, 50);
+DECLARE_MF(midCo2, 0, 50, 100);
+DECLARE_MF(highCo2, 50, 100, 100);
 
-MembershipFunction lowRisk = {0, 0, 50};
-MembershipFunction midRisk = {0, 50, 100};
-MembershipFunction highRisk = {50, 100, 100};
+DECLARE_MF(lowRisk, 0, 0, 50);
+DECLARE_MF(midRisk, 0, 50, 100);
+DECLARE_MF(highRisk, 50, 100, 100);
 #pragma udata
 
 #pragma udata rp
-RuleTerm ifHighTemp = {&highTemp, 0, 0};
-RuleTerm andHighCo2 = {&highCo2, 0, 0};
-RuleTerm thenHighRisk = {&highRisk, 0, 1};
+DECLARE_RT(ifHighTemp, &highTemp);
+DECLARE_RT(andHighCo2, &highCo2);
+DECLARE_RT(thenHighRisk, &highRisk);
 
-RuleTerm andlowCo2 = {&lowCo2, 0, 0};
-RuleTerm thenMidRisk = {&midRisk, 0, 1};
+DECLARE_RT(andlowCo2, &lowCo2);
+DECLARE_RT(thenMidRisk, &midRisk);
 #pragma udata
 
 #pragma udata rule
-RuleTerm* antecedents1[MAX_ANTECEDENTS] = {&ifHighTemp, &andHighCo2};
-Rule ifHighTempAndHighCo2ThenHighRisk = {antecedents1, &thenHighRisk, 2};
-
-RuleTerm* antecedents2[MAX_ANTECEDENTS] = {&ifHighTemp, &andlowCo2};
-Rule ifHighTempAndlowCo2ThenMidRisk = {antecedents2, &thenMidRisk, 2};
+DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
+DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andlowCo2);
 #pragma udata
 
 #pragma udata ruleEngine
-Rule* rules[2] = {&ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk};
-RuleEngine engine = {rules, 2};
+DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
 #pragma udata
 
-
-
-
 void main(void) {
-    UINT8 risk;
+    UINT8 risk = 0;
     // Set crisp inputs
     ifHighTemp.input = 50;
     andHighCo2.input = 60;
     andlowCo2.input = 60;
-  
+
     // Print output engine
     risk = RuleEngine_run(&engine);
-    if(risk == 100) {
-        risk = 0;
-    } else {
-        risk = 50;
-    }
+    
     while(1);
 }

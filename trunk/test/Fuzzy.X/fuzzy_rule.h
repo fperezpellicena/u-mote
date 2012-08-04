@@ -22,6 +22,13 @@
 
 #define MAX_ANTECEDENTS     0x02
 
+#define DECLARE_RT(name, mf)\
+RuleTerm name = {mf, 0, 1}
+
+#define DECLARE_RULE(name, consecuent, size, ...)\
+RuleTerm* name##ruleTerms[size] = {__VA_ARGS__};\
+Rule name = {name##ruleTerms, consecuent, size}
+
 /*****************************************************************************
  *  Let R1:
  *      If temperature is high and gas concentration is high then risk is high
