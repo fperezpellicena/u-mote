@@ -6,54 +6,57 @@
 #pragma config XINST = OFF          //Extended instruction set disabled
 
 #pragma udata mf
+MembershipFunction lowTemp = {-40, 0, 20};
+MembershipFunction midTemp = {0, 20, 40};
 MembershipFunction highTemp = {30, 40, 125};
+
+MembershipFunction lowCo2 = {0, 0, 50};
+MembershipFunction midCo2 = {0, 50, 100};
 MembershipFunction highCo2 = {50, 100, 100};
+
+MembershipFunction lowRisk = {0, 0, 50};
+MembershipFunction midRisk = {0, 50, 100};
 MembershipFunction highRisk = {50, 100, 100};
 #pragma udata
 
 #pragma udata rp
-RuleTerm antecedent1 = {&highTemp, 0, 0};
-RuleTerm antecedent2 = {&highCo2, 0, 0};
-RuleTerm consecuent = {&highRisk, 0, 1};
+RuleTerm ifHighTemp = {&highTemp, 0, 0};
+RuleTerm andHighCo2 = {&highCo2, 0, 0};
+RuleTerm thenHighRisk = {&highRisk, 0, 1};
+
+RuleTerm andlowCo2 = {&lowCo2, 0, 0};
+RuleTerm thenMidRisk = {&midRisk, 0, 1};
 #pragma udata
 
 #pragma udata rule
-RuleTerm* antecedents[MAX_ANTECEDENTS] = {&antecedent1, &antecedent2};
-Rule rule = {antecedents, &consecuent, 2};
+RuleTerm* antecedents1[MAX_ANTECEDENTS] = {&ifHighTemp, &andHighCo2};
+Rule ifHighTempAndHighCo2ThenHighRisk = {antecedents1, &thenHighRisk, 2};
+
+RuleTerm* antecedents2[MAX_ANTECEDENTS] = {&ifHighTemp, &andlowCo2};
+Rule ifHighTempAndlowCo2ThenMidRisk = {antecedents2, &thenMidRisk, 2};
 #pragma udata
 
 #pragma udata ruleEngine
-Rule* rules[1] = {&rule};
-RuleEngine engine = {rules, 1};
+Rule* rules[2] = {&ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk};
+RuleEngine engine = {rules, 2};
 #pragma udata
 
-Rule* r;
-RuleTerm* rt;
-//MembershipFunction* mf;
-UINT8 i;
-UINT8 j;
-UINT8 value;
-UINT8 risk;
+
+
 
 void main(void) {
+    UINT8 risk;
     // Set crisp inputs
-    antecedent1.input = 50;
-    antecedent2.input = 60;
-
-//    // Test
-//    for (i = 0; i < 1; i++) {
-//        r = engine.rules[i];
-//        for (j = 0; j < r->antecedentsSize; j++) {
-//            rt = rule.antecedents[j];
-//            value = rt->membershipFunction->left;
-//            value = rt->membershipFunction->mid;
-//            value = rt->membershipFunction->right;
-//            Rule_evaluate(r);
-//        }
-//    }
-
+    ifHighTemp.input = 50;
+    andHighCo2.input = 60;
+    andlowCo2.input = 60;
   
     // Print output engine
     risk = RuleEngine_run(&engine);
+    if(risk == 100) {
+        risk = 0;
+    } else {
+        risk = 50;
+    }
     while(1);
 }
