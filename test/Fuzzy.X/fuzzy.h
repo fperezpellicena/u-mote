@@ -23,6 +23,10 @@
 
 #define MAX_RULES   5
 
+#define DECLARE_ENGINE(name, size, ...)\
+Rule* name##rules[size] = {__VA_ARGS__};\
+RuleEngine name = {name##rules, size}
+
 /*..........................................................................*/
 /* Rules class */
 typedef struct RuleEngine RuleEngine;
