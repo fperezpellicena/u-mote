@@ -19,7 +19,7 @@
 /* Pragmas */
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
 #pragma config STVREN = ON          //stack overflow/underflow reset enabled
-#pragma config XINST = OFF           //Extended instruction set disabled
+#pragma config XINST = OFF          //Extended instruction set disabled
 #pragma config CPUDIV = OSC4_PLL6   //CPU system clock divide 6
 #pragma config CP0 = OFF            //Program memory is not code-protected
 #pragma config OSC = INTOSCPLL      //Internal OSC(8mhz), PLL enabled by soft
@@ -45,6 +45,7 @@
 #include "Compiler.h"
 #include "bsp.h"
 #include "isr.h"
+#include "rtc.h"
 
 #include "digi_proxy.h"
 
