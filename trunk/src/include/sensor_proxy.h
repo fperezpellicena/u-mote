@@ -21,26 +21,30 @@
 #include "sensor.h"
 #include "list.h"
 
+#define DECLARE_SENSOR_VECTOR(name, size, ...)\
+Sensor* name##sensors[size] = {__VA_ARGS__};\
+SensorVector name = {size, name##sensors}
+
 /*..........................................................................*/
 /* Sensor vector */
 typedef struct SensorVector SensorVector;
 
 struct SensorVector {
-    Sensor sensors[MAX_SENSORS];
     UINT8 size;
+    Sensor** sensors;
 };
 
 /*..........................................................................*/
 void SensorProxy_init(void);
 
-/*..........................................................................*/
-void SensorProxy_add(Sensor* sensor);
+///*..........................................................................*/
+//void SensorProxy_add(Sensor* sensor);
 
 /*..........................................................................*/
 void SensorProxy_sense(void);
 
-/*..........................................................................*/
-BOOL SensorProxy_alert(void);
+///*..........................................................................*/
+//BOOL SensorProxy_alert(void);
 
 /*..........................................................................*/
 UINT8 SensorProxy_getSensorByte(void);

@@ -16,68 +16,41 @@
  */
 
 #include "ircA1_proxy.h"
-#include "sensor.h"
-#include "sensor_proxy.h"
 #include "bsp.h"
 #include "hw_adc.h"
-#include "util.h"
 
-static float ircaExpCal[] = {-0.058, -0.199, -0.698};  // e^(-b*x^c)
-
-static IrcA1 ircA1;
+static float_t ircaExpCal[] = {-0.058, -0.199, -0.698};  // e^(-b*x^c)
 
 /*...........................................................................*/
 /* Init ADC and I/O */
 void IrcA1Proxy_init(void) {
-    Sensor_create(IRCA1_ID, &ircA1.sensor, (Sense)&IrcA1Proxy_sense,
-            (CheckAlert)&IrcA1Proxy_checkAlert);
-    SensorProxy_add(&ircA1.sensor);
     Adc_init();
     IrcA1_init();
 }
 
 /*...........................................................................*/
-void IrcA1Proxy_calibrateZero(void) {
+void IrcA1Proxy_calibrateZero(IrcA1* ircA1) {
     // Measure
-    IrcA1Proxy_measure();
+    IrcA1Proxy_measure(ircA1);
     // Calculate zero after 20-30 minutes powered in gas absence
-    ircA1.cal.zero = ircA1.data.act / ircA1.data.ref;
+    ircA1->cal->zero = ircA1->data->act / ircA1->data->ref;
 }
 
 /*...........................................................................*/
-void IrcA1Proxy_calibrateSpan(void) {
+void IrcA1Proxy_calibrateSpan(IrcA1* ircA1) {
     UINT8 abs;
     // Measure
-    IrcA1Proxy_measure();
+    IrcA1Proxy_measure(ircA1);
     // Absorbance
-    abs = 1 - (ircA1.data.act / (ircA1.data.act * ircA1.cal.zero));
+    abs = 1 - (ircA1->data->act / (ircA1->data->act * ircA1->cal->zero));
     // Calculate span
-    ircA1.cal.span = abs / 1 - ircaExpCal[IRCA1_MODEL];
+    ircA1->cal->span = abs / 1 - ircaExpCal[IRCA1_MODEL];
 }
 
 /*...........................................................................*/
-void IrcA1Proxy_measure(void) {
+void IrcA1Proxy_measure(IrcA1* ircA1) {
     // Sense
-    ircA1.data.ref = Adc_convert(IRCA1_REF);
-    ircA1.data.act = Adc_convert(IRCA1_ACT);
-    ircA1.data.tmp = Adc_convert(IRCA1_TMP);
-}
-
-/*...........................................................................*/
-void IrcA1Proxy_sense(List* measures) {
-    // Measure values
-    IrcA1Proxy_measure();
-    // Calculate CO2
-    IrcA1_calculate(&ircA1);
-    // Put data into measures
-    List_add(measures, round(ircA1.data.x));   // Float to int routine
-}
-
-/*...........................................................................*/
-BOOL IrcA1Proxy_checkAlert(List* measures) {
-    IrcA1Proxy_sense(measures);
-    if(ircA1.data.x >= IRCA1_X_THR){
-        return TRUE;
-    }
-    return FALSE;
+    ircA1->data->ref = Adc_convert(IRCA1_REF);
+    ircA1->data->act = Adc_convert(IRCA1_ACT);
+    ircA1->data->tmp = Adc_convert(IRCA1_TMP);
 }

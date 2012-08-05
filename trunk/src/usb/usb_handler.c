@@ -42,11 +42,6 @@ void USB_process(void) {
     unsigned char length;
     static char RTCC_CONF[] = "rtccconfig";
     static char RTCC_TEST[] = "rtcctest";
-    static char SHT_TEST[] = "shttest";
-    static char GPS_CONF[] = "gpsconfig";
-    static char GPS_TEST[] = "gpsconfig";
-    //    char SENSOR_LIST[] = "sensorlist";
-    //    char SENSOR_TEST[] = "sensortest";
     static char XBEE_JOIN[] = "xbeejoin";
     BYTE numBytesRead;
     // User Application USB tasks
@@ -62,19 +57,9 @@ void USB_process(void) {
             USBRtccHandler_parseRTCCData(USB_Out_Buffer);
         } else if (strncmp(USB_Out_Buffer, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
             length = USBRtccHandler_testRTCC(USB_In_Buffer);
-        } else if (strncmp(USB_Out_Buffer, GPS_CONF, strlen(GPS_CONF)) == 0) {
-            USBGpsHandler_parseGPSData(USB_Out_Buffer);
-        } else if (strncmp(USB_Out_Buffer, SHT_TEST, strlen(SHT_TEST)) == 0) {
-            length = USBShtHandler_sht11Test(USB_Out_Buffer);
-        } else if (strncmp(USB_Out_Buffer, GPS_TEST, strlen(GPS_TEST)) == 0) {
-            length = USBGpsHandler_testGPS(USB_In_Buffer);
         } else if (strncmp(USB_Out_Buffer, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
             USBXBeeHandler_join(USB_In_Buffer);
-        }/* else if (strncmp(USB_Out_Buffer, SENSOR_LIST, strlen(SENSOR_LIST)) == 0) {
-            listSensors(USB_In_Buffer);
-        } else if (strncmp(USB_Out_Buffer, SENSOR_TEST, strlen(SENSOR_TEST)) == 0) {
-            testSensors(USB_In_Buffer);
-        } */ else {
+        } else {
             // Si el comando es erróneo, muestra un mensaje de error
             length = USB_ERROR_MSG_LEN;
             Util_str2ram((UINT8 rom*)USB_ERROR_MSG, (UINT8*)USB_In_Buffer);

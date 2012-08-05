@@ -20,6 +20,19 @@
 
 #include "sensor.h"
 
+#define DECLARE_IRCA(id, name, senseFn)\
+DECLARE_FUZZY_SENSOR(id, name##id, senseFn);\
+IrcA1Data name##data;\
+Irca1Cal name##cal;\
+IrcA1 name = {&name##id, &name##data, &name##cal}
+
+#define DECLARE_FUZZY_IRCA(id, name, senseFn, temsSize, ...)\
+DECLARE_FUZZY_SENSOR(id, name##id, senseFn, temsSize, __VA_ARGS__);\
+IrcA1Data name##data;\
+Irca1Cal name##cal;\
+IrcA1 name = {&name##id, &name##data, &name##cal}
+
+
 /*...........................................................................*/
 /* Class IrcA1Data sensor calibration data */
 typedef struct Irca1Cal Irca1Cal;
@@ -48,9 +61,9 @@ struct IrcA1Data {
 typedef struct IrcA1 IrcA1;
 
 struct IrcA1 {
-    Sensor sensor;
-    IrcA1Data data;
-    Irca1Cal cal;
+    Sensor* sensor;
+    IrcA1Data* data;
+    Irca1Cal* cal;
 };
 
 /*...........................................................................*/

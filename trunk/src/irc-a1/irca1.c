@@ -41,12 +41,12 @@ void IrcA1_init(void) {
 void IrcA1_calculate(IrcA1* ircA1) {
     float abs;
     // Operates with sensor data and calibration data
-    abs = 1 - (ircA1->data.act / (ircA1->data.act * ircA1->cal.zero));
+    abs = 1 - (ircA1->data->act / (ircA1->data->act * ircA1->cal->zero));
     if (abs > 0) {
-        ircA1->data.x = (pow(log(1 - (abs / ircA1->cal.span)),(1 / ircaC[IRCA1_MODEL])))
+        ircA1->data->x = (pow(log(1 - (abs / ircA1->cal->span)),(1 / ircaC[IRCA1_MODEL])))
                 / ircaPowCal[IRCA1_MODEL];
     } else {
-          ircA1->data.x = (pow(log(1 + (abs / ircA1->cal.span)), (1 / ircaC[IRCA1_MODEL])))
+          ircA1->data->x = (pow(log(1 + (abs / ircA1->cal->span)), (1 / ircaC[IRCA1_MODEL])))
                 / ircaPowCal[IRCA1_MODEL];
     }
 }

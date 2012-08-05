@@ -128,12 +128,12 @@
 /*..........................................................................*/
 /* SHT11 section */
 
-#define SHT11_ENABLED
-#define SHT11_ID            1
+#define SHT_ENABLED
+#define SHT_ID            1
 
-#define SHT11_TMP_THR       20      // Umbral 80ºC
+#define SHT_TMP_THR       20      // Umbral 80ºC
 
-#ifdef SHT11_ENABLED
+#ifdef SHT_ENABLED
 #   define SHT_DATA_PIN     PORTBbits.RB1
 #   define SHT_DATA         TRISBbits.TRISB1    /* Data tx/rx pin */
 #   define SHT_DATA_DDR     LATBbits.LATB1	/* Data direction register */
@@ -172,7 +172,8 @@
 /*..........................................................................*/
 
 #define MONITORING                  0           /* Continuous sensing mode */
-#define ALERT_DRIVEN                1           /* Alert only sensing mode */
+#define THRESHOLD_DRIVEN            1           /* Alert only sensing mode */
+#define FUZZY_DRIVEN                2           /* Alert fuzzy based mode */
 #define SENSING_MODE                MONITORING
 
 #define MAX_SENSORS                 5                       /* Max sensors */

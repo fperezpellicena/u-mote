@@ -17,11 +17,17 @@
 
 #include "sensor.h"
 
-
 /*..........................................................................*/
-void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction,
-        CheckAlert checkAlertFunction) {
+void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction) {
     sensor->id = id;
     sensor->sense = senseFunction;
-    sensor->checkAlert = checkAlertFunction;
+
+}
+
+/*..........................................................................*/
+void Sensor_createFuzzy(UINT8 id, Sensor* sensor, Sense senseFunction,
+        UINT8 ruleTermsSize, RuleTerm** ruleTerms) {
+    Sensor_create(id, sensor, senseFunction);
+    sensor->ruleTermsSize = ruleTermsSize;
+    sensor->ruleTerms = ruleTerms;
 }

@@ -53,12 +53,24 @@ struct ShtData {
     UINT8 humi_chk;
 };
 
+/* Declare sht sensor */
+#define DECLARE_SHT(id, name, senseFn) \
+DECLARE_SENSOR(id, name##id, senseFn);\
+ShtData name##data;\
+Sht name = {&name##id, &name##data}
+
+/* Declare fuzzy sht sensor */
+#define DECLARE_FUZZY_SHT(id, name, senseFn, termsSize, ...) \
+DECLARE_FUZZY_SENSOR(id, name##id, senseFn, termsSize, __VA_ARGS__);\
+ShtData name##data;\
+Sht name = {&name##id, &name##data}
+
 /* Sht11 class */
 typedef struct Sht Sht;
 
 struct Sht {
-    Sensor sensor;
-    ShtData data;
+    Sensor* sensor;
+    ShtData* data;
 };
 
 /* Init pins and registers*/
@@ -106,6 +118,7 @@ UINT8 Sht11_measure(Sht* sht);
 
 /* Measures temperature and humidity */
 UINT8 Sht11_measureAndCalculate(Sht* sht);
+
 
 /* 
  * Calculates temperature [°C] and humidity [%RH]
