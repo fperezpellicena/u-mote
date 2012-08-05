@@ -21,6 +21,16 @@
 #include "GenericTypeDefs.h"
 #include "bsp.h"
 #include "list.h"
+#include "fuzzy_rule.h"
+
+/* Declare sensor*/
+#define DECLARE_SENSOR(id, name, senseFn)\
+Sensor name = {id, senseFn, NULL, 0}
+
+/* Declare fuzzy sensor*/
+#define DECLARE_FUZZY_SENSOR(id, name, senseFn, termsSize, ...)\
+RuleTerm* name##terms[termsSize] = {__VA_ARGS__};\
+Sensor name = {id, senseFn, name##terms, termsSize}
 
 /*..........................................................................*/
 /* Sense function prototype */
@@ -36,14 +46,16 @@ typedef struct Sensor Sensor;
 
 struct Sensor {
     UINT8 id;
-    /* Sense function */
-    Sense sense;
-    /* Check alert function */
-    CheckAlert checkAlert;
+    Sense sense; /* Sense function */
+    RuleTerm** ruleTerms; /* Rule terms associated */
+    UINT8 ruleTermsSize; /* Rule terms size */
 };
 
 /*..........................................................................*/
-void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction,
-        CheckAlert checkAlertFunction);
+void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction);
+
+/*..........................................................................*/
+void Sensor_createFuzzy(UINT8 id, Sensor* sensor, Sense senseFunction,
+       UINT8 ruleTermsSize, RuleTerm** ruleTerms);
 
 #endif /* sensor_h */

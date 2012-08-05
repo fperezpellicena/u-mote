@@ -19,30 +19,8 @@
 #include "sensor_proxy.h"
 #include "sht.h"
 
-static Sht sht;
 
 /*...........................................................................*/
 void ShtProxy_init(void) {
-    Sensor_create(SHT11_ID, &sht.sensor, (Sense)&ShtProxy_sense,
-            (CheckAlert)&ShtProxy_checkAlert);
-    SensorProxy_add(&sht.sensor);
     Sht11_init();
-}
-
-/*...........................................................................*/
-void ShtProxy_sense(List* measures) {
-    // Measure
-    Sht11_measure(&sht);
-    // Put measures into payload
-    List_add(measures, sht.data.humidity.i);
-    List_add(measures, sht.data.temperature.i);
-}
-
-/*...........................................................................*/
-BOOL ShtProxy_checkAlert(List* measures) {
-    ShtProxy_sense(measures);
-    if(sht.data.temperature.i >= SHT11_TMP_THR ){
-        return TRUE;
-    }
-    return FALSE;
 }

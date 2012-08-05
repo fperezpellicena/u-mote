@@ -24,18 +24,12 @@
 void IrcA1Proxy_init(void);
 
 /*..........................................................................*/
-void IrcA1Proxy_calibrateZero(void);
+void IrcA1Proxy_calibrateZero(IrcA1* ircA1);
 
 /*..........................................................................*/
-void IrcA1Proxy_calibrateSpan(void);
+void IrcA1Proxy_calibrateSpan(IrcA1* ircA1);
 
 /*..........................................................................*/
-void IrcA1Proxy_measure(void);
-
-/*..........................................................................*/
-void IrcA1Proxy_sense(List* measures);
-
-/*..........................................................................*/
-BOOL IrcA1Proxy_checkAlert(List* measures);
+void IrcA1Proxy_measure(IrcA1* ircA1);
 
 #endif /* ircA1_proxy_h */

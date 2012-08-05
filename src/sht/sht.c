@@ -140,21 +140,21 @@ UINT8 Sht11_measureAndCalculate(Sht* sht) {
     UINT8 error = Sht11_measure(sht);
     // Calculate compensated values
     //converts integer to float
-    sht->data.temperature.f = (float) sht->data.temperature.i;
+    sht->data->temperature.f = (float) sht->data->temperature.i;
     //converts integer to float
-    sht->data.humidity.f = (float) sht->data.humidity.i;
+    sht->data->humidity.f = (float) sht->data->humidity.i;
     //calculate humidity,temperature
-    Sht11_calculate(&sht->data.humidity.f, &sht->data.temperature.f); 
+    Sht11_calculate(&sht->data->humidity.f, &sht->data->temperature.f);
     return error;
 }
 
 UINT8 Sht11_measure(Sht* sht) {
     UINT8 error = 0;
     // Get measures
-    error += Sht11_measureParam((int*) &sht->data.temperature.i,
-            &sht->data.temp_chk, SHT_MEASURE_TEMP);
-    error += Sht11_measureParam((int*) &sht->data.humidity.i,
-            &sht->data.humi_chk, SHT_MEASURE_HUMI);
+    error += Sht11_measureParam((int*) &sht->data->temperature.i,
+            &sht->data->temp_chk, SHT_MEASURE_TEMP);
+    error += Sht11_measureParam((int*) &sht->data->humidity.i,
+            &sht->data->humi_chk, SHT_MEASURE_HUMI);
     return error;
 }
 

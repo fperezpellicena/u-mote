@@ -16,27 +16,84 @@
  */
 
 #include "sensor_proxy.h"
+#include "fuzzy.h"
+#include "sht.h"
+#include "irca1.h"
+#include "util.h"
+#include "sht_proxy.h"
+#include "irca1_proxy.h"
 
-/* Installed sensors */
-static SensorVector sensorVector;
+static UINT8 Sht_sense(List* measures);
+static UINT8 Irca_sense(List* measures);
+
+#pragma udata mf
+DECLARE_MF(lowTemp, -40, 0, 20);
+DECLARE_MF(midTemp, 0, 20, 40);
+DECLARE_MF(highTemp, 30, 40, 125);
+
+DECLARE_MF(lowCo2, 0, 0, 50);
+DECLARE_MF(midCo2, 0, 50, 100);
+DECLARE_MF(highCo2, 50, 100, 100);
+
+DECLARE_MF(lowRisk, 0, 0, 50);
+DECLARE_MF(midRisk, 0, 50, 100);
+DECLARE_MF(highRisk, 50, 100, 100);
+#pragma udata
+
+#pragma udata rp
+DECLARE_RT(ifHighTemp, &highTemp);
+DECLARE_RT(andHighCo2, &highCo2);
+DECLARE_RT(thenHighRisk, &highRisk);
+
+DECLARE_RT(andLowCo2, &lowCo2);
+DECLARE_RT(thenMidRisk, &midRisk);
+#pragma udata
+
+#pragma udata rule
+DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
+DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
+#pragma udata
+
+#pragma udata ruleEngine
+DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
+#pragma udata
+
+/* Declare one SHT sensor */
+#pragma udata sensors
+DECLARE_FUZZY_SHT(SHT_ID, sht, &Sht_sense, 1, &ifHighTemp);
+DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &Irca_sense, 2, &andHighCo2, &andLowCo2);
+DECLARE_SENSOR_VECTOR(sensors, 2, &sht, &irca);
+#pragma udata
+
 static List measures;
+
+/*...........................................................................*/
+static UINT8 Sht_sense(List* measures) {
+    // Measure
+    Sht11_measure(&sht);
+    // Put measures into payload
+    List_add(measures, sht.data->humidity.i);
+    List_add(measures, sht.data->temperature.i);
+    // Return temperature
+    return sht.data->temperature.i;
+}
+
+/*...........................................................................*/
+static UINT8 Irca_sense(List* measures) {
+    // Measure values
+    IrcA1Proxy_measure(&irca);
+    // Calculate CO2
+    IrcA1_calculate(&irca);
+    // Put data into measures
+    List_add(measures, round(irca.data->x)); // Float to int routine
+}
 
 /*..........................................................................*/
 void SensorProxy_init(void) {
     List_init(&measures);
-    sensorVector.size = 0;
-    SENSORS_PWR_DDR = 0; /* Sensor power on/off pin as output */
-}
-
-/*..........................................................................*/
-
-/* Adds a sensor to board */
-void SensorProxy_add(Sensor* sensor) {
-    if (sensorVector.size < MAX_SENSORS) {
-        sensorVector.sensors[sensorVector.size].sense = sensor->sense;
-        sensorVector.sensors[sensorVector.size].checkAlert = sensor->checkAlert;
-        sensorVector.size++;
-    }
+    ShtProxy_init(); /* Init SHT resources */
+    IrcA1Proxy_init(); /* Init IRCA resources */
+    SensorProxy_powerOff(); /* Sensor power on/off pin as output */
 }
 
 /*..........................................................................*/
@@ -49,8 +106,8 @@ void SensorProxy_sense(void) {
     // Empty previous measures
     List_empty(&measures);
     // For each sensor installed, put measures into payload
-    for (i = 0; i < sensorVector.size; i++) {
-        sensorVector.sensors[i].sense(&measures);
+    for (i = 0; i < sensors.size; i++) {
+        sensors.sensors[i]->sense(&measures);
     }
     // Turn off sensor board
     SensorProxy_powerOff();
@@ -59,36 +116,40 @@ void SensorProxy_sense(void) {
 /*..........................................................................*/
 
 /* Measure sensor board and check for alert condition */
-BOOL SensorProxy_alert(void) {
+UINT8 SensorProxy_fuzzy(void) {
     UINT8 i;
-    BOOL alert = FALSE;
-    if(sensorVector.size == 0) {
+    UINT8 j;
+    UINT8 measure;
+    if (sensors.size == 0) {
         return FALSE;
     }
     // Turn on sensor board
     SensorProxy_powerOn();
     // Empty previous measures
     List_empty(&measures);
-    for (i = 0; i < sensorVector.size; i++) {
-        if (sensorVector.sensors[i].checkAlert(&measures) == TRUE) {
-            alert = TRUE;
+    for (i = 0; i < sensors.size; i++) {
+        measure = sensors.sensors[i]->sense(&measures);
+        for (j = 0; j < sensors.sensors[i]->ruleTermsSize; j++) {
+            sensors.sensors[i]->ruleTerms[j]->input = measure;
         }
     }
     // Turn off sensor board
     SensorProxy_powerOff();
-    return alert;
+    // Run fuzzy engine
+    return RuleEngine_run(&engine);
 }
 
 /*..........................................................................*/
+
 /* Returns sensor byte identification based on sensor id attribute */
 UINT8 SensorProxy_getSensorByte(void) {
     UINT8 byte = 0;
     UINT8 i;
-    if(sensorVector.size == 0) {
+    if (sensors.size == 0) {
         return 0;
     }
-    for (i = 0; i < sensorVector.size; i++) {
-        byte |= sensorVector.sensors[i].id; // Sensor id's OR'ed
+    for (i = 0; i < sensors.size; i++) {
+        byte |= sensors.sensors[i]->id; // Sensor id's OR'ed
     }
     return byte;
 }

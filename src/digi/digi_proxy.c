@@ -23,34 +23,8 @@
 #include "list.h"
 #include <rtcc.h>
 
-#ifdef SHT_ENABLED
-#include "sht11.h"
-#endif
-
-#ifdef GPS_ENABLED
-#include "gps_isr.h"
-#include "gps_api.h"
-#endif
-
-#ifdef RTCC_ENABLED
-#include "rtc.h"
-#endif
-
-#pragma udata digi_isr_data
-static rtccTimeDate timestampData; /* Timestamp data */
-
-#ifdef SHT_ENABLED
-static Sht11 shtData; /* SHT11 sensor data */
-#endif
-
-#ifdef GPS_ENABLED
-static NMEAOutput gpsData; /* GPS data */
-#endif
-
-
 
 #pragma udata
-
 static List list;
 static Serial xbeeProxySerial;
 static XBeePacket xbeeProxyPacket;
@@ -142,6 +116,7 @@ BOOL XBeeProxy_readPacket(XBeePacket * const packet) {
     return FALSE;
 }
 
+/*..........................................................................*/
 /* Read XBee packet(generalized)*/
 BOOL XBeeProxy_read(void) {
     UINT8 data = xbeeProxyPacket.lastByte;
@@ -185,6 +160,7 @@ BOOL XBeeProxy_read(void) {
     return FALSE;
 }
 
+/*..........................................................................*/
 /* Join mote */
 BOOL XBeeProxy_join(void) {
     static UINT8 command[3];
@@ -263,8 +239,8 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
         // Crea una trama y la envía
     }
 #else
-#   if SENSING_MODE == ALERT_DRIVEN
-    // Send frame only on alert condition or on monitoring mode
+#if SENSING_MODE == THRESHOLD_DRIVEN
+    // Send frame only on alert condition
     if (SensorProxy_alert()) {
         // Prepara la nueva trama
         List_init(&list);
@@ -273,14 +249,14 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
         // Put sensor ids
         List_add(&list, SensorProxy_getSensorByte());
         // Put sensor payload into buffer
-        List_append(&list, (List*)SensorProxy_getMeasures());
+        List_append(&list, (List*) SensorProxy_getMeasures());
         // Send prepared request (hay que prepararla antes para optimizar
         // el tiempo que está despierto el sistema)
         XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
                 XBEE_RADIOUS, XBEE_OPTIONS, list.data, list.size);
         XBeeProxy_sendPacket(&xbeeProxyPacket);
     }
-#   else
+#elsif SENSING_MODE == MONITORING
     // Prepara la nueva trama
     List_init(&list);
     // Read datetime and put into buffer
@@ -290,13 +266,32 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
     // Sense installed sensors
     SensorProxy_sense();
     // Put sensor payload into buffer
-    List_append(&list, (List*)SensorProxy_getMeasures());
+    List_append(&list, (List*) SensorProxy_getMeasures());
     // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
     XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
             XBEE_RADIOUS, XBEE_OPTIONS, list.data, list.size);
     XBeeProxy_sendPacket(&xbeeProxyPacket);
-#   endif
+#else
+    UINT8 risk = 0;
+     // Prepara la nueva trama
+    List_init(&list);
+    // Read datetime and put into buffer
+    Rtc_readToList(&list);
+    // Put sensor ids
+    List_add(&list, SensorProxy_getSensorByte());
+    // Sense installed sensors
+    risk = SensorProxy_fuzzy();
+    // Put sensor payload into buffer
+    List_append(&list, (List*) SensorProxy_getMeasures());
+    // Add Risk level
+    List_add(&list, risk);
+    // Send prepared request (hay que prepararla antes para optimizar
+    // el tiempo que está despierto el sistema)
+    XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
+            XBEE_RADIOUS, XBEE_OPTIONS, list.data, list.size);
+    XBeeProxy_sendPacket(&xbeeProxyPacket);
+#endif
 #endif
 }
 
