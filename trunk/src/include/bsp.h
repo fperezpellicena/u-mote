@@ -125,20 +125,28 @@
 
 #define ADC_INT_ENABLED     0
 
+#define AVERAGE_FACTOR  16
+#define DIV_AVERAGE     4
+
+
 /*..........................................................................*/
 /* SHT11 section */
 
 #define SHT_ENABLED
-#define SHT_ID            1
+#define SHT_ID              0xAA
 
-#define SHT_TMP_THR       20      // Umbral 80ºC
+#define SHT_TMP_THR         20      // Umbral 80ºC
+
+#define SHT_HUM_ENABLED     0
 
 #ifdef SHT_ENABLED
-#   define SHT_DATA_PIN     PORTBbits.RB1
-#   define SHT_DATA         TRISBbits.TRISB1    /* Data tx/rx pin */
-#   define SHT_DATA_DDR     LATBbits.LATB1	/* Data direction register */
-#   define SHT_SCK          LATBbits.LATB2	/* Clk pin */
-#   define SHT_SCK_DDR      TRISBbits.TRISB2    /* Clk direction register */
+#   define SHT_DATA_PIN     PORTAbits.RA0
+#   define SHT_DATA         TRISAbits.TRISA0    /* Data tx/rx pin */
+#   define SHT_DATA_DDR     LATAbits.LATA0	/* Data direction register */
+#   define SHT_SCK          LATAbits.LATA1	/* Clk pin */
+#   define SHT_SCK_DDR      TRISAbits.TRISA1    /* Clk direction register */
+#   define SHT_DATA_CNF     ANCON0bits.PCFG0
+#   define SHT_SCK_CNF      ANCON0bits.PCFG1
 #endif
 
 /*...........................................................................*/
@@ -174,7 +182,7 @@
 #define MONITORING                  0           /* Continuous sensing mode */
 #define THRESHOLD_DRIVEN            1           /* Alert only sensing mode */
 #define FUZZY_DRIVEN                2           /* Alert fuzzy based mode */
-#define SENSING_MODE                MONITORING
+#define SENSING_MODE                FUZZY_DRIVEN
 
 #define MAX_SENSORS                 5                       /* Max sensors */
 #define SENSORS_PWR                 LATBbits.LATB3      /* Power on/off pin*/
@@ -182,6 +190,7 @@
 
 #define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
 #define MAX_LIST_SIZE               100
+#define SENSORS                     1
 
 /*...........................................................................*/
 /* Prototypes */

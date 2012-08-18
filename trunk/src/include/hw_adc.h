@@ -20,11 +20,6 @@
 
 #include "GenericTypeDefs.h"
 
-#ifndef AVERAGE_FACTOR
-    #define AVERAGE_FACTOR  16
-    #define DIV_AVERAGE     4
-#endif
-
 void Adc_init(void);
 
 void Adc_close(void);
@@ -36,5 +31,7 @@ UINT16 Adc_readValue(void);
 UINT16 Adc_convert(UINT8 channel);
 
 UINT16 Adc_convertAveragedValue(UINT8 channel);
+
+UINT8 Adc_usbTest(char* usbOutBuffer);
 
 #endif  /* hw_adc_h*/

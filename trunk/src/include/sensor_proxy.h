@@ -21,9 +21,9 @@
 #include "sensor.h"
 #include "list.h"
 
-#define DECLARE_SENSOR_VECTOR(name, size, ...)\
-Sensor* name##sensors[size] = {__VA_ARGS__};\
-SensorVector name = {size, name##sensors}
+#define DECLARE_SENSOR_VECTOR(name, ...)\
+Sensor* name##sensors[SENSORS] = {__VA_ARGS__};\
+SensorVector name = {SENSORS, name##sensors}
 
 /*..........................................................................*/
 /* Sensor vector */
@@ -31,7 +31,7 @@ typedef struct SensorVector SensorVector;
 
 struct SensorVector {
     UINT8 size;
-    Sensor** sensors;
+    Sensor* sensors[SENSORS];
 };
 
 /*..........................................................................*/
@@ -42,6 +42,11 @@ void SensorProxy_init(void);
 
 /*..........................................................................*/
 void SensorProxy_sense(void);
+
+/*..........................................................................*/
+
+/* Measure sensor board and check for alert condition */
+UINT8 SensorProxy_fuzzy(void);
 
 ///*..........................................................................*/
 //BOOL SensorProxy_alert(void);
@@ -57,6 +62,9 @@ void SensorProxy_powerOn(void);
 
 /*..........................................................................*/
 void SensorProxy_powerOff(void);
+
+/*..........................................................................*/
+UINT8 SensorProxy_usbTest(char* usbOutBuffer);
 
 #endif /* sensor_proxy_h*/
 

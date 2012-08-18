@@ -47,6 +47,8 @@
 #include "isr.h"
 #include "rtc.h"
 
+#include "sht.h"
+
 #include "digi_proxy.h"
 
 #ifdef USB_ENABLED
@@ -82,6 +84,8 @@ void main(void) {
             if (XBEE_ON_SLEEP_AWAKE) {
                 TRISEbits.TRISE0 = 0;
                 LATEbits.LATE0 = !LATEbits.LATE0;
+                TRISDbits.TRISD1 = 0;
+                
                 WDTCONbits.DS = 0;
                 DSWAKEHbits.DSINT0 = 0;
                 DSCONLbits.RELEASE = 0;
@@ -92,9 +96,15 @@ void main(void) {
                 DSWAKELbits.DSMCLR = 0;
                 DSCONLbits.RELEASE = 0;
                 XBeeProxy_join();
+                TRISDbits.TRISD1 = 0;
+                LATDbits.LATD1 = 1;
+                // Set low power mode
+                //Sht11_writeStatusRegister(LOW_POWER_STAT_REG);
+                Sht11_reset();
             } else {
                 // Enable RTCC
                 Rtc_init();
+                
             }
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
             if ((USBGetDeviceState() == ATTACHED_STATE)) {

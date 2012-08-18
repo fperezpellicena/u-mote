@@ -18,11 +18,12 @@
 #include "sht.h"
 #include <delays.h>
 
-
 void Sht11_init(void) {
-    SHT_DATA_DDR = 0;
-    SHT_SCK_DDR = 0;
+    SHT_DATA_CNF = 1;
+    SHT_SCK_CNF = 1;
     SHT_DATA = 1;
+    SHT_SCK_DDR = 0;
+    SHT_DATA_DDR = 0;
     SHT_SCK = 0;
 }
 
@@ -128,17 +129,16 @@ UINT8 Sht11_readStatusRegister(UINT8 *p_value, UINT8 *p_checksum) {
     return error; //error=1 in case of no response form the sensor
 }
 
-UINT8 Sht11_writeStatusRegister(UINT8 *p_value) {
+UINT8 Sht11_writeStatusRegister(UINT8 p_value) {
     UINT8 error = 0;
     Sht11_start(); //transmission start
     error += Sht11_write(SHT_STAT_REG_W); //send command to sensor
-    error += Sht11_write(*p_value); //send value of status register
+    error += Sht11_write(p_value); //send value of status register
     return error; //error>=1 in case of no response form the sensor
 }
 
 UINT8 Sht11_measureAndCalculate(Sht* sht) {
     UINT8 error = Sht11_measure(sht);
-    // Calculate compensated values
     //converts integer to float
     sht->data->temperature.f = (float) sht->data->temperature.i;
     //converts integer to float
@@ -153,8 +153,12 @@ UINT8 Sht11_measure(Sht* sht) {
     // Get measures
     error += Sht11_measureParam((int*) &sht->data->temperature.i,
             &sht->data->temp_chk, SHT_MEASURE_TEMP);
+    LATDbits.LATD1 = !LATDbits.LATD1;
+    SHT_DATA_DDR = 0;
+    SHT_DATA = 1;
     error += Sht11_measureParam((int*) &sht->data->humidity.i,
             &sht->data->humi_chk, SHT_MEASURE_HUMI);
+
     return error;
 }
 
@@ -171,14 +175,21 @@ UINT8 Sht11_measureParam(int *p_value, UINT8 *p_checksum, UINT8 mode) {
     Delay1KTCYx(5);
     SHT_DATA_DDR = 1;
     // Long busy wait can block usb
+
     while (SHT_DATA_PIN == 1);
+
     // Read two bytes response
     // FIXME No es crítico: No funciona con usb, intentar habilitar una interrupción de pin
     // y encapsular las siguientes líneas dentro de la ISR.
-    *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
-    *(p_value) = *(p_value) << 8;
-    *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
+    if (mode == SHT_MEASURE_HUMI && SHT_LOW_POWER) {
+        *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
+    } else {
+        *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
+        *(p_value) = *(p_value) << 8;
+        *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
+    }
     *p_checksum = Sht11_read(SHT_NACK); //read checksum
+
     return error;
 }
 
