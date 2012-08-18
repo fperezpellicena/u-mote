@@ -34,7 +34,7 @@ Sensor name = {id, senseFn, name##terms, termsSize}
 
 /*..........................................................................*/
 /* Sense function prototype */
-typedef UINT8 rom (*Sense)(List* list);
+typedef UINT8 rom (*Sense)(List* measures);
 
 /*..........................................................................*/
 /* Check alert function prototype */

@@ -17,15 +17,37 @@
 
 #include "hw_adc.h"
 #include "bsp.h"
+#include <adc.h>
+
+static UINT8 power(UINT8 base, UINT8 exp);
+
+static UINT8 power(UINT8 base, UINT8 exp) {
+    UINT8 res = 1;
+    UINT8 i;
+    for (i = 0; i < exp; i++) {
+        res *= base;
+    }
+    return res;
+}
+
+static void setChannel(UINT8 channel);
+
+static void setChannel(UINT8 channel) {
+    UINT8 diff = (UINT8) power(2, channel);
+    ADCON0bits.CHS = channel; /* Set channel */
+    ANCON0 = 0xFF - diff;
+}
 
 /**
  * Configura el ADC
  */
-void Adc_init(void) {
+void Adc_init() {
     ADCON0bits.VCFG = 0;
-    ADCON1bits.ADFM = 0; /* Left adjust */
+    ADCON1bits.ADFM = 1; /* Left adjust */
     ADCON1bits.ACQT = 0; /* Automatic acquisition time */
     ADCON1bits.ADCS = 0; /* Clk Fosc/2 */
+    ANCON1bits.VBGEN = 0;
+    ANCON1bits.VBG2EN = 0;
 #if ADC_INT_ENABLED
     PIR1bits.ADIF = 0;
     PIE1bits.ADIE = 1;
@@ -38,12 +60,12 @@ void Adc_close(void) {
     ADCON0bits.ADON = 0; /* Power off */
 }
 
-static void Adc_dummy(void);
+static void Adc_calibrate(void);
 
 /**
  * Realiza una conversión dummy para compensar el ruido de las entradas.
  */
-static void Adc_dummy(void) {
+static void Adc_calibrate(void) {
     ADCON1bits.ADCAL = 1;
     ADCON0bits.GO = 1;
     while (ADCON0bits.GO);
@@ -54,9 +76,8 @@ static void Adc_dummy(void) {
  * Inicia una conversión, precedida de una dummy.
  */
 void Adc_startConversion(UINT8 channel) {
-    ANCON0 = channel >> 8;  /* VBG Selection and port configuration */
-    ANCON1 = channel;       /* Port configuration */
-    Adc_dummy();
+    setChannel(channel);
+    Adc_calibrate();
     ADCON0bits.GO = 1;
 }
 
@@ -79,9 +100,9 @@ UINT16 Adc_readValue(void) {
  * @return muestra con ruido de entrada compensado
  */
 UINT16 Adc_convert(UINT8 channel) {
-    ANCON0 = channel >> 8;  /* VBG Selection and port configuration */
-    ANCON1 = channel;       /* Port configuration */
-    Adc_dummy();
+    setChannel(channel);
+    ADCON0bits.ADON = 1;
+    Adc_calibrate();
     ADCON0bits.GO = 1;
     return Adc_readValue();
 }
@@ -97,12 +118,19 @@ UINT16 Adc_convert(UINT8 channel) {
 UINT16 Adc_convertAveragedValue(UINT8 channel) {
     UINT32 tmp = 0;
     UINT8 i = AVERAGE_FACTOR;
-    ANCON0 = channel >> 8;  /* VBG Selection and port configuration */
-    ANCON1 = channel;       /* Port configuration */
-    Adc_dummy();
+    setChannel(channel);
+    Adc_calibrate();
     while (i--) {
         ADCON0bits.GO = 1;
         tmp += Adc_readValue();
     }
     return tmp >> DIV_AVERAGE;
+}
+
+/* Test ADC */
+UINT8 Adc_usbTest(char* usbOutBuffer) {
+    Adc_init();
+    TRISAbits.TRISA1 = 1;
+    usbOutBuffer[0] = Adc_convert(1);
+    return 1;
 }

@@ -28,6 +28,8 @@
 #define SHT_STAT_REG_W      0x06    		/* Write status register command */
 #define SHT_RESET           0x1E    		/* Reset */
 
+#define SHT_LOW_POWER       0x01                /* 8bit RH / 12 bit TMP */
+
 #define SHT_ACK             1			/* Send ACK */
 #define SHT_NACK            0                   /* Not send ACK */
 
@@ -108,7 +110,7 @@ UINT8 Sht11_write(UINT8 value);
 UINT8 Sht11_readStatusRegister(UINT8 *p_value, UINT8 *p_checksum);
 
 /* Writes the status register with checksum (8-bit) */
-UINT8 Sht11_writeStatusRegister(UINT8 *p_value);
+UINT8 Sht11_writeStatusRegister(UINT8 p_value);
 
 /* Makes a measurement (humidity/temperature) with checksum */
 UINT8 Sht11_measureParam(INT *p_value, UINT8 *p_checksum, UINT8 mode);

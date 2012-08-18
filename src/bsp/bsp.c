@@ -28,7 +28,6 @@ void BSP_init(void) {
     BSP_enablePLL();
     // Default all pins to digital
     ADCON1 |= 0x0F;
-    // Default all pins to digital
     ANCON0 = 0xFF;
     ANCON1 = 0xFF;
     // Init interrupt vectors
@@ -44,10 +43,6 @@ void BSP_init(void) {
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
 #endif
-
-    //#ifdef SHT11_ENABLED
-    //    ShtProxy_init();
-    //#endif
 }
 
 /*...........................................................................*/

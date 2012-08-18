@@ -21,7 +21,8 @@
 #include "isr.h"
 #include "sensor_proxy.h"
 #include "list.h"
-#include <rtcc.h>
+#include "util.h"
+#include "rtc.h"
 
 
 #pragma udata
@@ -185,6 +186,13 @@ BOOL XBeeProxy_join(void) {
 }
 
 /*..........................................................................*/
+void XBeeProxy_usbJoin(char usbBuffer[]) {
+    if(XBeeProxy_join())
+        Util_str2ram((UINT8 rom*)USB_JOINED_MSG, (UINT8*)usbBuffer);
+    Util_str2ram((UINT8 rom*)USB_JOINED_MSG, (UINT8*)usbBuffer);
+}
+
+/*..........................................................................*/
 
 /** Interrupt handler section */
 
@@ -256,7 +264,7 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
                 XBEE_RADIOUS, XBEE_OPTIONS, list.data, list.size);
         XBeeProxy_sendPacket(&xbeeProxyPacket);
     }
-#elsif SENSING_MODE == MONITORING
+#elif SENSING_MODE == MONITORING
     // Prepara la nueva trama
     List_init(&list);
     // Read datetime and put into buffer

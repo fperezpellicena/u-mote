@@ -18,16 +18,20 @@
 #include <string.h>
 #include "bsp.h"
 #include "GenericTypeDefs.h"
+
+#include "util.h"
+#include "rtc.h"
+#include "hw_adc.h"
+
+#include "sensor_proxy.h"
+#include "digi_proxy.h"
+
 #include "usb_handler.h"
 #include "usb_config.h"
 #include "usb_device.h"
 #include "usb.h"
 #include "usb_function_cdc.h"
-#include "usb_rtcc_handler.h"
-#include "usb_gps_handler.h"
-#include "usb_digi_handler.h"
-#include "usb_sht_handler.h"
-#include "util.h"
+
 
 
 #pragma udata
@@ -43,6 +47,8 @@ void USB_process(void) {
     static char RTCC_CONF[] = "rtccconfig";
     static char RTCC_TEST[] = "rtcctest";
     static char XBEE_JOIN[] = "xbeejoin";
+    static char ADC_TEST[] = "adctest";
+    static char SENSOR_TEST[] = "sensortest";
     BYTE numBytesRead;
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
@@ -54,15 +60,19 @@ void USB_process(void) {
     // Si ha leído datos
     if (numBytesRead != 0) {
         if (strncmp(USB_Out_Buffer, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
-            USBRtccHandler_parseRTCCData(USB_Out_Buffer);
+            Rtc_usbParse(USB_Out_Buffer);
         } else if (strncmp(USB_Out_Buffer, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
-            length = USBRtccHandler_testRTCC(USB_In_Buffer);
+            length = Rtc_usbReadTest(USB_In_Buffer);
         } else if (strncmp(USB_Out_Buffer, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
-            USBXBeeHandler_join(USB_In_Buffer);
+            XBeeProxy_usbJoin(USB_In_Buffer);
+        } else if (strncmp(USB_Out_Buffer, ADC_TEST, strlen(ADC_TEST)) == 0) {
+            length = Adc_usbTest(USB_In_Buffer);
+        } else if (strncmp(USB_Out_Buffer, SENSOR_TEST, strlen(SENSOR_TEST)) == 0) {
+            length = SensorProxy_usbTest(USB_In_Buffer);
         } else {
             // Si el comando es erróneo, muestra un mensaje de error
             length = USB_ERROR_MSG_LEN;
-            Util_str2ram((UINT8 rom*)USB_ERROR_MSG, (UINT8*)USB_In_Buffer);
+            Util_str2ram((UINT8 rom*)USB_ERROR_MSG, (UINT8*) USB_In_Buffer);
         }
         // Si está preparado para enviar datos
         if (USBUSARTIsTxTrfReady() && length != 0) {

@@ -21,6 +21,9 @@
 #include "digi_api.h"
 #include "GenericTypeDefs.h"
 
+#define USB_JOINED_MSG "Mote joined\0"
+#define USB_JOINED_ERROR_MSG "Mote not joined\0"
+
 
 void XBeeProxy_init(void);
 
@@ -31,6 +34,8 @@ BOOL XBeeProxy_readPacket(XBeePacket* const packet);
 BOOL XBeeProxy_read(void);
 
 BOOL XBeeProxy_join(void);
+
+void XBeeProxy_usbJoin(char usbBuffer[]);
 
 /*..........................................................................*/
 /* Interrupt handler functions */
