@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="applicationName">uMote</string>
+	<string name="configurationTab">Configuration</string>
+    <string name="monitorTab">Monitor</string>
+    <string name="setDateTitle">Set date</string>
+    <string name="setTimeTitle">Set time</string>
+    <string name="save">Save</string>
+    <string name="savePhoneDateTime">Save phone datetime</string>
+</resources>
