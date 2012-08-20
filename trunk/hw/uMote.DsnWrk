@@ -4,3 +4,5 @@ Version=1.0
 ProjectPath=uMote.PrjPCB
 [Project2]
 ProjectPath=uMoteSensor.PrjPCB
+[Project3]
+ProjectPath=uMoteAdapter.PrjPCB
