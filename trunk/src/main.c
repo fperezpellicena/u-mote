@@ -46,6 +46,7 @@
 #include "bsp.h"
 #include "isr.h"
 #include "rtc.h"
+#include <delays.h>
 
 #include "sht.h"
 
@@ -82,10 +83,11 @@ void main(void) {
             //  1.- Si se ha despertado tras un estado de deep sleep
             //  2.- Y ha sido causado por INT0 --> XBEE INT PIN
             if (XBEE_ON_SLEEP_AWAKE) {
+#ifdef __18F46J50_H
                 TRISEbits.TRISE0 = 0;
                 LATEbits.LATE0 = !LATEbits.LATE0;
                 TRISDbits.TRISD1 = 0;
-                
+#endif
                 WDTCONbits.DS = 0;
                 DSWAKEHbits.DSINT0 = 0;
                 DSCONLbits.RELEASE = 0;
@@ -95,16 +97,20 @@ void main(void) {
                 // On reset push, join xbee
                 DSWAKELbits.DSMCLR = 0;
                 DSCONLbits.RELEASE = 0;
+                // Bugfix: Es necesario un delay tras el reset
+                Delay10KTCYx(5);
                 XBeeProxy_join();
+#ifdef __18F46J50_H
                 TRISDbits.TRISD1 = 0;
                 LATDbits.LATD1 = 1;
+#endif
                 // Set low power mode
                 //Sht11_writeStatusRegister(LOW_POWER_STAT_REG);
-                Sht11_reset();
+                //                Sht11_reset();
             } else {
                 // Enable RTCC
                 Rtc_init();
-                
+
             }
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
             if ((USBGetDeviceState() == ATTACHED_STATE)) {
