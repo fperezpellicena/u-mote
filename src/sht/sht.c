@@ -153,7 +153,9 @@ UINT8 Sht11_measure(Sht* sht) {
     // Get measures
     error += Sht11_measureParam((int*) &sht->data->temperature.i,
             &sht->data->temp_chk, SHT_MEASURE_TEMP);
+#ifdef __18F46J50_H
     LATDbits.LATD1 = !LATDbits.LATD1;
+#endif
     SHT_DATA_DDR = 0;
     SHT_DATA = 1;
     error += Sht11_measureParam((int*) &sht->data->humidity.i,
