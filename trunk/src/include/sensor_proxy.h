@@ -52,7 +52,7 @@ UINT8 SensorProxy_fuzzy(void);
 //BOOL SensorProxy_alert(void);
 
 /*..........................................................................*/
-UINT8 SensorProxy_getSensorByte(void);
+void SensorProxy_putSensors(List* list);
 
 /*..........................................................................*/
 List* SensorProxy_getMeasures(void);
@@ -64,7 +64,8 @@ void SensorProxy_powerOn(void);
 void SensorProxy_powerOff(void);
 
 /*..........................................................................*/
-UINT8 SensorProxy_usbTest(char* usbOutBuffer);
+UINT8 SensorProxy_usbShtTemperature(char* usbOutBuffer);
+UINT8 SensorProxy_usbShtHumidity(char* usbOutBuffer);
 
 #endif /* sensor_proxy_h*/
 

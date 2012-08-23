@@ -23,7 +23,9 @@
 #define USB_ERROR_MSG_LEN   19
 
 /* Procesamiento de información USB */
+void USB_welcome(void);
 void USB_process(void);
 void USB_blinkStatus(void);
+
 
 #endif /* usb_handler_h */

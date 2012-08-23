@@ -43,12 +43,12 @@ typedef struct ShtData ShtData;
 
 struct ShtData {
     union {
-        UINT8 i;
+        UINT16 i;
         float f;
     } temperature;
 
     union {
-        UINT8 i;
+        UINT16 i;
         float f;
     } humidity;
     UINT8 temp_chk;
@@ -113,7 +113,7 @@ UINT8 Sht11_readStatusRegister(UINT8 *p_value, UINT8 *p_checksum);
 UINT8 Sht11_writeStatusRegister(UINT8 p_value);
 
 /* Makes a measurement (humidity/temperature) with checksum */
-UINT8 Sht11_measureParam(INT *p_value, UINT8 *p_checksum, UINT8 mode);
+UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode);
 
 /* Measures temperature and humidity */
 UINT8 Sht11_measure(Sht* sht);

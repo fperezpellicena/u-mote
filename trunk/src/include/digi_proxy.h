@@ -35,7 +35,7 @@ BOOL XBeeProxy_read(void);
 
 BOOL XBeeProxy_join(void);
 
-void XBeeProxy_usbJoin(char usbBuffer[]);
+void XBeeProxy_usbJoin(char* usbBuffer);
 
 /*..........................................................................*/
 /* Interrupt handler functions */

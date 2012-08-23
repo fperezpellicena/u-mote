@@ -22,6 +22,7 @@
 #include "util.h"
 #include "sht_proxy.h"
 #include "irca1_proxy.h"
+#include <stdio.h>
 
 static List measures;
 
@@ -119,7 +120,6 @@ void SensorProxy_sense(void) {
     // Empty previous measures
     List_empty(&measures);
     // For each sensor installed, put measures into payload
-    //sht.sensor->sense(&measures);
     for (i = 0; i < SENSORS; i++) {
         sensors[i]->sense(&measures);
     }
@@ -138,10 +138,7 @@ UINT8 SensorProxy_fuzzy(void) {
     SensorProxy_powerOn();
     // Empty previous measures
     List_empty(&measures);
-    //    measure = sht.sensor->sense(&measures);
-    //    for (j = 0; j < sht.sensor->ruleTermsSize; j++) {
-    //        sht.sensor->ruleTerms[j]->input = measure;
-    //    }
+    // Put measures into rule terms
     for (i = 0; i < SENSORS; i++) {
         measure = sensors[i]->sense(&measures);
         for (j = 0; j < sensors[i]->ruleTermsSize; j++) {
@@ -156,9 +153,14 @@ UINT8 SensorProxy_fuzzy(void) {
 
 /*..........................................................................*/
 
-/* Returns sensor byte identification based on sensor id attribute */
-UINT8 SensorProxy_getSensorByte(void) {
-    return sht.sensor->id;
+/* Put sensor byte identification based on sensor id attribute */
+void SensorProxy_putSensors(List* list) {
+    // FIXME Mal
+    UINT32 sensors = NO_SENSORS | NO_SENSORS | sht.sensor->id | NO_SENSORS;
+    List_add(list, (UINT8) sensors);
+    List_add(list, (UINT8) sensors >> 8);
+    List_add(list, (UINT8) sensors >> 16);
+    List_add(list, (UINT8) sensors >> 24);
 }
 
 /*..........................................................................*/
@@ -183,12 +185,32 @@ void SensorProxy_powerOff(void) {
 }
 
 /*...........................................................................*/
-UINT8 SensorProxy_usbTest(char* usbOutBuffer) {
-    List* list = NULL;
 
-    SensorProxy_sense();
-    list = SensorProxy_getMeasures();
-    Util_strCopy(list->data, (UINT8*) usbOutBuffer, list->size);
-    return list->size;
+/* Get sht 11 temperature for usb request */
+UINT8 SensorProxy_usbShtTemperature(char* usbOutBuffer) {
+    Sht11_init();
+    Sht11_measureParam((UINT16*) & sht.data->temperature.i,
+            &sht.data->temp_chk, SHT_MEASURE_TEMP);
+    //Converts integer to float
+    sht.data->temperature.f = (float) sht.data->temperature.i;
+    Sht11_calculateTemperature(&sht.data->temperature.f);
+    return sprintf(usbOutBuffer, (const char*) "Temperatura: %d.%2u % \n\r",
+            (UINT16) sht.data->temperature.f,
+            fabs(((sht.data->temperature.f - (int) sht.data->temperature.f)*100)));
+}
 
+/*...........................................................................*/
+
+/* Get sht 11 humidity for usb request */
+UINT8 SensorProxy_usbShtHumidity(char* usbOutBuffer) {
+    Sht11_init();
+    Sht11_measureParam((UINT16*) & sht.data->humidity.i,
+            &sht.data->humi_chk, SHT_MEASURE_HUMI);
+    // Converts integer to float
+    sht.data->humidity.f = (float) sht.data->humidity.i;
+    Sht11_calculateHumidity(&sht.data->humidity.f);
+
+    return sprintf(usbOutBuffer, "Humedad relativa: %d.%2u % \n\r",
+            (int) sht.data->humidity.f / 100,
+            fabs(((sht.data->humidity.f - (int) sht.data->humidity.f)*100)));
 }
