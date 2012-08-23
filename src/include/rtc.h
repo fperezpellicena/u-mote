@@ -36,7 +36,7 @@ void Rtc_readToList(List* list);
 /* Set Rtc data from parameter */
 void Rtc_write(rtccTimeDate* timestamp);
 
-void Rtc_usbParse(char* usbBuffer);
+UINT8 Rtc_usbParse(char* usbBuffer, char* usbOut);
 
 UINT8 Rtc_usbReadTest(char* usbBuffer);
 

@@ -243,7 +243,7 @@ void sleep(void) {
  *  code execution will resume at the device’s Reset vector.
  */
 void deepSleep(void) {
-    //INTCONbits.GIEH = 0;    /* Disable interrupts*/
+    INTCONbits.GIEH = 0;    /* Disable interrupts*/
     DSWAKEL = 0;
     DSWAKEH = 0;
     WDTCONbits.SWDTEN = 1; /* turn on the watch dog timer */

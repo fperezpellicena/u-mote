@@ -38,14 +38,14 @@ UINT8 Sht11_write(UINT8 value) {
         }
         Delay1KTCYx(1); //observe setup time
         SHT_SCK = 1; //clk for SENSI-BUS
-        Delay1KTCYx(3); //pulswith approx. 5 us
+        Delay1KTCYx(1); //pulswith approx. 5 us
         SHT_SCK = 0;
         Delay1KTCYx(1); //observe hold time
     }
     SHT_DATA = 1; //release SHT_DATA-line
     Delay1KTCYx(1); //observe setup time
     SHT_SCK = 1; //clk #9 for ack
-    Delay1KTCYx(2);
+    Delay1KTCYx(1);
     // To read SHT ack(low), change pin direction
     SHT_DATA_DDR = 1;
     // Read pin
@@ -60,12 +60,12 @@ UINT8 Sht11_read(UINT8 ack) {
     SHT_DATA = 1;
     for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
-        Delay1KTCYx(3);
+        Delay1KTCYx(1);
         SHT_SCK = 1; //clk for SENSI-BUS
         if (SHT_DATA_PIN) {
             val = (val | i); //read bit
         }
-        Delay1KTCYx(3);
+        Delay1KTCYx(1);
         SHT_SCK = 0;
     }
 
@@ -73,9 +73,9 @@ UINT8 Sht11_read(UINT8 ack) {
         SHT_DATA_DDR = 0;
         SHT_DATA = 0; //in case of "ack==1" pull down SHT_DATA-Line
     }
-    Delay1KTCYx(2); //observe setup time
+    Delay1KTCYx(1); //observe setup time
     SHT_SCK = 1; //clk #9 for ack
-    Delay1KTCYx(3); //pulswith approx. 5 us
+    Delay1KTCYx(1); //pulswith approx. 5 us
     SHT_SCK = 0;
     Delay1KTCYx(1); //observe hold time
     return val;
@@ -92,7 +92,7 @@ void Sht11_start(void) {
     SHT_DATA = 0;
     Delay1KTCYx(1);
     SHT_SCK = 0;
-    Delay1KTCYx(3);
+    Delay1KTCYx(1);
     SHT_SCK = 1;
     Delay1KTCYx(1);
     SHT_DATA = 1;
@@ -109,7 +109,9 @@ void Sht11_reset(void) {
         SHT_SCK = 1;
         Delay1KTCYx(1);
         SHT_SCK = 0;
+        Delay1KTCYx(1);
     }
+    Delay1KTCYx(1);
     Sht11_start(); //transmission start
 }
 
@@ -133,6 +135,7 @@ UINT8 Sht11_writeStatusRegister(UINT8 p_value) {
     UINT8 error = 0;
     Sht11_start(); //transmission start
     error += Sht11_write(SHT_STAT_REG_W); //send command to sensor
+    SHT_DATA_DDR = 0;
     error += Sht11_write(p_value); //send value of status register
     return error; //error>=1 in case of no response form the sensor
 }
@@ -151,20 +154,20 @@ UINT8 Sht11_measureAndCalculate(Sht* sht) {
 UINT8 Sht11_measure(Sht* sht) {
     UINT8 error = 0;
     // Get measures
-    error += Sht11_measureParam((int*) &sht->data->temperature.i,
+    error += Sht11_measureParam(&sht->data->temperature.i,
             &sht->data->temp_chk, SHT_MEASURE_TEMP);
 #ifdef __18F46J50_H
     LATDbits.LATD1 = !LATDbits.LATD1;
 #endif
     SHT_DATA_DDR = 0;
     SHT_DATA = 1;
-    error += Sht11_measureParam((int*) &sht->data->humidity.i,
+    error += Sht11_measureParam(&sht->data->humidity.i,
             &sht->data->humi_chk, SHT_MEASURE_HUMI);
 
     return error;
 }
 
-UINT8 Sht11_measureParam(int *p_value, UINT8 *p_checksum, UINT8 mode) {
+UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
     UINT8 error = 0;
     Sht11_start(); //transmission start
     switch (mode) { //send command to sensor
@@ -174,7 +177,7 @@ UINT8 Sht11_measureParam(int *p_value, UINT8 *p_checksum, UINT8 mode) {
             break;
         default: break;
     }
-    Delay1KTCYx(5);
+    Delay1KTCYx(1);
     SHT_DATA_DDR = 1;
     // Long busy wait can block usb
 
@@ -183,13 +186,9 @@ UINT8 Sht11_measureParam(int *p_value, UINT8 *p_checksum, UINT8 mode) {
     // Read two bytes response
     // FIXME No es crítico: No funciona con usb, intentar habilitar una interrupción de pin
     // y encapsular las siguientes líneas dentro de la ISR.
-    if (mode == SHT_MEASURE_HUMI && SHT_LOW_POWER) {
-        *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
-    } else {
-        *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
-        *(p_value) = *(p_value) << 8;
-        *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
-    }
+    *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
+    *(p_value) = *(p_value) << 8;
+    *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
     *p_checksum = Sht11_read(SHT_NACK); //read checksum
 
     return error;
@@ -224,8 +223,8 @@ void Sht11_calculateHumidity(float* p_humidity) {
 }
 
 void Sht11_calculateTemperature(float* p_temp) {
-    const float D1 = 39.64;
-    const float D2 = -0.01;
+    const float D1 = -39.6;
+    const float D2 = 0.01;
     float measure = *p_temp;
     *p_temp = D1 + D2 * measure;
 }

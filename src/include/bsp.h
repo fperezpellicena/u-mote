@@ -114,6 +114,43 @@
 #   endif
 #endif
 
+#ifdef __18F46J50_H
+#define mInitAllLEDs()      LATE &= 0xFC; TRISE &= 0xFC; TRISD &= 0xFC; LATD &= 0xFC;
+
+#define mLED_1              LATEbits.LATE0
+#define mLED_2              LATEbits.LATE1
+#define mLED_3              LATDbits.LATD0
+#define mLED_4              LATDbits.LATD1
+#else
+#define mInitAllLEDs()      LATC &= 0xFC; TRISC &= 0xFC;
+
+#define mLED_1              LATCbits.LATC0
+#define mLED_2              LATCbits.LATC1
+#define mLED_3
+#define mLED_4
+#endif
+
+#define mGetLED_1()         mLED_1
+#define mGetLED_2()         mLED_2
+#define mGetLED_3()         mLED_3;
+#define mGetLED_4()         mLED_4;
+
+#define mLED_1_On()         mLED_1 = 1;
+#define mLED_2_On()         mLED_2 = 1;
+#define mLED_3_On()         mLED_3 = 1;
+#define mLED_4_On()         mLED_4 = 1;
+
+#define mLED_1_Off()        mLED_1 = 0;
+#define mLED_2_Off()        mLED_2 = 0;
+#define mLED_3_Off()        mLED_3 = 0;
+#define mLED_4_Off()        mLED_4 = 0;
+
+#define mLED_1_Toggle()     mLED_1 = !mLED_1;
+#define mLED_2_Toggle()     mLED_2 = !mLED_2;
+#define mLED_3_Toggle()     mLED_3 = !mLED_3;
+#define mLED_4_Toggle()     mLED_4 = !mLED_4;
+
+
 /*...........................................................................*/
 /* RTCC SECTION */
 
@@ -133,7 +170,7 @@
 /* SHT11 section */
 
 #define SHT_ENABLED
-#define SHT_ID              0xAA
+#define SHT_ID              0x0A
 
 #define SHT_TMP_THR         20      // Umbral 80ºC
 
@@ -153,7 +190,7 @@
 /* IRC-A1 section */
 
 #define IRCA1_ENABLED
-#define IRCA1_ID        2
+#define IRCA1_ID        0x08
 
 #define IRC_A1_SAFE     0
 #define IRC_A1_COMB     1
@@ -191,11 +228,16 @@
 #define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
 #define MAX_LIST_SIZE               100
 #define SENSORS                     1
+#define NO_SENSORS                  0x00                  /* No sensors Id */
 
 /*...........................................................................*/
 /* Prototypes */
 void BSP_init(void);
-void BSP_prepareSleep(void);
+void BSP_deepSleep(void);
+void BSP_sleep(void);
+void BSP_onPowerUp(void);
+void BSP_onMclr(void);
+void BSP_onWakeUp(void);
 void BSP_enablePLL(void);
 
 

@@ -64,6 +64,7 @@ BOOL XBeeProxy_sendPacket(XBeePacket * const packet) {
         packet->checksum += *p++;
     }
     Serial_send(&xbeeProxySerial, (0xFF - packet->checksum));
+    // Bugfix: Flush buffer
     Serial_send(&xbeeProxySerial, NULL);
     return TRUE;
 }
@@ -186,7 +187,7 @@ BOOL XBeeProxy_join(void) {
 }
 
 /*..........................................................................*/
-void XBeeProxy_usbJoin(char usbBuffer[]) {
+void XBeeProxy_usbJoin(char* usbBuffer) {
     if(XBeeProxy_join())
         Util_str2ram((UINT8 rom*)USB_JOINED_MSG, (UINT8*)usbBuffer);
     Util_str2ram((UINT8 rom*)USB_JOINED_MSG, (UINT8*)usbBuffer);
@@ -255,7 +256,7 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
         // Read datetime and put into buffer
         Rtc_readToList(&list);
         // Put sensor ids
-        List_add(&list, SensorProxy_getSensorByte());
+        List_add(&list, SensorProxy_getSensors());
         // Put sensor payload into buffer
         List_append(&list, (List*) SensorProxy_getMeasures());
         // Send prepared request (hay que prepararla antes para optimizar
@@ -270,7 +271,7 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
     // Read datetime and put into buffer
     Rtc_readToList(&list);
     // Put sensor ids
-    List_add(&list, SensorProxy_getSensorByte());
+    List_add(&list, SensorProxy_getSensors());
     // Sense installed sensors
     SensorProxy_sense();
     // Put sensor payload into buffer
@@ -287,7 +288,8 @@ void XBeeProxy_handleBottomHalveInterrupt(void) {
     // Read datetime and put into buffer
     Rtc_readToList(&list);
     // Put sensor ids
-    List_add(&list, SensorProxy_getSensorByte());
+    SensorProxy_putSensors(&list);
+    //List_add(&list, SensorProxy_getSensors());
     // Sense installed sensors
     risk = SensorProxy_fuzzy();
     // Put sensor payload into buffer

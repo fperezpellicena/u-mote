@@ -119,7 +119,7 @@ void Rtc_write(rtccTimeDate* timestamp) {
  *
  * @param usbBuffer
  */
-void Rtc_usbParse(char* usbBuffer) {
+UINT8 Rtc_usbParse(char* usbBuffer, char* usbOut) {
     rtccTimeDate timestamp;
     char* result = NULL;
     // Skip rtcc SOF(start of frame)
@@ -145,9 +145,23 @@ void Rtc_usbParse(char* usbBuffer) {
     // Read sec
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.sec = atoi(result);
-    // Write rtcc
+
+     // first initial power up of the device.
+    // unlock the RTCC registers so that we can write to them
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    RTCCFGbits.RTCWREN = 1;
+
+    // reset RTCC date/time (only on first power on)
+    RTCCFGbits.RTCPTR1 = 1;
+    RTCCFGbits.RTCPTR0 = 1;
+
     Rtc_write(&timestamp);
-    RTCCFGbits.RTCEN = 1;
+
+    Rtc_enable(); // enable RTCC module
+    RTCCAL = 0;
+    
+    return 1;
 }
 
 /**
@@ -156,18 +170,11 @@ void Rtc_usbParse(char* usbBuffer) {
  * @param usbInBuffer
  */
 UINT8 Rtc_usbReadTest(char* usbBuffer) {
-    UINT8 i = 0;
     // Lee la fecha/hora
     rtccTimeDate timestamp;
     Rtc_read(&timestamp);
-    // Pone dd/mm/yy en el buffer
-    usbBuffer[i++] = timestamp.f.mday;
-    usbBuffer[i++] = timestamp.f.mon;
-    usbBuffer[i++] = timestamp.f.year;
-    // Pone hh:mm:ss
-    usbBuffer[i++] = timestamp.f.hour;
-    usbBuffer[i++] = timestamp.f.min;
-    usbBuffer[i++] = timestamp.f.sec;
     // Devuelve el tamaño del contenido
-    return i;
+    return sprintf(usbBuffer, "Hora/fecha: %u:%u:%u %u/%u/%u \n\r", timestamp.f.hour,
+            timestamp.f.min, timestamp.f.sec, timestamp.f.mday, timestamp.f.mon,
+            timestamp.f.year);
 }
