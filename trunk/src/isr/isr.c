@@ -17,8 +17,10 @@
 
 #include "isr.h"
 #include "bsp.h"
-#include "usb_config.h"
-#include "usb_device.h"
+#if USB_ENABLED
+#   include "usb_config.h"
+#   include "usb_device.h"
+#endif
 
 /*..........................................................................*/
 /* Interrupt vectors */
@@ -37,7 +39,7 @@ static InterruptHandler* activeInterrupt;
 void ISR_hi(void) {
     unsigned char index;
     // Execute USB tasks only if usb is plugged
-#ifdef USB_ENABLED
+#if USB_ENABLED
     if (USB_PLUGGED) {
         USBDeviceTasks();
     } else {
@@ -71,7 +73,7 @@ void ISR_hi(void) {
 /** Internally, clears GIE bit, so it is not reentrant */
 void ISR_lo(void) {
     unsigned char index;
-#ifdef USB_ENABLED
+#if USB_ENABLED
     if (!USB_PLUGGED) {
         for (index = 0; index < interruptVectorLO.size; index++) {
             // Check for active interrupt

@@ -22,18 +22,11 @@
 #include "hw_serial.h"
 #include "GenericTypeDefs.h"
 
+void GpsProxy_init();
 
-typedef struct GpsProxy GpsProxy;
+BOOL GpsProxy_readOutput(NMEAOutput* packet);
 
-struct GpsProxy {
-    Serial* serial;
-};
-
-void GpsProxy_create(GpsProxy * const proxy, Serial * const serial);
-
-BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet);
-
-void GpsProxy_sendCommand(GpsProxy * const proxy, NMEACommandPacket* packet);
+void GpsProxy_sendCommand(NMEACommandPacket* packet);
 
 
 #endif /* gps_proxy_h */

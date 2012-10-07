@@ -15,99 +15,106 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "bsp.h"
 #include "sensor_proxy.h"
-#include "fuzzy.h"
-#include "sht.h"
-#include "irca1.h"
 #include "util.h"
-#include "sht_proxy.h"
-#include "irca1_proxy.h"
 #include <stdio.h>
 
-static List measures;
-
-UINT8 Sht_sense(List* measures);
-
-//static UINT8 Irca_sense(List* measures);
-
-#pragma udata mf
-DECLARE_MF(lowTemp, -40, 0, 20);
-DECLARE_MF(midTemp, 0, 20, 40);
-DECLARE_MF(highTemp, 30, 40, 255);
-
-//DECLARE_MF(lowCo2, 0, 0, 50);
-//DECLARE_MF(midCo2, 0, 50, 100);
-//DECLARE_MF(highCo2, 50, 100, 100);
-
-DECLARE_MF(lowRisk, 0, 0, 50);
-DECLARE_MF(midRisk, 0, 50, 100);
-DECLARE_MF(highRisk, 50, 100, 255);
-#pragma udata
-
-#pragma udata rp
-DECLARE_RT(ifHighTemp, &highTemp);
-DECLARE_RT(ifMidTemp, &midTemp);
-DECLARE_RT(ifLowTemp, &lowTemp);
-//DECLARE_RT(andHighCo2, &highCo2);
-DECLARE_RT(thenHighRisk, &highRisk);
-DECLARE_RT(thenMidRisk, &midRisk);
-DECLARE_RT(thenLowRisk, &lowRisk);
-
-//DECLARE_RT(andLowCo2, &lowCo2);
-//DECLARE_RT(thenMidRisk, &midRisk);
-#pragma udata
-
-#pragma udata rule
-DECLARE_RULE(ifHighTempThenHighRisk, &thenHighRisk, 1, &ifHighTemp);
-DECLARE_RULE(ifMidTempThenMidRisk, &thenMidRisk, 1, &ifMidTemp);
-DECLARE_RULE(ifLowTempThenLowRisk, &thenLowRisk, 1, &ifLowTemp);
-//DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
-//DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
-#pragma udata
-
-#pragma udata ruleEngine
-DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
-        &ifMidTempThenMidRisk, &ifLowTempThenLowRisk);
-//DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
-#pragma udata
-
-/* Declare one SHT sensor */
-#pragma udata sensors
-DECLARE_FUZZY_SHT(SHT_ID, sht, &Sht_sense, 1, &ifHighTemp);
-//DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &Irca_sense, 2, &andHighCo2, &andLowCo2);
-Sensor* sensors[SENSORS];
-#pragma udata
-
-/*...........................................................................*/
-UINT8 Sht_sense(List* measures) {
-    // Measure
-    Sht11_measure(&sht);
-    List_add(measures, sht.data->temperature.i);
-#if SHT_HUM_ENABLED
-    // Put measures into payload
-    List_add(measures, sht.data->humidity.i);
+#if SHT_ENABLED
+#   include "sht.h"
 #endif
-    // Return temperature
-    return (UINT8) sht.data->temperature.f;
-}
+#if IRCA1_ENABLED
+#   include "irca1.h"
+#   include "irca1_proxy.h"
+#endif
 
-/*...........................................................................*/
-//static UINT8 Irca_sense(List* measures) {
-//    // Measure values
-//    IrcA1Proxy_measure(&irca);
-//    // Calculate CO2
-//    IrcA1_calculate(&irca);
-//    // Put data into measures
-//    List_add(measures, round(irca.data->x)); // Float to int routine
-//}
+#if SENSING_MODE == FUZZY_DRIVEN
+    #include "fuzzy.h"
+
+    #pragma udata tmp_mf
+    DECLARE_MF(lowTemp, -40, 0, 20);
+    DECLARE_MF(midTemp, 0, 20, 40);
+    DECLARE_MF(highTemp, 30, 40, 255);
+    DECLARE_RT(ifHighTemp, &highTemp);
+    DECLARE_RT(ifMidTemp, &midTemp);
+    DECLARE_RT(ifLowTemp, &lowTemp);
+    #pragma udata
+
+    #pragma udata risk_mf
+    DECLARE_MF(lowRisk, 0, 0, 50);
+    DECLARE_MF(midRisk, 0, 50, 100);
+    DECLARE_MF(highRisk, 50, 100, 255);
+    #pragma udata
+
+    #pragma udata rp
+    DECLARE_RT(thenHighRisk, &highRisk);
+    DECLARE_RT(thenMidRisk, &midRisk);
+    DECLARE_RT(thenLowRisk, &lowRisk);
+    #pragma udata
+
+    #pragma udata rules
+    DECLARE_RULE(ifHighTempThenHighRisk, &thenHighRisk, 1, &ifHighTemp);
+    DECLARE_RULE(ifMidTempThenMidRisk, &thenMidRisk, 1, &ifLowTemp);
+    DECLARE_RULE(ifLowTempThenLowRisk, &thenLowRisk, 1, &ifMidTemp);
+    //DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
+    //DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
+    #pragma udata
+
+    #pragma udata ruleEngine
+    DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
+            &ifMidTempThenMidRisk, &ifLowTempThenLowRisk);
+    //DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
+    #pragma udata
+#endif
+
+#pragma udata sensors_data
+Sensors sensors;
+#pragma udata
+
+/* Declare one SHT sensor for temperature */
+#if SHT_ENABLED
+#   pragma udata sht
+#       if SENSING_MODE == FUZZY_DRIVEN
+            DECLARE_FUZZY_SHT(SHT_ID, sht, &Sht11_measureTmp, 1, &ifHighTemp);
+#       else
+            DECLARE_SHT(SHT_ID, sht, &Sht11_measureTmp);
+#       endif
+#   pragma udata
+#endif
+            
+/* Declare one IRC-A1 gas sensor */
+#if IRCA1_ENABLED
+#   pragma udata irca
+#       if SENSING_MODE == FUZZY_DRIVEN
+            DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense, 1, &ifHighCO2);
+#       else
+            DECLARE_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense);
+#       endif
+#   pragma udata
+#endif
+
+static Payload measures;
 
 /*..........................................................................*/
 void SensorProxy_init(void) {
-    sensors[0] = sht.sensor;
-    List_init(&measures);
-    ShtProxy_init(); /* Init SHT resources */
-    //    IrcA1Proxy_init(); /* Init IRCA resources */
-    SensorProxy_powerOff(); /* Sensor power on/off pin as output */
+    SENSOR_BOARD_CTRL_INIT();
+    Sensors_init(&sensors);
+    Payload_init(&measures);
+#if SHT_ENABLED
+    SensorProxy_add(&sensors, sht.sensor);
+    Sht11_init();
+#endif
+#if IRCA1_ENABLED
+    SensorProxy_add(&sensors, irca.sensor);
+    IrcA1Proxy_init();
+#endif
+}
+
+/*..........................................................................*/
+void SensorProxy_add(Sensors* sensors, Sensor* sensor) {
+    if (sensors->size < SENSORS) {
+        sensors->sensors[sensors->size++] = sensor;
+    }
 }
 
 /*..........................................................................*/
@@ -116,101 +123,56 @@ void SensorProxy_init(void) {
 void SensorProxy_sense(void) {
     UINT8 i;
     // Turn on sensor board
-    SensorProxy_powerOn();
+    SENSOR_BOARD_ON();
     // Empty previous measures
-    List_empty(&measures);
+    Payload_empty(&measures);
     // For each sensor installed, put measures into payload
-    for (i = 0; i < SENSORS; i++) {
-        sensors[i]->sense(&measures);
+    for (i = 0; i < sensors.size; i++) {
+        sensors.sensors[i]->sense(&measures);
     }
     // Turn off sensor board
-    SensorProxy_powerOff();
+    SENSOR_BOARD_OFF();
 }
 
 /*..........................................................................*/
 
-/* Measure sensor board and check for alert condition */
-UINT8 SensorProxy_fuzzy(void) {
-    UINT8 i;
-    UINT8 j;
-    UINT8 measure;
-    // Turn on sensor board
-    SensorProxy_powerOn();
-    // Empty previous measures
-    List_empty(&measures);
-    // Put measures into rule terms
-    for (i = 0; i < SENSORS; i++) {
-        measure = sensors[i]->sense(&measures);
-        for (j = 0; j < sensors[i]->ruleTermsSize; j++) {
-            sensors[i]->ruleTerms[j]->input = measure;
+#if SENSING_MODE == FUZZY_DRIVEN
+    /* Measure sensor board and check for alert condition */
+    UINT8 SensorProxy_fuzzy(void) {
+        UINT8 i;
+        UINT8 j;
+        UINT8 measure;
+        // Turn on sensor board
+        SensorProxy_powerOn();
+        // Empty previous measures
+        Payload_empty(&measures);
+        // Put measures into rule terms
+        for (i = 0; i < sensors.size; i++) {
+            measure = sensors.sensors[i]->sense(&measures);
+            for (j = 0; j < sensors.sensors[i]->ruleTermsSize; j++) {
+                sensors.sensors[i]->ruleTerms[j]->input = measure;
+            }
         }
+        // Turn off sensor board
+        SensorProxy_powerOff();
+        // Run fuzzy engine
+        return RuleEngine_run(&engine);
     }
-    // Turn off sensor board
-    SensorProxy_powerOff();
-    // Run fuzzy engine
-    return RuleEngine_run(&engine);
-}
+#endif
 
 /*..........................................................................*/
 
 /* Put sensor byte identification based on sensor id attribute */
-void SensorProxy_putSensors(List* list) {
-    // FIXME Mal
-    UINT32 sensors = NO_SENSORS | NO_SENSORS | sht.sensor->id | NO_SENSORS;
-    List_add(list, (UINT8) sensors);
-    List_add(list, (UINT8) sensors >> 8);
-    List_add(list, (UINT8) sensors >> 16);
-    List_add(list, (UINT8) sensors >> 24);
+void SensorProxy_addSensorsToPayload(Payload* payload) {
+    UINT32 sensors = 0; //NO_SENSORS << 24 | NO_SENSORS << 16 | sht.sensor->id << 8 | NO_SENSORS;
+    Payload_add(payload, (UINT8) sensors);
+    Payload_add(payload, (UINT8) sensors >> 8);
+    Payload_add(payload, (UINT8) sensors >> 16);
+    Payload_add(payload, (UINT8) sensors >> 24);
 }
 
 /*..........................................................................*/
-
-/* Return measures */
-List* SensorProxy_getMeasures(void) {
-    return &measures;
-}
-
-/*...........................................................................*/
-
-/* Power on sensor board */
-void SensorProxy_powerOn(void) {
-    SENSORS_PWR = 1;
-}
-
-/*...........................................................................*/
-
-/* Power off sensor board */
-void SensorProxy_powerOff(void) {
-    SENSORS_PWR = 0;
-}
-
-/*...........................................................................*/
-
-/* Get sht 11 temperature for usb request */
-UINT8 SensorProxy_usbShtTemperature(char* usbOutBuffer) {
-    Sht11_init();
-    Sht11_measureParam((UINT16*) & sht.data->temperature.i,
-            &sht.data->temp_chk, SHT_MEASURE_TEMP);
-    //Converts integer to float
-    sht.data->temperature.f = (float) sht.data->temperature.i;
-    Sht11_calculateTemperature(&sht.data->temperature.f);
-    return sprintf(usbOutBuffer, (const char*) "Temperatura: %d.%2u % \n\r",
-            (UINT16) sht.data->temperature.f,
-            fabs(((sht.data->temperature.f - (int) sht.data->temperature.f)*100)));
-}
-
-/*...........................................................................*/
-
-/* Get sht 11 humidity for usb request */
-UINT8 SensorProxy_usbShtHumidity(char* usbOutBuffer) {
-    Sht11_init();
-    Sht11_measureParam((UINT16*) & sht.data->humidity.i,
-            &sht.data->humi_chk, SHT_MEASURE_HUMI);
-    // Converts integer to float
-    sht.data->humidity.f = (float) sht.data->humidity.i;
-    Sht11_calculateHumidity(&sht.data->humidity.f);
-
-    return sprintf(usbOutBuffer, "Humedad relativa: %d.%2u % \n\r",
-            (int) sht.data->humidity.f / 100,
-            fabs(((sht.data->humidity.f - (int) sht.data->humidity.f)*100)));
+/* Put measures to payload */
+void SensorProxy_addMeasuresToPayload(Payload* payload) {
+    Payload_append(payload, &measures);
 }

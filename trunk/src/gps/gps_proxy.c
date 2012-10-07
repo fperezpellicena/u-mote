@@ -17,15 +17,17 @@
 
 #include "gps_proxy.h"
 #include "gps_api.h"
+#include "hw_serial.h"
+#include "bsp.h"
 
-void GpsProxy_create(GpsProxy * const proxy, Serial * const serial) {
-    proxy->serial = serial;
+void GpsProxy_init() {
+    Serial_init(EUSART_9600);
 }
 
-BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
+BOOL GpsProxy_readOutput(NMEAOutput* packet) {
      UINT8 data;
-    while (Serial_available(proxy->serial)) {
-        data = Serial_read(proxy->serial);
+    while (Serial_available()) {
+        data = Serial_read();
         switch(packet->rxState) {
             case NMEA_PACKET_PREAMBLE:  //$
                 if(data == NMEA_PREAMBLE) {
@@ -57,7 +59,7 @@ BOOL GpsProxy_readOutput(GpsProxy * const proxy, NMEAOutput* packet) {
     }
 }
 
-void GpsProxy_sendCommand(GpsProxy * const proxy, NMEACommandPacket* packet) {
+void GpsProxy_sendCommand(NMEACommandPacket* packet) {
 
 }
 

@@ -15,19 +15,18 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef sht_proxy_h
-#define sht_proxy_h
+#include "digi_api.h"
 
-#include "GenericTypeDefs.h"
-#include "list.h"
-
-/*...........................................................................*/
-void ShtProxy_init(void);
-
-/*...........................................................................*/
-void ShtProxy_sense(List* measures);
-
-/*...........................................................................*/
-BOOL ShtProxy_checkAlert(List* measures) ;
-
-#endif /*sht_proxy_h*/
+BOOL XBee_readModemStatusPacket(XBeePacket* packet, UINT8* status) {
+    UINT8* p;
+    if (packet->apiId != MODEM_STATUS) {
+        return FALSE;
+    }
+    if (status) {
+        *status = packet->frame.modemStatus.status;
+    }
+    p = packet->frame.explicitAddressing.reserved;
+    *p++ = TRANSMIT_REQUEST_RESERVED_H;
+    *p++ = TRANSMIT_REQUEST_RESERVED_L;
+    return TRUE;
+}

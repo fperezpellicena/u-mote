@@ -15,13 +15,17 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sht_proxy.h"
-#include "sensor_proxy.h"
-#include "sht.h"
+#include "register.h"
+#include <p18cxxx.h>
 
+void Register_lockIO(void) {
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    PPSCONbits.IOLOCK = BANKED;
+}
 
-/*...........................................................................*/
-void ShtProxy_init(void) {
-    // Init I/O
-    Sht11_init();    
+void Register_lockRTC(void) {
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    RTCCFGbits.RTCWREN = FALSE;
 }

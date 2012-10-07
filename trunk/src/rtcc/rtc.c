@@ -17,18 +17,18 @@
 
 #include "rtc.h"
 #include "GenericTypeDefs.h"
-#include "list.h"
+#include "payload.h"
+#include "register.h"
 #include <string.h>
 #include <stdlib.h>
 
 rom const CHAR8* SEPARATOR = "#";
+static rtccTimeDate timestamp;
 
-/*..........................................................................*/
 
-/* Init and enable RTC */
-void Rtc_init() {
-    rtccTimeDate timestamp;
+static void Rtc_initDefaultTimeDate(void);
 
+static void Rtc_initDefaultTimeDate(void) {
     timestamp.f.hour = 0x01;
     timestamp.f.min = 0x00;
     timestamp.f.sec = 0x00;
@@ -36,53 +36,63 @@ void Rtc_init() {
     timestamp.f.mon = 0x01;
     timestamp.f.mday = 0x01;
     timestamp.f.wday = 0x12;
+}
 
-    // first initial power up of the device.
-    // unlock the RTCC registers so that we can write to them
-    EECON2 = 0x55;
-    EECON2 = 0xAA;
-    RTCCFGbits.RTCWREN = 1;
+static void Rtc_resetTimeDatePtr(void);
 
+static void Rtc_resetTimeDatePtr(void) {
     // reset RTCC date/time (only on first power on)
     RTCCFGbits.RTCPTR1 = 1;
     RTCCFGbits.RTCPTR0 = 1;
+}
 
+static void Rtc_writeDefatultTimeDate(void);
+static void Rtc_writeDefatultTimeDate(void) {
+    Register_unLockRTC();
+    Rtc_resetTimeDatePtr();
     Rtc_write(&timestamp);
+}
 
-    Rtc_enable(); // enable RTCC module
-    RTCCAL = 0;
+/*..........................................................................*/
+
+/* Init and enable RTC */
+void Rtc_init(void) {
+    Rtc_initDefaultTimeDate();
+    Rtc_writeDefatultTimeDate();
+    Rtc_enable(); 
 }
 
 /*..........................................................................*/
 
 /* Enable RTC */
-void Rtc_enable() {
+void Rtc_enable(void) {
     RTCCFGbits.RTCEN = 1;
+    RTCCAL = 0;
 }
 
 /*..........................................................................*/
 
 /* Read Rtc data into parameter */
-void Rtc_read(rtccTimeDate* timestamp) {
+rtccTimeDate* Rtc_read(void) {
     // if already in the middle of SYNC, wait for next period
     while (RTCCFGbits.RTCSYNC != 1);
     // wait while RTCC registers are safe to read
     while (RTCCFGbits.RTCSYNC == 1);
-    RtccReadTimeDate(timestamp);
+    RtccReadTimeDate(&timestamp);
+    return &timestamp;
 }
 
 /*..........................................................................*/
 
 /* Read Rtc data into a list */
-void Rtc_readToList(List* list) {
-    rtccTimeDate timestamp;
-    Rtc_read(&timestamp);
-    List_add(list, timestamp.f.mday);
-    List_add(list, timestamp.f.mon);
-    List_add(list, timestamp.f.year);
-    List_add(list, timestamp.f.hour);
-    List_add(list, timestamp.f.min);
-    List_add(list, timestamp.f.sec);
+void Rtc_addTimeToPayload(Payload* payload) {
+    Rtc_read();
+    Payload_add(payload, timestamp.f.mday);
+    Payload_add(payload, timestamp.f.mon);
+    Payload_add(payload, timestamp.f.year);
+    Payload_add(payload, timestamp.f.hour);
+    Payload_add(payload, timestamp.f.min);
+    Payload_add(payload, timestamp.f.sec);
 }
 
 /*..........................................................................*/
@@ -116,11 +126,8 @@ void Rtc_write(rtccTimeDate* timestamp) {
  *      mday: BCD codification, 01-31
  *      mon: BCD codification, 01-12
  *      year: BCD codification, 00-99
- *
- * @param usbBuffer
  */
-UINT8 Rtc_usbParse(char* usbBuffer, char* usbOut) {
-    rtccTimeDate timestamp;
+rtccTimeDate* Rtc_parse(char* usbBuffer) {
     char* result = NULL;
     // Skip rtcc SOF(start of frame)
     result = strtokpgmram(usbBuffer, (rom const char far*)SEPARATOR);
@@ -146,35 +153,11 @@ UINT8 Rtc_usbParse(char* usbBuffer, char* usbOut) {
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.sec = atoi(result);
 
-     // first initial power up of the device.
     // unlock the RTCC registers so that we can write to them
-    EECON2 = 0x55;
-    EECON2 = 0xAA;
-    RTCCFGbits.RTCWREN = 1;
-
-    // reset RTCC date/time (only on first power on)
-    RTCCFGbits.RTCPTR1 = 1;
-    RTCCFGbits.RTCPTR0 = 1;
-
+    Register_unLockIO();
+    Rtc_resetTimeDatePtr();
     Rtc_write(&timestamp);
-
     Rtc_enable(); // enable RTCC module
-    RTCCAL = 0;
-    
-    return 1;
-}
 
-/**
- * Recupera la fecha/hora del sistema y la pone en el buffer USB para envío.
- *
- * @param usbInBuffer
- */
-UINT8 Rtc_usbReadTest(char* usbBuffer) {
-    // Lee la fecha/hora
-    rtccTimeDate timestamp;
-    Rtc_read(&timestamp);
-    // Devuelve el tamaño del contenido
-    return sprintf(usbBuffer, "Hora/fecha: %u:%u:%u %u/%u/%u \n\r", timestamp.f.hour,
-            timestamp.f.min, timestamp.f.sec, timestamp.f.mday, timestamp.f.mon,
-            timestamp.f.year);
+    return &timestamp;
 }

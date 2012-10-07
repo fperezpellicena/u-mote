@@ -20,7 +20,7 @@
 
 #include "GenericTypeDefs.h"
 #include "bsp.h"
-#include "list.h"
+#include "payload.h"
 #include "fuzzy_rule.h"
 
 /* Declare sensor*/
@@ -34,11 +34,11 @@ Sensor name = {id, senseFn, name##terms, termsSize}
 
 /*..........................................................................*/
 /* Sense function prototype */
-typedef UINT8 rom (*Sense)(List* measures);
+typedef UINT8 rom (*Sense)(Payload* measures);
 
 /*..........................................................................*/
 /* Check alert function prototype */
-typedef BOOL rom (*CheckAlert)(List* list);
+typedef BOOL rom (*CheckAlert)(Payload* list);
 
 /*..........................................................................*/
 /* Sensor class */
@@ -57,5 +57,17 @@ void Sensor_create(UINT8 id, Sensor* sensor, Sense senseFunction);
 /*..........................................................................*/
 void Sensor_createFuzzy(UINT8 id, Sensor* sensor, Sense senseFunction,
        UINT8 ruleTermsSize, RuleTerm** ruleTerms);
+
+/*..........................................................................*/
+/* Sensor vector */
+typedef struct Sensors Sensors;
+
+struct Sensors {
+    UINT8 size;
+    Sensor* sensors[SENSORS];
+};
+
+/*..........................................................................*/
+void Sensors_init(Sensors* sensors);
 
 #endif /* sensor_h */

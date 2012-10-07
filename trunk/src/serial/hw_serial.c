@@ -17,37 +17,9 @@
 
 #include "bsp.h"
 #include "hw_serial.h"
-#include <p18cxxx.h>
 
 /** Interrupt driven uart */
-
-static void Serial_1_init(UINT8 baudrate);
-static void Serial_2_init(UINT8 baudrate);
-
-static void Serial_1_init(UINT8 baudrate) {
-    // I/O config.
-    TRISCbits.TRISC7 = 1;
-    TRISCbits.TRISC6 = 0;
-    // Tx status
-    TXSTA1bits.SYNC = 0;
-    TXSTA1bits.TXEN = 1;
-    TXSTA1bits.BRGH = 0;
-    // Rx status
-    RCSTA1bits.SPEN = 1;
-    RCSTA1bits.CREN = 1;
-    // Baudrate
-    SPBRG1 = baudrate; // 9600bps -> 12
-    // Interrupts
-#ifdef  EUSART1_INTERRUPT
-    PIE1bits.RC1IE = 1;
-    PIE1bits.TX1IE = 0;
-    PIR1bits.RC1IF = 0;
-
-    IPR1bits.RC1IP = 1; // High priority defatult
-#endif
-}
-
-static void Serial_2_init(UINT8 baudrate) {
+void Serial_init(UINT8 baudrate) {
     // PPS - Configure RX2 RA5 (RP2)
     RPINR16 = 4;
     // PPS - Configure TX2 RA1 (RP1)
@@ -65,81 +37,49 @@ static void Serial_2_init(UINT8 baudrate) {
 
     SPBRG2 = baudrate; // 9600bps -> 12
 #ifdef EUSART2_INTERRUPT
-        PIE3bits.RC2IE = 1;
-        PIE3bits.TX2IE = 0;
-        PIR3bits.RC2IF = 0;
+    PIE3bits.RC2IE = 1;
+    PIE3bits.TX2IE = 0;
+    PIR3bits.RC2IF = 0;
 
-        IPR3bits.RC2IP = 1; // High priority defatult
+    IPR3bits.RC2IP = 1; // High priority defatult
 #endif
 }
 
-void Serial_init(Serial * const serial, UINT8 uart, UINT8 baudrate) {
-    serial->uart = uart;
-    if (uart == EUSART1) {
-        Serial_1_init(baudrate);
-    } else {
-        Serial_2_init(baudrate);
-    }
+void Serial_send(UINT8 value) {
+    while (!TXSTA2bits.TRMT);
+    TXREG2 = value;
 }
 
-void Serial_send(Serial * const serial, UINT8 value) {
-    if (serial->uart == EUSART1) {
-        while (!TXSTA1bits.TRMT);
-        TXREG1 = value;
-    } else {
-        while (!TXSTA2bits.TRMT);
-        TXREG2 = value;
-    }
-}
-
-void Serial_sendArray(Serial * const serial, UINT8* values, UINT8 size) {
+void Serial_sendArray(UINT8* values, UINT8 size) {
     UINT8 i = 0;
-    while(i < size) {
-        Serial_send(serial, values[i++]);
+    while (i < size) {
+        Serial_send(values[i++]);
     }
-    Serial_send(serial, NULL);
+    Serial_send(NULL);
 }
 
-UINT8 Serial_read(Serial * const serial) {
-    /* Store received byte */
-    if (serial->uart == EUSART1) {
-        return RCREG1;
-    } else {
-        return RCREG2;
-    }
+UINT8 Serial_read() {
+    return RCREG2;
 }
 
-BOOL Serial_available(Serial * const serial) {
-    if (serial->uart == EUSART1 && PIR1bits.RC1IF) {
-        return TRUE; // Data is available, return TRUE
-    } else if (serial->uart == 2 && PIR3bits.RC2IF) {
+BOOL Serial_available() {
+    if (PIR3bits.RC2IF) {
         return TRUE; // Data is available, return TRUE
     }
     return FALSE;
 }
 
-void Serial_close(Serial * const serial) {
-    if (serial->uart == EUSART1) {
-        RCSTA1 &= 0b01001111; // Disable the receiver
-        TXSTA1bits.TXEN = 0; // and transmitter
-        PIE1 &= 0b11001111; // Disable both interrupts
-    } else {
-        RCSTA2 &= 0b01001111; // Disable the receiver
-        TXSTA2bits.TXEN = 0; // and transmitter
-        PIE3 &= 0b11001111; // Disable both interrupts
-    }
+void Serial_close() {
+    RCSTA2 &= 0b01001111; // Disable the receiver
+    TXSTA2bits.TXEN = 0; // and transmitter
+    PIE3 &= 0b11001111; // Disable both interrupts
 }
 
 /** Interrupt handler functions */
-BOOL Serial_checkInterrupt(Serial * const serial) {
-    return Serial_available(serial);
+BOOL Serial_checkInterrupt() {
+    return Serial_available();
 }
 
-void Serial_ackInterrupt(Serial * const serial) {
-    /* Store received byte */
-    if (serial->uart == EUSART1) {
-        PIR1bits.RC1IF = 0;
-    } else {
-        PIR3bits.RC2IF = 0;
-    }
+void Serial_ackInterrupt() {
+    PIR3bits.RC2IF = 0;
 }

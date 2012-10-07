@@ -15,23 +15,26 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef sht11_h
-#define sht11_h
-
-#include "GenericTypeDefs.h"
 #include "bsp.h"
-#include "sensor.h"
 
-#define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
-#define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
-#define SHT_STAT_REG_R      0x07    		/* Read status register command */
-#define SHT_STAT_REG_W      0x06    		/* Write status register command */
-#define SHT_RESET           0x1E    		/* Reset */
+#if SHT_ENABLED
+#   ifndef sht11_h
+#   define sht11_h
 
-#define SHT_LOW_POWER       0x01                /* 8bit RH / 12 bit TMP */
+#   include "GenericTypeDefs.h"
+#   include "sensor.h"
+#   include "sensor_proxy.h"
 
-#define SHT_ACK             1			/* Send ACK */
-#define SHT_NACK            0                   /* Not send ACK */
+#   define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
+#   define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
+#   define SHT_STAT_REG_R      0x07    		/* Read status register command */
+#   define SHT_STAT_REG_W      0x06    		/* Write status register command */
+#   define SHT_RESET           0x1E    		/* Reset */
+
+#   define SHT_LOW_POWER       0x01                /* 8bit RH / 12 bit TMP */
+
+#   define SHT_ACK             1			/* Send ACK */
+#   define SHT_NACK            0                   /* Not send ACK */
 
 /* Sensor measures temperature and humidity */
 enum Modes {
@@ -42,6 +45,7 @@ enum Modes {
 typedef struct ShtData ShtData;
 
 struct ShtData {
+
     union {
         UINT16 i;
         float f;
@@ -57,15 +61,15 @@ struct ShtData {
 
 /* Declare sht sensor */
 #define DECLARE_SHT(id, name, senseFn) \
-DECLARE_SENSOR(id, name##id, senseFn);\
-ShtData name##data;\
-Sht name = {&name##id, &name##data}
+    DECLARE_SENSOR(id, name##id, senseFn);\
+    ShtData name##data;\
+    Sht name = {&name##id, &name##data}
 
 /* Declare fuzzy sht sensor */
 #define DECLARE_FUZZY_SHT(id, name, senseFn, termsSize, ...) \
-DECLARE_FUZZY_SENSOR(id, name##id, senseFn, termsSize, __VA_ARGS__);\
-ShtData name##data;\
-Sht name = {&name##id, &name##data}
+    DECLARE_FUZZY_SENSOR(id, name##id, senseFn, termsSize, __VA_ARGS__);\
+    ShtData name##data;\
+    Sht name = {&name##id, &name##data}
 
 /* Sht11 class */
 typedef struct Sht Sht;
@@ -134,5 +138,15 @@ void Sht11_calculateHumidity(float* p_humidity);
 
 void Sht11_calculateTemperature(float* p_temp);
 
+/*..........................................................................*/
+UINT8 Sht11_usbShtTemperature(Sht* sht, char* usbOutBuffer);
+UINT8 Sht11_usbShtHumidity(Sht* sht, char* usbOutBuffer);
+
+UINT8 Sht11_measureTemperature(Sht* sht);
+UINT8 Sht11_measureHumidity(Sht* sht);
+void Sht11_measureTmp(Payload* measures);
+void Sht11_measureHum(Payload* measures);
+
 
 #endif /* sht11_h */
+#endif

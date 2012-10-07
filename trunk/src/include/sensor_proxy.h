@@ -19,53 +19,34 @@
 #define sensor_proxy_h
 
 #include "sensor.h"
-#include "list.h"
+#include "payload.h"
 
 #define DECLARE_SENSOR_VECTOR(name, ...)\
 Sensor* name##sensors[SENSORS] = {__VA_ARGS__};\
 SensorVector name = {SENSORS, name##sensors}
 
 /*..........................................................................*/
-/* Sensor vector */
-typedef struct SensorVector SensorVector;
-
-struct SensorVector {
-    UINT8 size;
-    Sensor* sensors[SENSORS];
-};
-
-/*..........................................................................*/
 void SensorProxy_init(void);
 
-///*..........................................................................*/
-//void SensorProxy_add(Sensor* sensor);
+/*..........................................................................*/
+void SensorProxy_add(Sensors* sensors, Sensor* sensor);
 
 /*..........................................................................*/
 void SensorProxy_sense(void);
 
 /*..........................................................................*/
 
-/* Measure sensor board and check for alert condition */
-UINT8 SensorProxy_fuzzy(void);
-
-///*..........................................................................*/
-//BOOL SensorProxy_alert(void);
-
-/*..........................................................................*/
-void SensorProxy_putSensors(List* list);
+#if SENSING_MODE == FUZZY_DRIVEN
+    /* Measure sensor board and check for alert condition */
+    UINT8 SensorProxy_fuzzy(void);
+#endif
 
 /*..........................................................................*/
-List* SensorProxy_getMeasures(void);
+void SensorProxy_addSensorsToPayload(Payload* list);
 
 /*..........................................................................*/
-void SensorProxy_powerOn(void);
+void SensorProxy_addMeasuresToPayload(Payload* payload);
 
-/*..........................................................................*/
-void SensorProxy_powerOff(void);
-
-/*..........................................................................*/
-UINT8 SensorProxy_usbShtTemperature(char* usbOutBuffer);
-UINT8 SensorProxy_usbShtHumidity(char* usbOutBuffer);
 
 #endif /* sensor_proxy_h*/
 

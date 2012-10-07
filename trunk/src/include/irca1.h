@@ -15,13 +15,15 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef irca1_h
-#define irca1_h
+#include "bsp.h"
+#if IRCA1_ENABLED
+#   ifndef irca1_h
+#   define irca1_h
 
-#include "sensor.h"
+#   include "sensor.h"
 
 #define DECLARE_IRCA(id, name, senseFn)\
-DECLARE_FUZZY_SENSOR(id, name##id, senseFn);\
+DECLARE_SENSOR(id, name##id, senseFn);\
 IrcA1Data name##data;\
 Irca1Cal name##cal;\
 IrcA1 name = {&name##id, &name##data, &name##cal}
@@ -74,4 +76,5 @@ void IrcA1_init(void);
 /* IrcA1 calculate CO2 */
 void IrcA1_calculate(IrcA1* irca1) ;
 
-#endif /* irca1_h */
+#   endif /* irca1_h */
+#endif

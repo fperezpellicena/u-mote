@@ -15,24 +15,17 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bsp.h"
-#include "digi_api.h"
-#include <string.h>
+#ifndef digi_interrupt_h
+#define digi_interrupt_h
 
-void XBee_resetPacket(XBeePacket * const packet) {
-    packet->dataPtr = (UINT8*) packet;
-    packet->checksum = 0;
-    packet->rxState = XBEE_PACKET_RX_START;
-    packet->length = 0;
-    packet->index = 0;
-    packet->apiId = 0;
-    memset(packet->frame.payload, 0, MAX_PAYLOAD); //FIXME Magic number
-}
+void XBeeInterrupt_install(void);
 
-UINT8 XBee_escape(UINT8 value) {
-    if (value == START_DELIMITER || value == XON
-            || value == XOFF || value == ESCAPE) {
-        return value ^ 0x20;
-    }
-    return value;
-}
+/* Top halve interrupt handler */
+void XBeeInterrupt_handleTopHalve(void);
+
+/* Bottom halve interrupt handler*/
+void XBeeInterrupt_handleBottomHalve(void);
+
+BOOL XBeeInterrupt_check(void);
+
+#endif     /* digi_interrupt_h */

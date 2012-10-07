@@ -16,23 +16,22 @@
  */
 
 #include "bsp.h"
-#include "digi_api.h"
-#include <string.h>
+#ifdef SHT_ENABLED
+#ifndef sht_fuzzy_h
+#define sht_fuzzy_h
 
-void XBee_resetPacket(XBeePacket * const packet) {
-    packet->dataPtr = (UINT8*) packet;
-    packet->checksum = 0;
-    packet->rxState = XBEE_PACKET_RX_START;
-    packet->length = 0;
-    packet->index = 0;
-    packet->apiId = 0;
-    memset(packet->frame.payload, 0, MAX_PAYLOAD); //FIXME Magic number
-}
+#include "list.h"
+#include "fuzzy.h"
+#include "sht.h"
 
-UINT8 XBee_escape(UINT8 value) {
-    if (value == START_DELIMITER || value == XON
-            || value == XOFF || value == ESCAPE) {
-        return value ^ 0x20;
-    }
-    return value;
-}
+/* Declare fuzzy sht sensor */
+#define DECLARE_FUZZY_SHT(id, name, senseFn, termsSize, ...) \
+    DECLARE_FUZZY_SENSOR(id, name##id, senseFn, termsSize, __VA_ARGS__);\
+    ShtData name##data;\
+    Sht name = {&name##id, &name##data}
+
+
+void ShtFuzzy_init(void);
+
+#endif /*sht_fuzzy_h*/
+#endif

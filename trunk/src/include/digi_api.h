@@ -258,6 +258,8 @@ struct XBeePacket {
 
 void XBee_resetPacket(XBeePacket * const packet);
 
+UINT8 XBee_escape(UINT8 value);
+
 /*..........................................................................*/
 
 /* TX METHODS */
