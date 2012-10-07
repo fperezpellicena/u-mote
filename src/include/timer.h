@@ -15,36 +15,31 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ircA1_proxy.h"
+#ifndef timer_h
+#define timer_h
 
-#if IRCA1_ENABLED
-#   include "hw_adc.h"
+#define TIMER_8_MODE        0b01000000
+#define TIMER_CKI_SRC       0b00100000
+#define TIMER_BYPASS_PRESC  0b00001000
 
-static float_t ircaExpCal[] = {-0.058, -0.199, -0.698};  // e^(-b*x^c)
+
+typedef enum Prescaler {
+    PRESCALER_2 = 0b00000000, PRESCALER_4 = 0b00000001,
+    PRESCALER_8 = 0b00000010, PRESCALER_16 = 0b00000011,
+    PRESCALER_32 = 0b00000100, PRESCALER_64 = 0b00000101,
+    PRESCALER_128 = 0b00000110, PRESCALER_256 = 0b00000111
+};
 
 /*...........................................................................*/
-/* Init ADC and I/O */
-void IrcA1Proxy_init(void) {
-    Adc_init();
-    IrcA1_init();
-}
+void Timer0_init(Prescaler prescaler, UINT8 mode, UINT8 clkSrc, UINT8 bypassPresc,
+        BOOL enableInt);
 
 /*...........................................................................*/
-void IrcA1Proxy_sense(Payload* measures) {
-    IrcA1 ircA1;
-    ircA1.data->ref = Adc_convert(IRCA1_REF);
-    ircA1.data->act = Adc_convert(IRCA1_ACT);
-    ircA1.data->tmp = Adc_convert(IRCA1_TMP);
-    Payload_add(measures, ircA1.data->ref);
-    Payload_add(measures, ircA1.data->act);
-    Payload_add(measures, ircA1.data->tmp);
-}
+void Timer0_on();
 
-void IrcA1Proxy_pulseOn(void) {
-    IRCA1_PULSE_ON();
-}
+/*...........................................................................*/
+void Timer0_off();
 
-void IrcA1Proxy_pulseOff(void) {
-    IRCA1_PULSE_OFF();
-}
-#endif
+
+
+#endif /* timer_h */

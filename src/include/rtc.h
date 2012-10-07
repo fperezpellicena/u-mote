@@ -19,25 +19,24 @@
 #define rtc_h
 
 #include <rtcc.h>
-#include "list.h"
+#include "payload.h"
 
-/* Init and enable RTC*/
+/*..........................................................................*/
 void Rtc_init(void);
 
-/* Enable Rtc */
+/*..........................................................................*/
 void Rtc_enable(void);
 
-/* Read Rtc data into parameter */
-void Rtc_read(rtccTimeDate* timestamp);
+/*..........................................................................*/
+rtccTimeDate* Rtc_read(void);
 
-/* Read Rtc data into list */
-void Rtc_readToList(List* list);
-
-/* Set Rtc data from parameter */
+/*..........................................................................*/
 void Rtc_write(rtccTimeDate* timestamp);
 
-UINT8 Rtc_usbParse(char* usbBuffer, char* usbOut);
+/*..........................................................................*/
+rtccTimeDate* Rtc_parse(char* usbBuffer);
 
-UINT8 Rtc_usbReadTest(char* usbBuffer);
+/*..........................................................................*/
+void Rtc_addTimeToPayload(Payload* payload);
 
 #endif

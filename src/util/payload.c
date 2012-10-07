@@ -15,37 +15,36 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "list.h"
+#include "payload.h"
 
 /*..........................................................................*/
 /* Init list, set size equals zero */
-void List_init(List* list) {
-    list->size = 0;
-    //List_empty(list);
+void Payload_init(Payload* payload) {
+    payload->size = 0;
 }
 
 /*..........................................................................*/
 /* Add one elemento to the list */
-void List_add(List* list, UINT8 element) {
-    if (list->size < MAX_LIST_SIZE - 1) {
-        list->data[list->size++] = element;
+void Payload_add(Payload* payload, UINT8 element) {
+    if (payload->size < MAX_PAYLOAD - 1) {
+        payload->data[payload->size++] = element;
     }
 }
 
 /*..........................................................................*/
 /* Delete all elements of the list */
-void List_empty(List* list) {
-    UINT8 i = MAX_LIST_SIZE - 1;
+void Payload_empty(Payload* payload) {
+    UINT8 i = MAX_PAYLOAD - 1;
     while (i--) {
-        list->data[i] = NULL;
+        payload->data[i] = NULL;
     }
 }
 
 /*..........................................................................*/
 /* Append all elements to the list */
-void List_append(List* list, List* elements) {
+void Payload_append(Payload* to, Payload* from) {
     UINT8 i = 0;
-    while(i < elements->size) {
-        List_add(list, elements->data[i++]);
+    while(i < from->size) {
+        Payload_add(to, from->data[i++]);
     }
 }

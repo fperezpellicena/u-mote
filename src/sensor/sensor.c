@@ -31,3 +31,8 @@ void Sensor_createFuzzy(UINT8 id, Sensor* sensor, Sense senseFunction,
     sensor->ruleTermsSize = ruleTermsSize;
     sensor->ruleTerms = ruleTerms;
 }
+
+/*..........................................................................*/
+void Sensors_init(Sensors* sensors) {
+    sensors->size = 0;
+}

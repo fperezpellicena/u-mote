@@ -28,7 +28,7 @@
  * In this mode, the OSTS bit is set
  * (see Section 3.5.1 “Oscillator Control Register”).
  */
-void runPrimaryMode(void) {
+void Power_runPrimaryMode(void) {
     DSCONHbits.DSEN = 0;
     OSCCONbits.SCS = 0;
 }
@@ -55,7 +55,7 @@ void runPrimaryMode(void) {
  * In such situations, initial oscillator operation is far from stable
  * and unpredictable operation may result.
  */
-void runSecondaryMode(void) {
+void Power_runSecondaryMode(void) {
     DSCONHbits.DSEN = 0;
     OSCCONbits.SCS = 1;
 }
@@ -69,11 +69,11 @@ void runSecondaryMode(void) {
  * while still executing code.
  * It works well for user applications, which are not highly timing-sensitive
  * or do not require high-speed clocks at all times.
- * This mode is entered by setting the SCS<1:0> bits (OSCCON<1:0>) to ‘11’.
+ * This mode is entered by setting the SCS<1:0> bits (OSCCON<1:0>) to 110.
  * When the clock source is switched to the internal oscillator block,
  * the primary oscillator is shutdown and the OSTS bit is cleared.
  */
-void runRcMode(void) {
+void Power_runRcMode(void) {
     DSCONHbits.DSEN = 0;
     OSCCONbits.SCS = 3;
 }
@@ -98,7 +98,7 @@ void runRcMode(void) {
  * After the wake-up, the OSTS bit remains set.
  * The IDLEN and SCS bits are not affected by the wake-up.
  */
-void idlePrimaryMode(void) {
+void Power_idlePrimaryMode(void) {
     OSCCONbits.IDLEN = 1;
     // If PRI_RUN is not enabled(SCS != '00') then set SCS = 0x00
     if (OSCCONbits.SCS != 0) {
@@ -136,7 +136,7 @@ void idlePrimaryMode(void) {
  * In such situations, initial oscillator operation is far from stable and
  * unpredictable operation may result.
  */
-void idleSecondaryMode(void) {
+void Power_idleSecondaryMode(void) {
     // FIXME ¿Should check for timer 1 status?
     OSCCONbits.IDLEN = 1;
     // If SEC_RUN is not enabled(SCS = '01') then set SCS = 0x01
@@ -165,7 +165,7 @@ void idleSecondaryMode(void) {
  * The IDLEN and SCS bits are not affected by the wake-up.
  * The INTRC source will continue to run if either the WDT or the FSCM is enabled.
  */
-void idleRcMode(void) {
+void Power_idleRcMode(void) {
     // FIXME ¿Should check for timer 1 status?
     OSCCONbits.IDLEN = 1;
     // If RC_RUN is not enabled(SCS = '11') then set SCS = 0x11
@@ -190,7 +190,7 @@ void idleRcMode(void) {
  * If the WDT is selected, the INTRC source will continue to operate.
  * If the Timer1 oscillator is enabled, it will also continue to run.
  */
-void sleep(void) {
+void Power_sleep(void) {
     OSCCONbits.IDLEN = 0;
     Sleep();
     Nop();
@@ -242,7 +242,7 @@ void sleep(void) {
  * perform a Power-on Reset (POR). When the device is released from Reset,
  *  code execution will resume at the device’s Reset vector.
  */
-void deepSleep(void) {
+void Power_deepSleep(void) {
     INTCONbits.GIEH = 0;    /* Disable interrupts*/
     DSWAKEL = 0;
     DSWAKEH = 0;

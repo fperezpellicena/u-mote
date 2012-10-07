@@ -17,31 +17,36 @@
 
 #include "bsp.h"
 #include "power.h"
-#include "usb_device.h"
-#include "sensor_proxy.h"
-#include "sht_proxy.h"
-#include "isr.h"
-#include "rtc.h"
-#include "digi_proxy.h"
 #include <delays.h>
+#include "digi_interrupt.h"
+#if USB_ENABLED
+#include "usb_device.h"
+#endif
+#include "sensor_proxy.h"
+#include "isr.h"
+#if RTCC_ENABLED
+#include "rtc.h"
+#endif
+#include "digi_proxy.h"
 
 /*...........................................................................*/
 void BSP_init(void) {
+    Power_runRcMode();
     // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
     BSP_enablePLL();
     // Default all pins to digital
-    ADCON1 |= 0x0F;
-    ANCON0 = 0xFF;
-    ANCON1 = 0xFF;
+    BSP_defaultIO();
     //Initialize all of the LED pins
     mInitAllLEDs();
-    // Init interrupt vectors
-    InterruptHandler_initVectors();
     // Initializes mote API
     XBeeProxy_init();
     // Enable sensor board
     SensorProxy_init();
-#ifdef USB_ENABLED
+#if SLEEP_MODE == SLEEP
+    // Init interrupt vectors
+    InterruptHandler_initVectors();
+#endif
+#if USB_ENABLED
     ENABLE_USB_ATTACH;
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
@@ -62,9 +67,18 @@ void BSP_enablePLL(void) {
 }
 
 /*...........................................................................*/
+void BSP_defaultIO(void) {
+    ADCON1 |= 0x0F;
+    ANCON0 = 0xFF;
+    ANCON1 = 0xFF;
+}
+
+/*...........................................................................*/
 void BSP_onPowerUp(void) {
+#if RTCC_ENABLED
     // Enable RTCC
     Rtc_init();
+#endif
 }
 
 /*...........................................................................*/
@@ -74,11 +88,21 @@ void BSP_onMclr(void) {
     DSCONLbits.RELEASE = 0;
     // Bugfix: Es necesario un delay tras el reset
     Delay10KTCYx(10);
+    Power_runPrimaryMode();
     XBeeProxy_join();
+    Power_runRcMode();
 #ifdef __18F46J50_H
     TRISDbits.TRISD1 = 0;
     LATDbits.LATD1 = 1;
 #endif
+}
+
+static void BSP_clearWakeUpFlags(void);
+
+static void BSP_clearWakeUpFlags(void) {
+    WDTCONbits.DS = 0;
+    DSWAKEHbits.DSINT0 = 0;
+    DSCONLbits.RELEASE = 0;
 }
 
 /*...........................................................................*/
@@ -89,13 +113,11 @@ void BSP_onWakeUp(void) {
     TRISDbits.TRISD1 = 0;
 #endif
     // Clear wake up flags
-    WDTCONbits.DS = 0;
-    DSWAKEHbits.DSINT0 = 0;
-    DSCONLbits.RELEASE = 0;
+    BSP_clearWakeUpFlags();
     // Enable sensor board
     SensorProxy_init();
     // Ejecuta la interrupción que ha despertado al sistema
-    XBeeProxy_handleBottomHalveInterrupt();
+    XBeeInterrupt_handleBottomHalve();
 }
 
 /*...........................................................................*/
@@ -104,7 +126,7 @@ void BSP_deepSleep(void) {
     OSCTUNEbits.PLLEN = 0;
     Rtc_enable();
     // Go to sleep
-    deepSleep();
+    Power_deepSleep();
 }
 
 /*...........................................................................*/
@@ -113,5 +135,5 @@ void BSP_sleep(void) {
     OSCTUNEbits.PLLEN = 0;
     Rtc_enable();
     // Go to sleep
-    sleep();
+    Power_sleep();
 }

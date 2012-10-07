@@ -15,24 +15,29 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bsp.h"
 #include "digi_api.h"
-#include <string.h>
 
-void XBee_resetPacket(XBeePacket * const packet) {
-    packet->dataPtr = (UINT8*) packet;
-    packet->checksum = 0;
-    packet->rxState = XBEE_PACKET_RX_START;
-    packet->length = 0;
-    packet->index = 0;
-    packet->apiId = 0;
-    memset(packet->frame.payload, 0, MAX_PAYLOAD); //FIXME Magic number
-}
-
-UINT8 XBee_escape(UINT8 value) {
-    if (value == START_DELIMITER || value == XON
-            || value == XOFF || value == ESCAPE) {
-        return value ^ 0x20;
+BOOL XBee_readReceivePacket(XBeePacket* packet, UINT8* frameId,
+        UINT8** sourceAddress, UINT8* options, UINT8** payload,
+        UINT8* length) {
+    UINT8* p;
+    if (packet->apiId != RECEIVE_PACKET) {
+        return FALSE;
     }
-    return value;
+    if (frameId) {
+        *frameId = packet->frame.receivePacket.frameId;
+    }
+    if (sourceAddress) {
+        *sourceAddress = (UINT8*) packet->frame.receivePacket.sourceAddress;
+    }
+    if (options) {
+        *options = packet->frame.receivePacket.options;
+    }
+    if (payload) {
+        *payload = packet->frame.receivePacket.payload;
+    }
+    if (length) {
+        *length = packet->length - 11;
+    }
+	return TRUE;
 }

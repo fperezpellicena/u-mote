@@ -15,21 +15,20 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ircA1_proxy_h
-#define ircA1_proxy_h
-
 #include "irca1.h"
+#if IRCA1_ENABLED
+#   ifndef ircA1_proxy_h
+#   define ircA1_proxy_h
 
 /*..........................................................................*/
 void IrcA1Proxy_init(void);
 
 /*..........................................................................*/
-void IrcA1Proxy_calibrateZero(IrcA1* ircA1);
+void IrcA1Proxy_sense(Payload* measures);
 
-/*..........................................................................*/
-void IrcA1Proxy_calibrateSpan(IrcA1* ircA1);
+void IrcA1Proxy_pulseOn(void);
 
-/*..........................................................................*/
-void IrcA1Proxy_measure(IrcA1* ircA1);
+void IrcA1Proxy_pulseOff(void);
 
-#endif /* ircA1_proxy_h */
+#   endif /* ircA1_proxy_h */
+#endif

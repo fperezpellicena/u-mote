@@ -15,24 +15,22 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bsp.h"
-#include "digi_api.h"
-#include <string.h>
+#include "sht_fuzzy.h"
+#ifdef SHT_ENABLED
+#include "sensor_proxy.h"
 
-void XBee_resetPacket(XBeePacket * const packet) {
-    packet->dataPtr = (UINT8*) packet;
-    packet->checksum = 0;
-    packet->rxState = XBEE_PACKET_RX_START;
-    packet->length = 0;
-    packet->index = 0;
-    packet->apiId = 0;
-    memset(packet->frame.payload, 0, MAX_PAYLOAD); //FIXME Magic number
+#pragma udata sht_mf
+DECLARE_MF(lowTemp, -40, 0, 20);
+DECLARE_MF(midTemp, 0, 20, 40);
+DECLARE_MF(highTemp, 30, 40, 255);
+DECLARE_RT(ifHighTemp, &highTemp);
+DECLARE_RT(ifMidTemp, &midTemp);
+DECLARE_RT(ifLowTemp, &lowTemp);
+#pragma udata
+
+/*...........................................................................*/
+void ShtFuzzy_init() {
+    Sht11_init();
 }
 
-UINT8 XBee_escape(UINT8 value) {
-    if (value == START_DELIMITER || value == XON
-            || value == XOFF || value == ESCAPE) {
-        return value ^ 0x20;
-    }
-    return value;
-}
+#endif

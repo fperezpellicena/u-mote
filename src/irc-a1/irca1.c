@@ -16,23 +16,42 @@
  */
 
 #include "irca1.h"
-#include <math.h>
+#include "register.h"
 
+#if IRCA1_ENABLED
+#   include <math.h>
+
+/* Calculation factors previously done */
 static float ircaPowCal[] = {-0.058, -0.199, -0.698};   // -b^(1/c)
 static float ircaC[] = {0.520, 0.528, 0.698};           // c
 
 /*...........................................................................*/
 
+static void IrcA1_initIO(void);
+static void IrcA1_initIO(void) {
+    IRCA1_REF = 0;      /* AN0 analog */
+    IRCA1_REF_DDR = 1;  /* AN0 as input */
+    IRCA1_ACT = 0;      /* AN1 analog */
+    IRCA1_ACT_DDR = 1;  /* AN1 as input */
+    IRCA1_TMP = 0;      /* AN1 analog */
+    IRCA1_TMP_DDR = 1;  /* AN2 as input */
+    IRCA1_CLK_DDR = 0;  /* PWM output */
+}
+
+static void IrcA1_initPWM(void);
+static void IrcA1_initPWM(void) {
+    IRCA1_REG_PERIOD = IRCA1_PERIOD; /* PWM period */
+    IRCA1_DUTY = IRCA1_PERIOD / 2;   /* PWM duty */
+    IRCA1_TMR |= IRCA1_PRESCALE;    /* Prescale 16 */
+    IRCA1_CCP |= IRCA1_CCP_PWM;  /* PWM mode*/
+    IRCA1_PULSE_ON();
+}
+
 /* Init sensor struct and hw associated */
 void IrcA1_init(void) {
-    /* Set pin I/O */
-    IRCA1_REF_DDR = 1;  /* Ref analog pin as input */
-    IRCA1_ACT_DDR = 1;  /* Act analog pin as input */
-    IRCA1_TMP_DDR = 1;  /* Tmp analog pin as input */
-    /* Set A/D config register */
-    IRCA1_REF = 0;      /* Ref pin configured as analog channel */
-    IRCA1_ACT = 0;      /* Act pin configured as analog channel */
-    IRCA1_TMP = 0;      /* Tmp pin configured as analog channel */
+    IrcA1_initIO();
+    Register_remap(&IRCA1_RPIN, IRCA1_TIMER);
+    IrcA1_initPWM();
 }
 
 /*...........................................................................*/
@@ -50,3 +69,4 @@ void IrcA1_calculate(IrcA1* ircA1) {
                 / ircaPowCal[IRCA1_MODEL];
     }
 }
+#endif

@@ -14,25 +14,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include "bsp.h"
-#include "digi_api.h"
-#include <string.h>
-
-void XBee_resetPacket(XBeePacket * const packet) {
-    packet->dataPtr = (UINT8*) packet;
-    packet->checksum = 0;
-    packet->rxState = XBEE_PACKET_RX_START;
-    packet->length = 0;
-    packet->index = 0;
-    packet->apiId = 0;
-    memset(packet->frame.payload, 0, MAX_PAYLOAD); //FIXME Magic number
-}
-
-UINT8 XBee_escape(UINT8 value) {
-    if (value == START_DELIMITER || value == XON
-            || value == XOFF || value == ESCAPE) {
-        return value ^ 0x20;
-    }
-    return value;
-}
+ 
+ #ifndef wdt_h
+ #define wdt_h
+ 
+ #include "GenericTypeDefs.h"
+ 
+ void Wdt_enable(void);
+ 
+ void Wdt_disable(void);
+ 
+ #endif /*wdt_h*/

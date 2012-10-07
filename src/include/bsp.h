@@ -23,9 +23,9 @@
 
 /*..........................................................................*/
 /* Operating mode */
-#define TEST    0
+#define DEBUG   0
 #define NORMAL  1
-#define MODE    TEST
+#define MODE    DEBUG
 
 /*..........................................................................*/
 /* Sleep mode */
@@ -58,8 +58,6 @@
 #define XBEE_RADIOUS                            0x00
 #define XBEE_OPTIONS                            0x00
 
-#define XBEE_SERIAL     			EUSART1	// Xbee serial port
-
 #define ON_SLEEP_INTERRUPT			2		// Xbee on_sleep interrupt 
 
 // if xbee interrupt mcu via serial, uncomment this define
@@ -68,7 +66,7 @@
 // else if xbee interrupt mcu via I/O pin, uncomment this define
 #define XBEE_INTERRUPT				ON_SLEEP_INTERRUPT
 
-#define SLEEP_STATUS_MESSAGES FALSE	// If xbee uart send sleep status messages on wake/sleep
+#define SLEEP_STATUS_MESSAGES       0	// If xbee uart send sleep status messages on wake/sleep
 
 // Defines based on previous selection
 #if XBEE_INTERRUPT == SERIAL_INTERRUPT
@@ -91,21 +89,20 @@
 #	endif
 #endif
 
-#define XBEE_BAUDRATE   EUSART_9600		// Xbee serial baudrate
+#define XBEE_BAUDRATE   EUSART_9600     // Xbee serial baudrate
 
-#define AUTO_JOIN_ON_POWER_UP   TRUE           // Join on power
-#define ON_MCLR                 DSWAKELbits.DSMCLR == 1
+#define ON_MCLR         DSWAKELbits.DSMCLR == 1
 
 
 /*...........................................................................*/
 /* USB SECTION */
 
-#define USB_ENABLED
+#define USB_ENABLED         0
 
 /* USB attach detector */
-#define USB_PLUG_PIN      PORTBbits.RB4
+#define USB_PLUG_PIN        PORTBbits.RB4
 
-#ifdef USB_ENABLED
+#if USB_ENABLED
 #   ifdef USB_PLUG_PIN
 #       define USB_PLUGGED    USB_PLUG_PIN == 1
 #       define ENABLE_USB_ATTACH     TRISBbits.TRISB4 = 1
@@ -154,7 +151,7 @@
 /*...........................................................................*/
 /* RTCC SECTION */
 
-#define RTCC_ENABLED
+#define RTCC_ENABLED        1
 
 
 /*...........................................................................*/
@@ -169,14 +166,14 @@
 /*..........................................................................*/
 /* SHT11 section */
 
-#define SHT_ENABLED
+#define SHT_ENABLED         0
 #define SHT_ID              0x0A
 
 #define SHT_TMP_THR         20      // Umbral 80ºC
 
 #define SHT_HUM_ENABLED     0
 
-#ifdef SHT_ENABLED
+#if SHT_ENABLED
 #   define SHT_DATA_PIN     PORTAbits.RA0
 #   define SHT_DATA         TRISAbits.TRISA0    /* Data tx/rx pin */
 #   define SHT_DATA_DDR     LATAbits.LATA0	/* Data direction register */
@@ -189,7 +186,7 @@
 /*...........................................................................*/
 /* IRC-A1 section */
 
-#define IRCA1_ENABLED
+#define IRCA1_ENABLED   1
 #define IRCA1_ID        0x08
 
 #define IRC_A1_SAFE     0
@@ -202,16 +199,29 @@
 
 #define IRCA1_X_THR     20      // Umbral 20%
 
-#ifdef IRCA1_ENABLED
-#   define IRCA1_REF        ANCON0bits.PCFG0  /* AN0 */
+#if IRCA1_ENABLED
+#   define IRCA1_REF        ANCON0bits.PCFG0    /* AN0 */
 #   define IRCA1_REF_DDR    TRISAbits.TRISA0
-#   define IRCA1_ACT        ANCON0bits.PCFG1  /* AN1 */
+#   define IRCA1_ACT        ANCON0bits.PCFG1    /* AN1 */
 #   define IRCA1_ACT_DDR    TRISAbits.TRISA1
-#   define IRCA1_TMP        ANCON0bits.PCFG2  /* AN2 */
+#   define IRCA1_TMP        ANCON0bits.PCFG2    /* AN2 */
 #   define IRCA1_TMP_DDR    TRISAbits.TRISA2
-#   define IRCA1_CLK        
-#   define IRCA1_CLK_DDR
+/* PWM OUTPUT CONFIGURATION FOR VPULSE */
+#   define IRCA1_CLK_DDR    TRISCbits.TRISC2    /* Vpulse */
+#   define IRCA1_RPIN       RPOR13              /* Remap-pin register */
+#   define IRCA1_TIMER      14                  /* Remap-pin register */
+#   define IRCA1_REG_PERIOD PR2                 /* Vpulse period */
+#   define IRCA1_DUTY       CCPR1L              /* Vpulse period */
+#   define IRCA1_TMR        T2CON               /* Timer counter */
+#   define IRCA1_CCP        CCP1CON             /* Timer counter */
+#   define IRCA1_PERIOD     255                 /* Period */
+#   define IRCA1_PRESCALE   0b00000010          /* Prescaler */
+#   define IRCA1_CCP_PWM    0b00001100          /* PWM mode */
+/* ON/OFF PWM */
+#   define IRCA1_PULSE_ON()    T2CONbits.TMR2ON = 1;
+#   define IRCA1_PULSE_OFF()   T2CONbits.TMR2ON = 0;
 #endif
+
 
 
 /*..........................................................................*/
@@ -219,20 +229,26 @@
 #define MONITORING                  0           /* Continuous sensing mode */
 #define THRESHOLD_DRIVEN            1           /* Alert only sensing mode */
 #define FUZZY_DRIVEN                2           /* Alert fuzzy based mode */
-#define SENSING_MODE                FUZZY_DRIVEN
+#define SENSING_MODE                MONITORING
 
 #define MAX_SENSORS                 5                       /* Max sensors */
-#define SENSORS_PWR                 LATBbits.LATB3      /* Power on/off pin*/
-#define SENSORS_PWR_DDR             TRISBbits.TRISB3
+#define SENSOR_BOARD_CTRL           LATBbits.LATB3      /* Power on/off pin*/
+#define SENSOR_BOARD_CTRL_DDR       TRISBbits.TRISB3      /* Power on/off pin*/
+#define SENSOR_BOARD_ON()           SENSOR_BOARD_CTRL = 1   /* Power on */
+#define SENSOR_BOARD_OFF()          SENSOR_BOARD_CTRL = 0   /* Power off */
+#define SENSOR_BOARD_CTRL_INIT() \
+    SENSOR_BOARD_CTRL_DDR = OUTPUT_PIN; \
+    SENSOR_BOARD_OFF()
 
 #define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
-#define MAX_LIST_SIZE               100
+#define MAX_PAYLOAD                 100
 #define SENSORS                     1
 #define NO_SENSORS                  0x00                  /* No sensors Id */
 
 /*...........................................................................*/
 /* Prototypes */
 void BSP_init(void);
+void BSP_defaultIO(void);
 void BSP_deepSleep(void);
 void BSP_sleep(void);
 void BSP_onPowerUp(void);

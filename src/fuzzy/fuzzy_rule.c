@@ -42,8 +42,8 @@ void Rule_evaluate(Rule* rule) {
     UINT8 i;
     // Fuzzy crisp inputs
     for (i = 0; i < rule->antecedentsSize; i++) {
-        rule->antecedents[i]->fuzzy = triangularFuzzify(
-                rule->antecedents[i]->input, rule->antecedents[i]->membershipFunction);
+        rule->antecedents[i]->fuzzy = RuleTerm_evaluate(rule->antecedents[i],
+                rule->antecedents[i]->input);
         // Apply min{u1, u2} implication rule
         rule->consecuent->fuzzy = RuleImplication_min(rule->consecuent->fuzzy,
                 rule->antecedents[i]->fuzzy);

@@ -28,7 +28,7 @@
  * In this mode, the OSTS bit is set
  * (see Section 3.5.1 “Oscillator Control Register”).
  */
-void runPrimaryMode(void);
+void Power_runPrimaryMode(void);
 
 /*..........................................................................*/
 
@@ -52,7 +52,7 @@ void runPrimaryMode(void);
  * In such situations, initial oscillator operation is far from stable
  * and unpredictable operation may result.
  */
-void runSecondaryMode(void);
+void Power_runSecondaryMode(void);
 
 /*..........................................................................*/
 
@@ -67,7 +67,7 @@ void runSecondaryMode(void);
  * When the clock source is switched to the internal oscillator block,
  * the primary oscillator is shutdown and the OSTS bit is cleared.
  */
-void runRcMode(void);
+void Power_runRcMode(void);
 
 /*..........................................................................*/
 
@@ -89,7 +89,7 @@ void runRcMode(void);
  * After the wake-up, the OSTS bit remains set.
  * The IDLEN and SCS bits are not affected by the wake-up.
  */
-void idlePrimaryMode(void);
+void Power_idlePrimaryMode(void);
 
 /*..........................................................................*/
 
@@ -119,7 +119,7 @@ void idlePrimaryMode(void);
  * In such situations, initial oscillator operation is far from stable and
  * unpredictable operation may result.
  */
-void idleSecondaryMode(void);
+void Power_idleSecondaryMode(void);
 
 /*..........................................................................*/
 
@@ -139,7 +139,7 @@ void idleSecondaryMode(void);
  * The IDLEN and SCS bits are not affected by the wake-up.
  * The INTRC source will continue to run if either the WDT or the FSCM is enabled.
  */
-void idleRcMode(void);
+void Power_idleRcMode(void);
 
 /*..........................................................................*/
 
@@ -155,7 +155,7 @@ void idleRcMode(void);
  * If the WDT is selected, the INTRC source will continue to operate.
  * If the Timer1 oscillator is enabled, it will also continue to run.
  */
-void sleep(void);
+void Power_sleep(void);
 
 /*..........................................................................*/
 
@@ -203,7 +203,7 @@ void sleep(void);
  * perform a Power-on Reset (POR). When the device is released from Reset,
  *  code execution will resume at the device’s Reset vector.
  */
-void deepSleep(void);
+void Power_deepSleep(void);
 
 
 #endif  /* power_h */

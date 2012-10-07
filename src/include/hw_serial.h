@@ -20,27 +20,21 @@
 
 #include "GenericTypeDefs.h"
 
-typedef struct Serial Serial;
+void Serial_init(UINT8 baudrate);
 
-struct Serial {
-    UINT8 uart;
-};
+void Serial_close();
 
-void Serial_init(Serial * const serial, UINT8 uart, UINT8 baudrate);
+void Serial_send(UINT8 value);
 
-void Serial_close(Serial * const serial);
+void Serial_sendArray(UINT8* values, UINT8 size);
 
-void Serial_send(Serial * const serial, UINT8 value);
+UINT8 Serial_read();
 
-void Serial_sendArray(Serial * const serial, UINT8* values, UINT8 size);
-
-UINT8 Serial_read(Serial * const serial);
-
-BOOL Serial_available(Serial * const serial);
+BOOL Serial_available();
 
 /** Interrupt handler functions */
-BOOL Serial_checkInterrupt(Serial * const serial);
+BOOL Serial_checkInterrupt();
 
-void Serial_ackInterrupt(Serial * const serial);
+void Serial_ackInterrupt();
 
 #endif          /* hw_serial_h */

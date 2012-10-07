@@ -37,17 +37,4 @@ BOOL XBeeProxy_join(void);
 
 void XBeeProxy_usbJoin(char* usbBuffer);
 
-/*..........................................................................*/
-/* Interrupt handler functions */
-
-void XBeeProxy_installInterrupt(void);
-
-/* Top halve interrupt handler */
-void XBeeProxy_handleTopHalveInterrupt(void);
-
-/* Bottom halve interrupt handler*/
-void XBeeProxy_handleBottomHalveInterrupt(void);
-
-BOOL XBeeProxy_checkInterrupt(void);
-
 #endif     /* digi_proxy_h*/

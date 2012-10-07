@@ -16,9 +16,13 @@
  */
 
 #include "sht.h"
-#include <delays.h>
 
-void Sht11_init(void) {
+#if SHT_ENABLED
+#   include <delays.h>
+#   include <stdio.h>
+#   include <math.h>
+
+void Sht11_init() {
     SHT_DATA_CNF = 1;
     SHT_SCK_CNF = 1;
     SHT_DATA = 1;
@@ -167,6 +171,16 @@ UINT8 Sht11_measure(Sht* sht) {
     return error;
 }
 
+UINT8 Sht11_measureTemperature(Sht* sht) {
+    return Sht11_measureParam((UINT16*) & sht->data->temperature.i,
+            &sht->data->temp_chk, SHT_MEASURE_TEMP);
+}
+
+UINT8 Sht11_measureHumidity(Sht* sht) {
+    return Sht11_measureParam((UINT16*) & sht->data->humidity.i,
+            &sht->data->humi_chk, SHT_MEASURE_HUMI);
+}
+
 UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
     UINT8 error = 0;
     Sht11_start(); //transmission start
@@ -184,8 +198,6 @@ UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
     while (SHT_DATA_PIN == 1);
 
     // Read two bytes response
-    // FIXME No es crítico: No funciona con usb, intentar habilitar una interrupción de pin
-    // y encapsular las siguientes líneas dentro de la ISR.
     *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
     *(p_value) = *(p_value) << 8;
     *(p_value) += Sht11_read(SHT_ACK); //read the second byte (LSB)
@@ -228,3 +240,47 @@ void Sht11_calculateTemperature(float* p_temp) {
     float measure = *p_temp;
     *p_temp = D1 + D2 * measure;
 }
+
+/*...........................................................................*/
+
+/* Get sht 11 temperature for usb request */
+UINT8 Sht11_usbShtTemperature(Sht* sht, char* usbOutBuffer) {
+    Sht11_init();
+    Sht11_measureTemperature(sht);
+    //Converts integer to float
+    sht->data->temperature.f = (float) sht->data->temperature.i;
+    Sht11_calculateTemperature(&sht->data->temperature.f);
+    return sprintf(usbOutBuffer, (const MEM_MODEL rom char*) "Temperatura: %d.%2u % \n\r",
+            (UINT16) sht->data->temperature.f,
+            fabs(((sht->data->temperature.f - (int) sht->data->temperature.f)*100)));
+}
+
+/*...........................................................................*/
+
+/* Get sht 11 humidity for usb request */
+UINT8 Sht11_usbShtHumidity(Sht* sht, char* usbOutBuffer) {
+    Sht11_init();
+    Sht11_measureHumidity(sht);
+    // Converts integer to float
+    sht->data->humidity.f = (float) sht->data->humidity.i;
+    Sht11_calculateHumidity(&sht->data->humidity.f);
+
+    return sprintf(usbOutBuffer, (const MEM_MODEL rom char*)"Humedad relativa: %d.%2u % \n\r",
+            (int) sht->data->humidity.f / 100,
+            fabs(((sht->data->humidity.f - (int) sht->data->humidity.f)*100)));
+}
+
+/*...........................................................................*/
+void Sht11_measureTmp(Payload* measures) {
+    Sht sht;
+    Sht11_measure(&sht);
+    Payload_add(measures, sht.data->temperature.i);
+}
+
+/*...........................................................................*/
+void Sht11_measureHumi(Payload* measures) {
+    Sht sht;
+    Sht11_measure(&sht);
+    Payload_add(measures, sht.data->humidity.i);
+}
+#endif

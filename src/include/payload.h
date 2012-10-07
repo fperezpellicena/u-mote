@@ -15,29 +15,29 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef list_h
-#define list_h
+#ifndef payload_h
+#define payload_h
 
 #include "bsp.h"
 
 /* Static List struct */
-typedef struct List List;
+typedef struct Payload Payload;
 
-struct List {
-    UINT8 data[MAX_LIST_SIZE];
+struct Payload {
+    UINT8 data[MAX_PAYLOAD];
     UINT8 size;
 };
 
 /* Init list */
-void List_init(List* list);
+void Payload_init(Payload* list);
 
 /* Add one element to the list */
-void List_add(List* list, UINT8 element);
+void Payload_add(Payload* list, UINT8 element);
 
 /* Delete all elements of the list */
-void List_empty(List* list);
+void Payload_empty(Payload* list);
 
 /* Append */
-void List_append(List* list, List* elements);
+void Payload_append(Payload* to, Payload* from);
 
 #endif /* list_H*/
