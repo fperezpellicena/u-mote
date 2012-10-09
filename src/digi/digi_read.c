@@ -19,7 +19,7 @@
  #include "digi_serial.h"
 
 /* Read XBee packet(generalized)*/
-BOOL XBeeProxy_readPacket(XBeePacket * const packet) {
+BOOL XBee_readPacket(XBeePacket * const packet) {
     UINT8 data;
     XBee_resetPacket(packet);
     while (XBeeSerial_available()) {

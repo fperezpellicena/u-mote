@@ -20,8 +20,6 @@
 #if IRCA1_ENABLED
 #   include "hw_adc.h"
 
-static float_t ircaExpCal[] = {-0.058, -0.199, -0.698};  // e^(-b*x^c)
-
 /*...........................................................................*/
 /* Init ADC and I/O */
 void IrcA1Proxy_init(void) {
@@ -35,16 +33,10 @@ void IrcA1Proxy_sense(Payload* measures) {
     ircA1.data->ref = Adc_convert(IRCA1_REF);
     ircA1.data->act = Adc_convert(IRCA1_ACT);
     ircA1.data->tmp = Adc_convert(IRCA1_TMP);
+    // Raw values
     Payload_add(measures, ircA1.data->ref);
     Payload_add(measures, ircA1.data->act);
     Payload_add(measures, ircA1.data->tmp);
 }
 
-void IrcA1Proxy_pulseOn(void) {
-    IRCA1_PULSE_ON();
-}
-
-void IrcA1Proxy_pulseOff(void) {
-    IRCA1_PULSE_OFF();
-}
 #endif

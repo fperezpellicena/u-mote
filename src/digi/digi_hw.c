@@ -15,26 +15,12 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef digi_proxy_h
-#define digi_proxy_h
-
+#include "bsp.h"
 #include "digi_api.h"
-#include "GenericTypeDefs.h"
+#include "digi_serial.h"
+#include "digi_interrupt.h"
 
-#define USB_JOINED_MSG "Mote joined\0"
-#define USB_JOINED_ERROR_MSG "Mote not joined\0"
-
-
-void XBeeProxy_init(void);
-
-BOOL XBeeProxy_sendPacket(XBeePacket * const packet);
-
-BOOL XBeeProxy_readPacket(XBeePacket* const packet);
-
-BOOL XBeeProxy_read(void);
-
-BOOL XBeeProxy_join(void);
-
-void XBeeProxy_usbJoin(char* usbBuffer);
-
-#endif     /* digi_proxy_h*/
+void XBee_init(void) {
+    XBeeSerial_init(EUSART_9600);
+    XBeeInterrupt_install();
+}

@@ -16,6 +16,8 @@
  */
 
 #include "isr.h"
+
+#if SLEEP_MODE == SLEEP
 #include "bsp.h"
 #if USB_ENABLED
 #   include "usb_config.h"
@@ -169,3 +171,4 @@ void InterruptHandler_handleActiveInterrupt(void) {
         activeInterrupt->handleBottomHalveInterrupt();
     }
 }
+#endif

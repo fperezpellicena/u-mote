@@ -19,7 +19,6 @@
 #define isr_h
 
 #include "GenericTypeDefs.h"
-#include "digi_proxy.h"
 #include "bsp.h"
 
 /*..........................................................................*/

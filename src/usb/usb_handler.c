@@ -37,7 +37,7 @@
     extern Sht sht;
 #endif
 
-#include "digi_proxy.h"
+#include "digi_api.h"
 
 #pragma udata buffers
 char USB_In_Buffer[64];
@@ -86,7 +86,7 @@ void USB_process(void) {
                     timestamp->f.hour, timestamp->f.min, timestamp->f.sec,
                     timestamp->f.mday, timestamp->f.mon, timestamp->f.year);
         } else if (strncmp(USB_Out_Buffer, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
-            XBeeProxy_usbJoin(USB_In_Buffer);
+            XBee_usbJoin(USB_In_Buffer);
             length = (UINT8)sprintf(USB_In_Buffer,
                     (const MEM_MODEL rom char*)"uMote unido a la red \n\r");
         } else if (strncmp(USB_Out_Buffer, ADC_TEST, strlen(ADC_TEST)) == 0) {
