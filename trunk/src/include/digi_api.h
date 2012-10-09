@@ -62,6 +62,9 @@
 /*..........................................................................*/
 #define PACKET_ACKNOWLEGED                      0x01
 #define PACKET_BROADCAST                        0x02
+/*..........................................................................*/
+#define COMMISSIONING_ONE_PRESS     1
+#define DEEP_SLEEP_MODE             8
 
 
 /*..........................................................................*/
@@ -254,6 +257,15 @@ struct XBeePacket {
 };
 
 /*..........................................................................*/
+/* INIT */
+
+void XBee_init(void);
+
+BOOL XBee_join(void);
+
+void XBee_usbJoin(char* usbBuffer);
+
+/*..........................................................................*/
 /* UTIL METHODS */
 
 void XBee_resetPacket(XBeePacket * const packet);
@@ -263,6 +275,8 @@ UINT8 XBee_escape(UINT8 value);
 /*..........................................................................*/
 
 /* TX METHODS */
+
+BOOL XBee_sendPacket(XBeePacket * const packet);
 
 void XBee_createCompleteATCommandPacket(XBeePacket* packet, UINT8 frameId,
 	UINT8* command,UINT8* params, UINT8 paramsLength);
@@ -286,6 +300,9 @@ void XBee_createRemoteAtCommandPacket(XBeePacket* packet, UINT8 frameId,
 /*..........................................................................*/
 
 /* RX METHODS */
+
+BOOL XBee_readPacket(XBeePacket * const packet);
+
 BOOL XBee_readAtCommandResponsePacket(XBeePacket* packet, UINT8* frameId,
 		UINT8** command, UINT8* status, UINT8* value);
 

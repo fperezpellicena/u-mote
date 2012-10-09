@@ -56,17 +56,35 @@ void IrcA1_init(void) {
 
 /*...........................................................................*/
 
-/* IrcA1 calculate CO2 */
-void IrcA1_calculate(IrcA1* ircA1) {
-    float abs;
-    // Operates with sensor data and calibration data
-    abs = 1 - (ircA1->data->act / (ircA1->data->act * ircA1->cal->zero));
+static float IrcA1_calculateAbs(IrcA1* ircA1);
+static float IrcA1_calculateAbs(IrcA1* ircA1) {
+    return 1 - (ircA1->data->act / (ircA1->data->act * ircA1->cal->zero));
+}
+
+static float IrcA1_calculateFactor(float abs, UINT8 span);
+static float IrcA1_calculateFactor(float abs, UINT8 span) {
     if (abs > 0) {
-        ircA1->data->x = (pow(log(1 - (abs / ircA1->cal->span)),(1 / ircaC[IRCA1_MODEL])))
-                / ircaPowCal[IRCA1_MODEL];
+        return 1 - (abs / span);
     } else {
-          ircA1->data->x = (pow(log(1 + (abs / ircA1->cal->span)), (1 / ircaC[IRCA1_MODEL])))
-                / ircaPowCal[IRCA1_MODEL];
+        return 1 + (abs / span);
     }
 }
+
+static float IrcA1_calculateConcentration(float abs, IrcA1* ircA1);
+static float IrcA1_calculateConcentration(float abs, IrcA1* ircA1) {
+    float factor = IrcA1_calculateFactor(abs, ircA1->cal->span);
+    float base = log(factor);
+    float exp = (1 / ircaC[IRCA1_MODEL]);
+    float num = pow(base,exp);
+    float den = ircaPowCal[IRCA1_MODEL];
+    float concentration = num / den;
+    return concentration;
+}
+
+/* IrcA1 calculate CO2 */
+void IrcA1_calculate(IrcA1* ircA1) {
+    float abs = IrcA1_calculateAbs(ircA1);
+    ircA1->data->x = IrcA1_calculateConcentration(abs, ircA1);
+}
+
 #endif

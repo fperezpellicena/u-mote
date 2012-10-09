@@ -19,7 +19,7 @@
 #include "digi_serial.h"
 
 /* Send XBee packet */
-BOOL XBeeProxy_sendPacket(XBeePacket * const packet) {
+BOOL XBee_sendPacket(XBeePacket * const packet) {
     UINT8* p = (UINT8*) packet;
     XBeeSerial_send(START_DELIMITER);
     // send the most significant bit

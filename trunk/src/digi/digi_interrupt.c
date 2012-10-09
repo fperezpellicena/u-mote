@@ -18,7 +18,6 @@
 #include "bsp.h"
 #include "digi_api.h"
 #include "digi_interrupt.h"
-#include "digi_proxy.h"
 #include "sensor_proxy.h"
 #include "payload.h"
 #include "rtc.h"
@@ -54,10 +53,10 @@ void XBeeInterrupt_handleTopHalve(void) {
 #if XBEE_INTERRUPT == SERIAL_INTERRUPT
     // If serial interrupt is configured, read last received byte
     // and store it in lastByte field
-    UINT8 byte = Serial_read(&xbeeProxySerial);
-    xbeeProxyPacket.lastByte = byte;
+    UINT8 byte = XBeeSerial_read();
+    packet.lastByte = byte;
     // ACK
-    Serial_ackInterrupt(&xbeeProxySerial);
+    XBeeSerial_ackInterrupt();
 #else
     // Comment:
     // if ON_SLEEP_INTERRUPT enabled
@@ -66,7 +65,7 @@ void XBeeInterrupt_handleTopHalve(void) {
     //  else
     //      clear ON_SLEEP flag
 #if SLEEP_STATUS_MESSAGES
-    XBeeProxy_readPacket(&xbeeProxyPacket);
+    XBee_readPacket(&packet);
 #else
     // ACK
     XBEE_ON_SLEEP_CLEAR_FLAG;
@@ -74,9 +73,9 @@ void XBeeInterrupt_handleTopHalve(void) {
 #endif
 }
 
-static void XBeeProxy_monitoring(void);
+static void XBee_monitoring(void);
 
-static void XBeeProxy_monitoring(void) {
+static void XBee_monitoring(void) {
     Payload_init(&payload);
     Rtc_addTimeToPayload(&payload);
     SensorProxy_addSensorsToPayload(&payload);
@@ -84,13 +83,13 @@ static void XBeeProxy_monitoring(void) {
     SensorProxy_addMeasuresToPayload(&payload);
     XBee_createTransmitRequestPacket(&packet, 0x06, XBEE_SINK_ADDRESS,
             XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
-    XBeeProxy_sendPacket(&packet);
+    XBee_sendPacket(&packet);
 }
 
 #if SENSING_MODE == FUZZY_DRIVEN
-static void XBeeProxy_fuzzyMonitoring(void);
+static void XBee_fuzzyMonitoring(void);
 
-static void XBeeProxy_fuzzyMonitoring(void) {
+static void XBee_fuzzyMonitoring(void) {
     UINT8 risk = 0;
     // Prepara la nueva trama
     Payload_init(&payload);
@@ -107,9 +106,9 @@ static void XBeeProxy_fuzzyMonitoring(void) {
     Payload_add(&payload, risk);
     // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
-    XBee_createTransmitRequestPacket(&xbeeProxyPacket, 0x06, XBEE_SINK_ADDRESS,
+    XBee_createTransmitRequestPacket(&packet, 0x06, XBEE_SINK_ADDRESS,
             XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
-    XBeeProxy_sendPacket(&xbeeProxyPacket);
+    XBee_sendPacket(&packet);
 }
 #endif
 
@@ -119,14 +118,14 @@ void XBeeInterrupt_handleBottomHalve(void) {
     // If serial interrupt is configured, process last received byte
     // and check for valid frame
     // If valid frame received, create new data frame and send
-    if (XBeeProxy_read() == TRUE) {
+    if (XBee_read() == TRUE) {
         // Crea una trama y la envía
     }
 #else
 #   if SENSING_MODE == MONITORING
-    XBeeProxy_monitoring();
+    XBee_monitoring();
 #   else
-    XBeeProxy_fuzzyMonitoring();
+    XBee_fuzzyMonitoring();
 #   endif
 #endif
 }
@@ -134,7 +133,7 @@ void XBeeInterrupt_handleBottomHalve(void) {
 BOOL XBeeInterrupt_check(void) {
 #if XBEE_INTERRUPT == SERIAL_INTERRUPT
     // If serial interrupt is configured, check serial
-    return Serial_checkInterrupt(&xbeeProxySerial);
+    return XBeeSerial_checkInterrupt();
 #else
     // If pin interrupt is enabled, check pin
     return XBEE_ON_SLEEP_FLAG;

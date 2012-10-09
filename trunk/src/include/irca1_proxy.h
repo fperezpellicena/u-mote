@@ -26,9 +26,5 @@ void IrcA1Proxy_init(void);
 /*..........................................................................*/
 void IrcA1Proxy_sense(Payload* measures);
 
-void IrcA1Proxy_pulseOn(void);
-
-void IrcA1Proxy_pulseOff(void);
-
 #   endif /* ircA1_proxy_h */
 #endif
