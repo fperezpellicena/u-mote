@@ -87,12 +87,13 @@ rtccTimeDate* Rtc_read(void) {
 /* Read Rtc data into a list */
 void Rtc_addTimeToPayload(Payload* payload) {
     Rtc_read();
-    Payload_add(payload, timestamp.f.mday);
-    Payload_add(payload, timestamp.f.mon);
-    Payload_add(payload, timestamp.f.year);
-    Payload_add(payload, timestamp.f.hour);
-    Payload_add(payload, timestamp.f.min);
-    Payload_add(payload, timestamp.f.sec);
+    Payload_addByte(payload, timestamp.f.sec);
+    Payload_addByte(payload, timestamp.f.min);
+    Payload_addByte(payload, timestamp.f.hour);
+    Payload_addByte(payload, timestamp.f.mday);
+    Payload_addByte(payload, timestamp.f.wday);
+    Payload_addByte(payload, timestamp.f.mon);
+    Payload_addByte(payload, timestamp.f.year);
 }
 
 /*..........................................................................*/

@@ -31,8 +31,11 @@ struct Payload {
 /* Init list */
 void Payload_init(Payload* list);
 
-/* Add one element to the list */
-void Payload_add(Payload* list, UINT8 element);
+/* Add one byte to the list */
+void Payload_addByte(Payload* payload, UINT8 element);
+
+/* Add one word to the list */
+void Payload_addWord(Payload* payload, UINT16 element);
 
 /* Delete all elements of the list */
 void Payload_empty(Payload* list);

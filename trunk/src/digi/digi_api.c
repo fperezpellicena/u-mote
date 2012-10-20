@@ -26,7 +26,7 @@ void XBee_resetPacket(XBeePacket * const packet) {
     packet->length = 0;
     packet->index = 0;
     packet->apiId = 0;
-    memset(packet->frame.payload, 0, MAX_PAYLOAD); //FIXME Magic number
+    memset(packet->frame.payload, 0, MAX_PAYLOAD);
 }
 
 UINT8 XBee_escape(UINT8 value) {

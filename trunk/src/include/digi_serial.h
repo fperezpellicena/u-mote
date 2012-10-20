@@ -26,14 +26,14 @@ void XBeeSerial_send(UINT8 value);
 
 void XBeeSerial_sendArray(UINT8* values, UINT8 size);
 
-UINT8 XBeeSerial_read();
+UINT8 XBeeSerial_read(void);
 
-BOOL XBeeSerial_available();
+BOOL XBeeSerial_available(void);
 
-void XBeeSerial_close();
+void XBeeSerial_close(void);
 
-BOOL XBeeSerial_checkInterrupt();
+BOOL XBeeSerial_checkInterrupt(void);
 
-void XBeeSerial_ackInterrupt();
+void XBeeSerial_ackInterrupt(void);
 
 #endif

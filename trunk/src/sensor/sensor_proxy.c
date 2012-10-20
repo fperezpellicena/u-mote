@@ -21,50 +21,50 @@
 #include <stdio.h>
 
 #if SHT_ENABLED
-#   include "sht.h"
+#include "sht.h"
 #endif
 #if IRCA1_ENABLED
-#   include "irca1.h"
-#   include "irca1_proxy.h"
+#include "irca1.h"
+#include "irca1_proxy.h"
 #endif
 
 #if SENSING_MODE == FUZZY_DRIVEN
-    #include "fuzzy.h"
+#include "fuzzy.h"
 
-    #pragma udata tmp_mf
-    DECLARE_MF(lowTemp, -40, 0, 20);
-    DECLARE_MF(midTemp, 0, 20, 40);
-    DECLARE_MF(highTemp, 30, 40, 255);
-    DECLARE_RT(ifHighTemp, &highTemp);
-    DECLARE_RT(ifMidTemp, &midTemp);
-    DECLARE_RT(ifLowTemp, &lowTemp);
-    #pragma udata
+#pragma udata tmp_mf
+DECLARE_MF(lowTemp, -40, 0, 20);
+DECLARE_MF(midTemp, 0, 20, 40);
+DECLARE_MF(highTemp, 30, 40, 255);
+DECLARE_RT(ifHighTemp, &highTemp);
+DECLARE_RT(ifMidTemp, &midTemp);
+DECLARE_RT(ifLowTemp, &lowTemp);
+#pragma udata
 
-    #pragma udata risk_mf
-    DECLARE_MF(lowRisk, 0, 0, 50);
-    DECLARE_MF(midRisk, 0, 50, 100);
-    DECLARE_MF(highRisk, 50, 100, 255);
-    #pragma udata
+#pragma udata risk_mf
+DECLARE_MF(lowRisk, 0, 0, 50);
+DECLARE_MF(midRisk, 0, 50, 100);
+DECLARE_MF(highRisk, 50, 100, 255);
+#pragma udata
 
-    #pragma udata rp
-    DECLARE_RT(thenHighRisk, &highRisk);
-    DECLARE_RT(thenMidRisk, &midRisk);
-    DECLARE_RT(thenLowRisk, &lowRisk);
-    #pragma udata
+#pragma udata rp
+DECLARE_RT(thenHighRisk, &highRisk);
+DECLARE_RT(thenMidRisk, &midRisk);
+DECLARE_RT(thenLowRisk, &lowRisk);
+#pragma udata
 
-    #pragma udata rules
-    DECLARE_RULE(ifHighTempThenHighRisk, &thenHighRisk, 1, &ifHighTemp);
-    DECLARE_RULE(ifMidTempThenMidRisk, &thenMidRisk, 1, &ifLowTemp);
-    DECLARE_RULE(ifLowTempThenLowRisk, &thenLowRisk, 1, &ifMidTemp);
-    //DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
-    //DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
-    #pragma udata
+#pragma udata rules
+DECLARE_RULE(ifHighTempThenHighRisk, &thenHighRisk, 1, &ifHighTemp);
+DECLARE_RULE(ifMidTempThenMidRisk, &thenMidRisk, 1, &ifLowTemp);
+DECLARE_RULE(ifLowTempThenLowRisk, &thenLowRisk, 1, &ifMidTemp);
+//DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
+//DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
+#pragma udata
 
-    #pragma udata ruleEngine
-    DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
-            &ifMidTempThenMidRisk, &ifLowTempThenLowRisk);
-    //DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
-    #pragma udata
+#pragma udata ruleEngine
+DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
+        &ifMidTempThenMidRisk, &ifLowTempThenLowRisk);
+//DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
+#pragma udata
 #endif
 
 #pragma udata sensors_data
@@ -73,27 +73,29 @@ Sensors sensors;
 
 /* Declare one SHT sensor for temperature */
 #if SHT_ENABLED
-#   pragma udata sht
-#       if SENSING_MODE == FUZZY_DRIVEN
-            DECLARE_FUZZY_SHT(SHT_ID, sht, &Sht11_measureTmp, 1, &ifHighTemp);
-#       else
-            DECLARE_SHT(SHT_ID, sht, &Sht11_measureTmp);
-#       endif
-#   pragma udata
+#pragma udata sht
+#if SENSING_MODE == FUZZY_DRIVEN
+DECLARE_FUZZY_SHT(SHT_ID, sht, &Sht11_measureTmp, 1, &ifHighTemp);
+#else
+DECLARE_SHT(SHT_ID, sht, &Sht11_measureTmp);
 #endif
-            
+#pragma udata
+#endif
+
 /* Declare one IRC-A1 gas sensor */
 #if IRCA1_ENABLED
-#   pragma udata irca
-#       if SENSING_MODE == FUZZY_DRIVEN
-            DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense, 1, &ifHighCO2);
-#       else
-            DECLARE_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense);
-#       endif
-#   pragma udata
+#pragma udata irca
+#if SENSING_MODE == FUZZY_DRIVEN
+DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense, 1, &ifHighCO2);
+#else
+DECLARE_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense);
+#endif
+#pragma udata
 #endif
 
 static Payload measures;
+
+static UINT8 SensorProxy_composeSensorIdentifiers(void);
 
 /*..........................................................................*/
 void SensorProxy_init(void) {
@@ -137,42 +139,59 @@ void SensorProxy_sense(void) {
 /*..........................................................................*/
 
 #if SENSING_MODE == FUZZY_DRIVEN
-    /* Measure sensor board and check for alert condition */
-    UINT8 SensorProxy_fuzzy(void) {
-        UINT8 i;
-        UINT8 j;
-        UINT8 measure;
-        // Turn on sensor board
-        SensorProxy_powerOn();
-        // Empty previous measures
-        Payload_empty(&measures);
-        // Put measures into rule terms
-        for (i = 0; i < sensors.size; i++) {
-            measure = sensors.sensors[i]->sense(&measures);
-            for (j = 0; j < sensors.sensors[i]->ruleTermsSize; j++) {
-                sensors.sensors[i]->ruleTerms[j]->input = measure;
-            }
+
+/* Measure sensor board and check for alert condition */
+UINT8 SensorProxy_fuzzy(void) {
+    UINT8 i;
+    UINT8 j;
+    UINT8 measure;
+    // Turn on sensor board
+    SensorProxy_powerOn();
+    // Empty previous measures
+    Payload_empty(&measures);
+    // Put measures into rule terms
+    for (i = 0; i < sensors.size; i++) {
+        measure = sensors.sensors[i]->sense(&measures);
+        for (j = 0; j < sensors.sensors[i]->ruleTermsSize; j++) {
+            sensors.sensors[i]->ruleTerms[j]->input = measure;
         }
-        // Turn off sensor board
-        SensorProxy_powerOff();
-        // Run fuzzy engine
-        return RuleEngine_run(&engine);
     }
+    // Turn off sensor board
+    SensorProxy_powerOff();
+    // Run fuzzy engine
+    return RuleEngine_run(&engine);
+}
 #endif
 
 /*..........................................................................*/
 
 /* Put sensor byte identification based on sensor id attribute */
 void SensorProxy_addSensorsToPayload(Payload* payload) {
-    UINT32 sensors = 0; //NO_SENSORS << 24 | NO_SENSORS << 16 | sht.sensor->id << 8 | NO_SENSORS;
-    Payload_add(payload, (UINT8) sensors);
-    Payload_add(payload, (UINT8) sensors >> 8);
-    Payload_add(payload, (UINT8) sensors >> 16);
-    Payload_add(payload, (UINT8) sensors >> 24);
+    UINT8 sensors = SensorProxy_composeSensorIdentifiers();
+    Payload_addByte(payload, 0);
+    Payload_addByte(payload, sensors);
+    Payload_addByte(payload, 0);
+    Payload_addByte(payload, 0);
 }
 
 /*..........................................................................*/
+
 /* Put measures to payload */
 void SensorProxy_addMeasuresToPayload(Payload* payload) {
     Payload_append(payload, &measures);
+}
+
+
+/*..........................................................................*/
+
+/* Compose sensor identifier array by OR'ing each identifier supposed uniques */
+// FIXME Sensor vector should be statically defined because it never changes one programmed
+static UINT8 SensorProxy_composeSensorIdentifiers(void) {
+    UINT8 i;
+    UINT8 sensorIdentifiers = 0;
+    // For each sensor installed, put measures into payload
+    for (i = 0; i < sensors.size; i++) {
+        sensorIdentifiers |= sensors.sensors[i]->id;
+    }
+    return sensorIdentifiers;
 }
