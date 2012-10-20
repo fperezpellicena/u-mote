@@ -40,16 +40,16 @@ UINT8 Sht11_write(UINT8 value) {
         } else {
             SHT_DATA = 0;
         }
-        Delay1KTCYx(1); //observe setup time
+        Delay1TCY(); //observe setup time
         SHT_SCK = 1; //clk for SENSI-BUS
-        Delay1KTCYx(1); //pulswith approx. 5 us
+        Delay1TCY(); //pulswith approx. 5 us
         SHT_SCK = 0;
-        Delay1KTCYx(1); //observe hold time
+        Delay1TCY(); //observe hold time
     }
     SHT_DATA = 1; //release SHT_DATA-line
-    Delay1KTCYx(1); //observe setup time
+    Delay1TCY(); //observe setup time
     SHT_SCK = 1; //clk #9 for ack
-    Delay1KTCYx(1);
+    Delay1TCY();
     // To read SHT ack(low), change pin direction
     SHT_DATA_DDR = 1;
     // Read pin
@@ -64,12 +64,12 @@ UINT8 Sht11_read(UINT8 ack) {
     SHT_DATA = 1;
     for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
-        Delay1KTCYx(1);
+        Delay1TCY();
         SHT_SCK = 1; //clk for SENSI-BUS
         if (SHT_DATA_PIN) {
             val = (val | i); //read bit
         }
-        Delay1KTCYx(1);
+        Delay1TCY();
         SHT_SCK = 0;
     }
 
@@ -77,11 +77,11 @@ UINT8 Sht11_read(UINT8 ack) {
         SHT_DATA_DDR = 0;
         SHT_DATA = 0; //in case of "ack==1" pull down SHT_DATA-Line
     }
-    Delay1KTCYx(1); //observe setup time
+    Delay1TCY(); //observe setup time
     SHT_SCK = 1; //clk #9 for ack
-    Delay1KTCYx(1); //pulswith approx. 5 us
+    Delay1TCY(); //pulswith approx. 5 us
     SHT_SCK = 0;
-    Delay1KTCYx(1); //observe hold time
+    Delay1TCY(); //observe hold time
     return val;
 }
 
@@ -90,17 +90,17 @@ UINT8 Sht11_read(UINT8 ack) {
 void Sht11_start(void) {
     SHT_DATA = 1;
     SHT_SCK = 0; //Initial state
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_SCK = 1;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_DATA = 0;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_SCK = 0;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_SCK = 1;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_DATA = 1;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_SCK = 0;
 }
 
@@ -111,11 +111,11 @@ void Sht11_reset(void) {
     //9 SHT_SCK cycles
     for (i = 0; i < 9; i++) {
         SHT_SCK = 1;
-        Delay1KTCYx(1);
+        Delay1TCY();
         SHT_SCK = 0;
-        Delay1KTCYx(1);
+        Delay1TCY();
     }
-    Delay1KTCYx(1);
+    Delay1TCY();
     Sht11_start(); //transmission start
 }
 
@@ -157,6 +157,8 @@ UINT8 Sht11_measureAndCalculate(Sht* sht) {
 
 UINT8 Sht11_measure(Sht* sht) {
     UINT8 error = 0;
+    SHT_DATA_DDR = 0;
+    SHT_DATA = 1;
     // Get measures
     error += Sht11_measureParam(&sht->data->temperature.i,
             &sht->data->temp_chk, SHT_MEASURE_TEMP);
@@ -191,12 +193,10 @@ UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
             break;
         default: break;
     }
-    Delay1KTCYx(1);
+    Delay1TCY();
     SHT_DATA_DDR = 1;
-    // Long busy wait can block usb
-
+    // FIXME Long busy wait could block usb, use interrupts instead.
     while (SHT_DATA_PIN == 1);
-
     // Read two bytes response
     *(p_value) = Sht11_read(SHT_ACK); //read the first byte (MSB)
     *(p_value) = *(p_value) << 8;
@@ -264,7 +264,6 @@ UINT8 Sht11_usbShtHumidity(Sht* sht, char* usbOutBuffer) {
     // Converts integer to float
     sht->data->humidity.f = (float) sht->data->humidity.i;
     Sht11_calculateHumidity(&sht->data->humidity.f);
-
     return sprintf(usbOutBuffer, (const MEM_MODEL rom char*)"Humedad relativa: %d.%2u % \n\r",
             (int) sht->data->humidity.f / 100,
             fabs(((sht->data->humidity.f - (int) sht->data->humidity.f)*100)));
@@ -273,14 +272,19 @@ UINT8 Sht11_usbShtHumidity(Sht* sht, char* usbOutBuffer) {
 /*...........................................................................*/
 void Sht11_measureTmp(Payload* measures) {
     Sht sht;
-    Sht11_measure(&sht);
-    Payload_add(measures, sht.data->temperature.i);
+    UINT16 tmp;
+    Sht11_init();
+    Sht11_measureTemperature(&sht);
+    // Temperature is either 12 or 14 bits length
+    tmp = sht.data->temperature.i;
+    Payload_addWord(measures, tmp);
 }
 
 /*...........................................................................*/
 void Sht11_measureHumi(Payload* measures) {
     Sht sht;
-    Sht11_measure(&sht);
-    Payload_add(measures, sht.data->humidity.i);
+    Sht11_init();
+    Sht11_measureHumidity(&sht);
+    Payload_addByte(measures, sht.data->humidity.i);
 }
 #endif

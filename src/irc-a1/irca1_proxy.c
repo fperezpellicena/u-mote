@@ -34,9 +34,9 @@ void IrcA1Proxy_sense(Payload* measures) {
     ircA1.data->act = Adc_convert(IRCA1_ACT);
     ircA1.data->tmp = Adc_convert(IRCA1_TMP);
     // Raw values
-    Payload_add(measures, ircA1.data->ref);
-    Payload_add(measures, ircA1.data->act);
-    Payload_add(measures, ircA1.data->tmp);
+    Payload_addByte(measures, ircA1.data->ref);
+    Payload_addByte(measures, ircA1.data->act);
+    Payload_addByte(measures, ircA1.data->tmp);
 }
 
 #endif

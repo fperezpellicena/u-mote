@@ -54,28 +54,28 @@ void XBeeSerial_sendArray(UINT8* values, UINT8 size) {
     XBeeSerial_send(NULL);
 }
 
-UINT8 XBeeSerial_read() {
+UINT8 XBeeSerial_read(void) {
     return RCREG1;
 }
 
-BOOL XBeeSerial_available() {
+BOOL XBeeSerial_available(void) {
     if (PIR1bits.RC1IF) {
         return TRUE; // Data is available, return TRUE
     }
     return FALSE;
 }
 
-void XBeeSerial_close() {
+void XBeeSerial_close(void) {
     RCSTA1 &= 0b01001111; // Disable the receiver
     TXSTA1bits.TXEN = 0; // and transmitter
     PIE1 &= 0b11001111; // Disable both interrupts
 }
 
 /** Interrupt handler functions */
-BOOL XBeeSerial_checkInterrupt() {
+BOOL XBeeSerial_checkInterrupt(void) {
     return XBeeSerial_available();
 }
 
-void XBeeSerial_ackInterrupt() {
+void XBeeSerial_ackInterrupt(void) {
     PIR1bits.RC1IF = 0;
 }

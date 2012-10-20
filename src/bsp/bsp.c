@@ -36,7 +36,6 @@
 
 /*...........................................................................*/
 void BSP_init(void) {
-    Power_runRcMode();
     // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
     BSP_enablePLL();
     // Default all pins to digital

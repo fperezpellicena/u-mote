@@ -97,15 +97,15 @@
 /*...........................................................................*/
 /* USB SECTION */
 
-#define USB_ENABLED         0
+#define USB_ENABLED         1
 
 /* USB attach detector */
 #define USB_PLUG_PIN        PORTBbits.RB4
 
 #if USB_ENABLED
 #   ifdef USB_PLUG_PIN
-#       define USB_PLUGGED    USB_PLUG_PIN == 1
-#       define ENABLE_USB_ATTACH     TRISBbits.TRISB4 = 1
+#       define USB_PLUGGED          USB_PLUG_PIN == 1
+#       define ENABLE_USB_ATTACH    TRISBbits.TRISB4 = 1
 #   else
 #       error "USB_PLUG_PIN not defined"
 #   endif
@@ -166,8 +166,8 @@
 /*..........................................................................*/
 /* SHT11 section */
 
-#define SHT_ENABLED         0
-#define SHT_ID              0x0A
+#define SHT_ENABLED         1
+#define SHT_ID              0x04
 
 #define SHT_TMP_THR         20      // Umbral 80ºC
 
@@ -186,7 +186,7 @@
 /*...........................................................................*/
 /* IRC-A1 section */
 
-#define IRCA1_ENABLED   1
+#define IRCA1_ENABLED   0
 #define IRCA1_ID        0x08
 
 #define IRC_A1_SAFE     0

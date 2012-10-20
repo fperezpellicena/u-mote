@@ -18,20 +18,35 @@
 #include "payload.h"
 
 /*..........................................................................*/
+
 /* Init list, set size equals zero */
 void Payload_init(Payload* payload) {
     payload->size = 0;
 }
 
 /*..........................................................................*/
-/* Add one elemento to the list */
-void Payload_add(Payload* payload, UINT8 element) {
+
+/* Add one byte to the list */
+void Payload_addByte(Payload* payload, UINT8 element) {
     if (payload->size < MAX_PAYLOAD - 1) {
         payload->data[payload->size++] = element;
     }
 }
 
 /*..........................................................................*/
+
+/* Add one word to the list(big endian) */
+void Payload_addWord(Payload* payload, UINT16 element) {
+    UINT8 lsb = (UINT8)element;
+    UINT8 msb = (UINT8)element >> 8;
+    if (payload->size < MAX_PAYLOAD - 2) {
+        payload->data[payload->size++] = msb;
+        payload->data[payload->size++] = lsb;
+    }
+}
+
+/*..........................................................................*/
+
 /* Delete all elements of the list */
 void Payload_empty(Payload* payload) {
     UINT8 i = MAX_PAYLOAD - 1;
@@ -41,10 +56,11 @@ void Payload_empty(Payload* payload) {
 }
 
 /*..........................................................................*/
+
 /* Append all elements to the list */
 void Payload_append(Payload* to, Payload* from) {
     UINT8 i = 0;
-    while(i < from->size) {
-        Payload_add(to, from->data[i++]);
+    while (i < from->size) {
+        Payload_addByte(to, from->data[i++]);
     }
 }

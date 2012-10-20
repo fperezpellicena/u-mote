@@ -63,10 +63,10 @@
 #pragma code
 
 void main(void) {
-    Wdt_enable();
     // Init basic system
     BSP_init();
     while (1) {
+        //Wdt_enable();
 #if USB_ENABLED
         // Comprueba el terminal que indica la conexión USB al inicio o al reset
         if (USB_PLUGGED) {
@@ -76,12 +76,13 @@ void main(void) {
             } else {
                 // Si ya se ha activado, realiza las tareas USB
                 USB_process();
+            }
 #ifdef __18F46J50_H
                 USB_blinkStatus();
 #endif
-            }
         } else {
             Power_runPrimaryMode();
+            
 #if SLEEP_MODE == DEEP_SLEEP
             if (XBEE_ON_SLEEP_AWAKE) {
                 BSP_onWakeUp();
