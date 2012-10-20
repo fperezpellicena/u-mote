@@ -58,28 +58,28 @@ void Serial_sendArray(UINT8* values, UINT8 size) {
     Serial_send(NULL);
 }
 
-UINT8 Serial_read() {
+UINT8 Serial_read(void) {
     return RCREG2;
 }
 
-BOOL Serial_available() {
+BOOL Serial_available(void) {
     if (PIR3bits.RC2IF) {
         return TRUE; // Data is available, return TRUE
     }
     return FALSE;
 }
 
-void Serial_close() {
+void Serial_close(void) {
     RCSTA2 &= 0b01001111; // Disable the receiver
     TXSTA2bits.TXEN = 0; // and transmitter
     PIE3 &= 0b11001111; // Disable both interrupts
 }
 
 /** Interrupt handler functions */
-BOOL Serial_checkInterrupt() {
+BOOL Serial_checkInterrupt(void) {
     return Serial_available();
 }
 
-void Serial_ackInterrupt() {
+void Serial_ackInterrupt(void) {
     PIR3bits.RC2IF = 0;
 }

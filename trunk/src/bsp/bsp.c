@@ -24,15 +24,14 @@
 #include <delays.h>
 
 #if USB_ENABLED
-#   include "usb_device.h"
+#include "usb_device.h"
 #endif
 #if RTCC_ENABLED
-#   include "rtc.h"
+#include "rtc.h"
 #endif
 #if SLEEP_MODE == SLEEP
-#   include "isr.h"
+#include "isr.h"
 #endif
-
 
 /*...........................................................................*/
 void BSP_init(void) {
@@ -41,7 +40,7 @@ void BSP_init(void) {
     // Default all pins to digital
     BSP_defaultIO();
     //Initialize all of the LED pins
-    mInitAllLEDs();
+    BSP_initLeds();
     // Initializes mote API
     XBee_init();
     // Enable sensor board
@@ -93,6 +92,7 @@ static void BSP_clearMclrFlags(void) {
 }
 
 /*...........................................................................*/
+
 /* On reset push, join xbee */
 void BSP_onMclr(void) {
     BSP_clearMclrFlags();
@@ -101,10 +101,6 @@ void BSP_onMclr(void) {
     Power_runPrimaryMode();
     XBee_join();
     Power_runRcMode();
-#ifdef __18F46J50_H
-    TRISDbits.TRISD1 = 0;
-    LATDbits.LATD1 = 1;
-#endif
 }
 
 static void BSP_clearWakeUpFlags(void);
@@ -117,11 +113,6 @@ static void BSP_clearWakeUpFlags(void) {
 
 /*...........................................................................*/
 void BSP_onWakeUp(void) {
-#ifdef __18F46J50_H
-    TRISEbits.TRISE0 = 0;
-    LATEbits.LATE0 = !LATEbits.LATE0;
-    TRISDbits.TRISD1 = 0;
-#endif
     // Clear wake up flags
     BSP_clearWakeUpFlags();
     // Ejecuta la interrupción que ha despertado al sistema

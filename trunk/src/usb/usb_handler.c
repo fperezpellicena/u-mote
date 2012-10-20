@@ -29,19 +29,19 @@
 #include "usb_function_cdc.h"
 
 #if RTCC_ENABLED
-#   include "rtc.h"
+#include "rtc.h"
 #endif
 
 #if SHT_ENABLED
-#   include "sht.h"
-    extern Sht sht;
+#include "sht.h"
+extern Sht sht;
 #endif
 
 #include "digi_api.h"
 
 #pragma udata buffers
-char USB_In_Buffer[64];
-char USB_Out_Buffer[64];
+Payload usbInputBuffer;
+Payload usbOutputBuffer;
 #pragma
 
 
@@ -50,71 +50,55 @@ char USB_Out_Buffer[64];
 
 /** Procesamiento de información USB  */
 void USB_process(void) {
-    UINT8 length;
     rtccTimeDate* timestamp;
     static char RTCC_CONF[] = "rtccconfig";
     static char RTCC_TEST[] = "rtcctest";
     static char XBEE_JOIN[] = "xbeejoin";
     static char ADC_TEST[] = "adctest";
     // Sht-11 test commands
-    static char SHT_TMP[] = "shttemp";
-    static char SHT_HUM[] = "shthum";
+    static char SHT[] = "shttest";
 
     BYTE numBytesRead;
+
+    // Init payloads
+    Payload_init(&usbInputBuffer);
+    Payload_init(&usbOutputBuffer);
+
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) {
         return;
     }
     // Recibe un buffer de tamaño determinado
-    numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
+    numBytesRead = getsUSBUSART(usbOutputBuffer.data, 64);
 
     // Si ha leído datos
     if (numBytesRead != 0) {
-        if (strncmp(USB_Out_Buffer, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
-            timestamp = Rtc_parse(USB_Out_Buffer);
-            length = (UINT8)sprintf(USB_In_Buffer,
-                    (const MEM_MODEL rom char*)"Fecha/Hora establecida: %2u:%2u:%2u %2u/%2u/%4u \n\r",
-                    timestamp->f.hour, timestamp->f.min, timestamp->f.sec,
-                    timestamp->f.mday, timestamp->f.mon, timestamp->f.year);
-            //mLED_3_Toggle();
-        } else if (strncmp(USB_Out_Buffer, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
-            // Lee la fecha/hora
-            timestamp = Rtc_read();
-             // Devuelve el tamaño del contenido
-            length = (UINT8)sprintf(USB_In_Buffer,
-                    (const MEM_MODEL rom char*)"Fecha/Hora: %u:%u:%u %u/%u/%u \n\r",
-                    timestamp->f.hour, timestamp->f.min, timestamp->f.sec,
-                    timestamp->f.mday, timestamp->f.mon, timestamp->f.year);
-        } else if (strncmp(USB_Out_Buffer, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
-            XBee_usbJoin(USB_In_Buffer);
-            length = (UINT8)sprintf(USB_In_Buffer,
-                    (const MEM_MODEL rom char*)"uMote unido a la red \n\r");
-        } else if (strncmp(USB_Out_Buffer, ADC_TEST, strlen(ADC_TEST)) == 0) {
-            length = Adc_usbTest(USB_In_Buffer);
-        } else if (strncmp(USB_Out_Buffer, SHT_TMP, strlen(SHT_TMP)) == 0) {
+        if (strncmp(usbOutputBuffer.data, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
+            Rtc_readInputStream(&usbOutputBuffer);
+            Rtc_writeFormattedTimestamp(&usbInputBuffer);
+        } else if (strncmp(usbOutputBuffer.data, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
+            Rtc_readTimestamp();
+            Rtc_writeFormattedTimestamp(&usbInputBuffer);
+        } else if (strncmp(usbOutputBuffer.data, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
+            XBee_join();
+            Payload_putString(&usbInputBuffer, (const MEM_MODEL rom char*) "Join request sent");
+        } else if (strncmp(usbOutputBuffer.data, ADC_TEST, strlen(ADC_TEST)) == 0) {
+            PAYLOAD_PUT_STRING_WITH_ARGS(&usbInputBuffer,
+                    "ADC channel 1: %u\n\r", Adc_testChannelOne());
+        } else if (strncmp(usbOutputBuffer.data, SHT, strlen(SHT)) == 0) {
 #if SHT_ENABLED
-            length = Sht11_usbShtTemperature(&sht, USB_In_Buffer);
+            Sht11_measure(&sht);
+            Sht11_addMeasuresCalculatedToPayload(&sht, &usbInputBuffer);
 #else
-            length = sprintf(USB_In_Buffer,
-                    (const MEM_MODEL rom char*)"SHT not installed");
-#endif
-        } else if (strncmp(USB_Out_Buffer, SHT_HUM, strlen(SHT_HUM)) == 0) {
-#if SHT_ENABLED
-            length = Sht11_usbShtHumidity(&sht, USB_In_Buffer);
-#else
-            length = sprintf(USB_In_Buffer,
-                    (const MEM_MODEL rom char*)"SHT not installed");
+            Payload_putString((const MEM_MODEL rom char*) "SHT11 not installed");
 #endif
         } else {
             // Si el comando es erróneo, muestra un mensaje de error
-            length = sprintf(USB_In_Buffer,
-                    (const MEM_MODEL rom char*)"Comando desconocido");
+            Payload_putString(&usbInputBuffer, (const MEM_MODEL rom char*) "Comando desconocido");
         }
         // Si está preparado para enviar datos
-        if (USBUSARTIsTxTrfReady() && length != 0) {
-           // mLED_4_Toggle();
-            putUSBUSART(USB_In_Buffer, (BYTE)length);
-            length = 0;
+        if (USBUSARTIsTxTrfReady() && usbInputBuffer.size != 0) {
+            putUSBUSART(usbInputBuffer.data, (BYTE) usbInputBuffer.size);
         }
     }
 

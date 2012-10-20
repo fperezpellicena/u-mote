@@ -97,7 +97,7 @@
 /*...........................................................................*/
 /* USB SECTION */
 
-#define USB_ENABLED         1
+#define USB_ENABLED         0
 
 /* USB attach detector */
 #define USB_PLUG_PIN        PORTBbits.RB4
@@ -112,14 +112,14 @@
 #endif
 
 #ifdef __18F46J50_H
-#define mInitAllLEDs()      LATE &= 0xFC; TRISE &= 0xFC; TRISD &= 0xFC; LATD &= 0xFC;
+#define BSP_initLeds()      LATE &= 0xFC; TRISE &= 0xFC; TRISD &= 0xFC; LATD &= 0xFC;
 
 #define mLED_1              LATEbits.LATE0
 #define mLED_2              LATEbits.LATE1
 #define mLED_3              LATDbits.LATD0
 #define mLED_4              LATDbits.LATD1
 #else
-#define mInitAllLEDs()      LATC &= 0xFC; TRISC &= 0xFC;
+#define BSP_initLeds()      LATC &= 0xFC; TRISC &= 0xFC;
 
 #define mLED_1              LATCbits.LATC0
 #define mLED_2              LATCbits.LATC1

@@ -19,6 +19,7 @@
 #define hw_adc_h
 
 #include "GenericTypeDefs.h"
+#include "payload.h"
 
 void Adc_init(void);
 
@@ -32,6 +33,6 @@ UINT16 Adc_convert(UINT8 channel);
 
 UINT16 Adc_convertAveragedValue(UINT8 channel);
 
-UINT8 Adc_usbTest(char* usbOutBuffer);
+UINT16 Adc_testChannelOne(void);
 
 #endif  /* hw_adc_h*/

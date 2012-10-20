@@ -22,8 +22,8 @@
 #   define sht11_h
 
 #   include "GenericTypeDefs.h"
-#   include "sensor.h"
 #   include "sensor_proxy.h"
+#   include "fuzzy_rule.h"
 
 #   define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
 #   define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
@@ -36,47 +36,51 @@
 #   define SHT_ACK             1			/* Send ACK */
 #   define SHT_NACK            0                   /* Not send ACK */
 
-/* Sensor measures temperature and humidity */
-enum Modes {
-    SHT_TEMP, SHT_HUMI
+
+/* Sht fuzzy terms */
+typedef struct ShtFuzzyTerms ShtFuzzyTerms;
+
+struct ShtFuzzyTerms {
+    RuleTerm** tempRules;
+    RuleTerm** humiRules;
+    UINT8 tempRulesSize;
+    UINT8 humiRulesSize;
 };
 
 /* Sht data class */
 typedef struct ShtData ShtData;
 
 struct ShtData {
-
     union {
         UINT16 i;
         float f;
     } temperature;
-
     union {
         UINT16 i;
         float f;
     } humidity;
-    UINT8 temp_chk;
-    UINT8 humi_chk;
+    UINT8 tempChk;
+    UINT8 humiChk;
 };
 
 /* Declare sht sensor */
-#define DECLARE_SHT(id, name, senseFn) \
-    DECLARE_SENSOR(id, name##id, senseFn);\
-    ShtData name##data;\
-    Sht name = {&name##id, &name##data}
+#define DECLARE_SHT(id, name) \
+    ShtData name##data = {0,0,0,0};\
+    Sht name = {id, &name##data, NULL}
 
 /* Declare fuzzy sht sensor */
 #define DECLARE_FUZZY_SHT(id, name, senseFn, termsSize, ...) \
-    DECLARE_FUZZY_SENSOR(id, name##id, senseFn, termsSize, __VA_ARGS__);\
+    RuleTerm* name##terms[termsSize] = {__VA_ARGS__};\
     ShtData name##data;\
-    Sht name = {&name##id, &name##data}
+    Sht name = {id, &name##data, NULL}
 
 /* Sht11 class */
 typedef struct Sht Sht;
 
 struct Sht {
-    Sensor* sensor;
+    UINT8 id;
     ShtData* data;
+    ShtFuzzyTerms* terms;
 };
 
 /* Init pins and registers*/
@@ -138,15 +142,11 @@ void Sht11_calculateHumidity(float* p_humidity);
 
 void Sht11_calculateTemperature(float* p_temp);
 
-/*..........................................................................*/
-UINT8 Sht11_usbShtTemperature(Sht* sht, char* usbOutBuffer);
-UINT8 Sht11_usbShtHumidity(Sht* sht, char* usbOutBuffer);
+void Sht11_addMeasuresToPayload(Sht* sht, Payload* payload);
 
-UINT8 Sht11_measureTemperature(Sht* sht);
-UINT8 Sht11_measureHumidity(Sht* sht);
-void Sht11_measureTmp(Payload* measures);
-void Sht11_measureHum(Payload* measures);
+void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload);
 
+void Sht11_prepareFuzzyInputs(Sht* sht);
 
 #endif /* sht11_h */
 #endif

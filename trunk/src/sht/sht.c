@@ -18,9 +18,10 @@
 #include "sht.h"
 
 #if SHT_ENABLED
-#   include <delays.h>
-#   include <stdio.h>
-#   include <math.h>
+#include <delays.h>
+#include <stdio.h>
+#include <math.h>
+#include "payload.h"
 
 void Sht11_init() {
     SHT_DATA_CNF = 1;
@@ -40,16 +41,16 @@ UINT8 Sht11_write(UINT8 value) {
         } else {
             SHT_DATA = 0;
         }
-        Delay1TCY(); //observe setup time
+        Delay10TCYx(10); //observe setup time
         SHT_SCK = 1; //clk for SENSI-BUS
-        Delay1TCY(); //pulswith approx. 5 us
+        Delay10TCYx(10); //pulswith approx. 5 us
         SHT_SCK = 0;
-        Delay1TCY(); //observe hold time
+        Delay10TCYx(10); //observe hold time
     }
     SHT_DATA = 1; //release SHT_DATA-line
-    Delay1TCY(); //observe setup time
+    Delay10TCYx(10); //observe setup time
     SHT_SCK = 1; //clk #9 for ack
-    Delay1TCY();
+    Delay10TCYx(10);
     // To read SHT ack(low), change pin direction
     SHT_DATA_DDR = 1;
     // Read pin
@@ -62,14 +63,14 @@ UINT8 Sht11_read(UINT8 ack) {
     UINT8 i, val = 0;
     SHT_DATA_DDR = 1;
     SHT_DATA = 1;
-    for (i = 0x80; i > 0; i /= 2) //shift bit for masking
+    for (i =0x80; i > 0; i /= 2) //shift bit for masking
     {
-        Delay1TCY();
+        Delay10TCYx(10);
         SHT_SCK = 1; //clk for SENSI-BUS
         if (SHT_DATA_PIN) {
             val = (val | i); //read bit
         }
-        Delay1TCY();
+        Delay10TCYx(10);
         SHT_SCK = 0;
     }
 
@@ -77,11 +78,11 @@ UINT8 Sht11_read(UINT8 ack) {
         SHT_DATA_DDR = 0;
         SHT_DATA = 0; //in case of "ack==1" pull down SHT_DATA-Line
     }
-    Delay1TCY(); //observe setup time
+    Delay10TCYx(10); //observe setup time
     SHT_SCK = 1; //clk #9 for ack
-    Delay1TCY(); //pulswith approx. 5 us
+    Delay10TCYx(10); //pulswith approx. 5 us
     SHT_SCK = 0;
-    Delay1TCY(); //observe hold time
+    Delay10TCYx(10); //observe hold time
     return val;
 }
 
@@ -90,17 +91,17 @@ UINT8 Sht11_read(UINT8 ack) {
 void Sht11_start(void) {
     SHT_DATA = 1;
     SHT_SCK = 0; //Initial state
-    Delay1TCY();
+    Delay10TCYx(10);
     SHT_SCK = 1;
-    Delay1TCY();
+    Delay10TCYx(10);
     SHT_DATA = 0;
-    Delay1TCY();
+    Delay10TCYx(10);
     SHT_SCK = 0;
-    Delay1TCY();
+    Delay10TCYx(10);
     SHT_SCK = 1;
-    Delay1TCY();
+    Delay10TCYx(10);
     SHT_DATA = 1;
-    Delay1TCY();
+    Delay10TCYx(10);
     SHT_SCK = 0;
 }
 
@@ -111,11 +112,11 @@ void Sht11_reset(void) {
     //9 SHT_SCK cycles
     for (i = 0; i < 9; i++) {
         SHT_SCK = 1;
-        Delay1TCY();
+        Delay10TCYx(10);
         SHT_SCK = 0;
-        Delay1TCY();
+        Delay10TCYx(10);
     }
-    Delay1TCY();
+    Delay10TCYx(10);
     Sht11_start(); //transmission start
 }
 
@@ -160,27 +161,17 @@ UINT8 Sht11_measure(Sht* sht) {
     SHT_DATA_DDR = 0;
     SHT_DATA = 1;
     // Get measures
-    error += Sht11_measureParam(&sht->data->temperature.i,
-            &sht->data->temp_chk, SHT_MEASURE_TEMP);
+    error += Sht11_measureParam(&sht->data->temperature.i, &sht->data->tempChk,
+            SHT_MEASURE_TEMP);
 #ifdef __18F46J50_H
     LATDbits.LATD1 = !LATDbits.LATD1;
 #endif
     SHT_DATA_DDR = 0;
     SHT_DATA = 1;
-    error += Sht11_measureParam(&sht->data->humidity.i,
-            &sht->data->humi_chk, SHT_MEASURE_HUMI);
+    error += Sht11_measureParam(&sht->data->humidity.i, &sht->data->humiChk,
+            SHT_MEASURE_HUMI);
 
     return error;
-}
-
-UINT8 Sht11_measureTemperature(Sht* sht) {
-    return Sht11_measureParam((UINT16*) & sht->data->temperature.i,
-            &sht->data->temp_chk, SHT_MEASURE_TEMP);
-}
-
-UINT8 Sht11_measureHumidity(Sht* sht) {
-    return Sht11_measureParam((UINT16*) & sht->data->humidity.i,
-            &sht->data->humi_chk, SHT_MEASURE_HUMI);
 }
 
 UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
@@ -193,7 +184,7 @@ UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
             break;
         default: break;
     }
-    Delay1TCY();
+    Delay10TCY();
     SHT_DATA_DDR = 1;
     // FIXME Long busy wait could block usb, use interrupts instead.
     while (SHT_DATA_PIN == 1);
@@ -226,65 +217,42 @@ void Sht11_calculate(float *p_humidity, float *p_temperature) {
     *p_humidity = rh_true; //return humidity[%RH]
 }
 
-void Sht11_calculateHumidity(float* p_humidity) {
-    const float C1 = 4;
-    const float C2 = -0.0405;
-    const float C3 = 0.0000028;
-    float measure = *p_humidity;
-    *p_humidity = C1 * measure + C2 * measure + C3 * measure * measure;
-}
+/*...........................................................................*/
 
-void Sht11_calculateTemperature(float* p_temp) {
-    const float D1 = -39.6;
-    const float D2 = 0.01;
-    float measure = *p_temp;
-    *p_temp = D1 + D2 * measure;
+/* Add temperature and humidity to payload */
+void Sht11_addMeasuresToPayload(Sht* sht, Payload* payload) {
+    Payload_addWord(payload, sht->data->temperature.i);
+    Payload_addWord(payload, sht->data->humidity.i);
 }
 
 /*...........................................................................*/
 
-/* Get sht 11 temperature for usb request */
-UINT8 Sht11_usbShtTemperature(Sht* sht, char* usbOutBuffer) {
-    Sht11_init();
-    Sht11_measureTemperature(sht);
-    //Converts integer to float
-    sht->data->temperature.f = (float) sht->data->temperature.i;
-    Sht11_calculateTemperature(&sht->data->temperature.f);
-    return sprintf(usbOutBuffer, (const MEM_MODEL rom char*) "Temperatura: %d.%2u % \n\r",
+/* Add temperature and humidity to payload */
+void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload) {
+    // Calculate
+    Sht11_calculate(&sht->data->humidity.f, &sht->data->temperature.f);
+    // Build strings and append to payload
+    sprintf(payload->data, (const MEM_MODEL rom char*) "Humedad relativa: %d.%2u % \n\r",
+            (int) sht->data->humidity.f / 100,
+            fabs(((sht->data->humidity.f - (int) sht->data->humidity.f)*100)));
+    sprintf(payload->data, (const MEM_MODEL rom char*) "Temperatura: %d.%2u % \n\r",
             (UINT16) sht->data->temperature.f,
             fabs(((sht->data->temperature.f - (int) sht->data->temperature.f)*100)));
 }
 
 /*...........................................................................*/
-
-/* Get sht 11 humidity for usb request */
-UINT8 Sht11_usbShtHumidity(Sht* sht, char* usbOutBuffer) {
-    Sht11_init();
-    Sht11_measureHumidity(sht);
-    // Converts integer to float
-    sht->data->humidity.f = (float) sht->data->humidity.i;
-    Sht11_calculateHumidity(&sht->data->humidity.f);
-    return sprintf(usbOutBuffer, (const MEM_MODEL rom char*)"Humedad relativa: %d.%2u % \n\r",
-            (int) sht->data->humidity.f / 100,
-            fabs(((sht->data->humidity.f - (int) sht->data->humidity.f)*100)));
+/* Put measures into rule terms */
+void Sht11_prepareFuzzyInputs(Sht* sht) {
+    UINT8 i;
+    ShtFuzzyTerms* terms = sht->terms;
+    // Put temperature measured into rule terms
+    for (i = 0; i < terms->tempRulesSize; i++) {
+        terms->tempRules[i]->input = sht->data->temperature.i;
+    }
+    // Put humidity measured into rule terms
+    for (i = 0; i < terms->humiRulesSize; i++) {
+        terms->humiRules[i]->input = sht->data->humidity.i;
+    }
 }
 
-/*...........................................................................*/
-void Sht11_measureTmp(Payload* measures) {
-    Sht sht;
-    UINT16 tmp;
-    Sht11_init();
-    Sht11_measureTemperature(&sht);
-    // Temperature is either 12 or 14 bits length
-    tmp = sht.data->temperature.i;
-    Payload_addWord(measures, tmp);
-}
-
-/*...........................................................................*/
-void Sht11_measureHumi(Payload* measures) {
-    Sht sht;
-    Sht11_init();
-    Sht11_measureHumidity(&sht);
-    Payload_addByte(measures, sht.data->humidity.i);
-}
 #endif

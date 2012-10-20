@@ -82,7 +82,6 @@ void main(void) {
 #endif
         } else {
             Power_runPrimaryMode();
-            
 #if SLEEP_MODE == DEEP_SLEEP
             if (XBEE_ON_SLEEP_AWAKE) {
                 BSP_onWakeUp();
@@ -117,7 +116,7 @@ void main(void) {
         } else {
             BSP_onPowerUp();
         }
-        Power_runRcMode();
+        //Power_runRcMode();
         BSP_deepSleep();
 #elif SLEEP_MODE == SLEEP
         // Si no está conectado el terminal USB, entra en modo de bajo consumo

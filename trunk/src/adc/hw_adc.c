@@ -128,9 +128,8 @@ UINT16 Adc_convertAveragedValue(UINT8 channel) {
 }
 
 /* Test ADC */
-UINT8 Adc_usbTest(char* usbOutBuffer) {
+UINT16 Adc_testChannelOne(void) {
     Adc_init();
     TRISAbits.TRISA1 = 1;
-    usbOutBuffer[0] = Adc_convert(1);
-    return 1;
+    return Adc_convert(1);
 }

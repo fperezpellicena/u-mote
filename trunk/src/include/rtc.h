@@ -28,13 +28,16 @@ void Rtc_init(void);
 void Rtc_enable(void);
 
 /*..........................................................................*/
-rtccTimeDate* Rtc_read(void);
+void Rtc_readTimestamp(void);
 
 /*..........................................................................*/
-void Rtc_write(rtccTimeDate* timestamp);
+void Rtc_writeTimestamp(rtccTimeDate* timestamp);
 
 /*..........................................................................*/
-rtccTimeDate* Rtc_parse(char* usbBuffer);
+void Rtc_writeFormattedTimestamp(Payload* output);
+
+/*..........................................................................*/
+void Rtc_readInputStream(Payload* input);
 
 /*..........................................................................*/
 void Rtc_addTimeToPayload(Payload* payload);
