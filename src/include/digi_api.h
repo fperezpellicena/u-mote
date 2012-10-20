@@ -19,6 +19,7 @@
 #define digi_api_h
 
 #include "GenericTypeDefs.h"
+#include "payload.h"
 
 /*..........................................................................*/
 
@@ -261,9 +262,7 @@ struct XBeePacket {
 
 void XBee_init(void);
 
-BOOL XBee_join(void);
-
-void XBee_usbJoin(char* usbBuffer);
+void XBee_join(void);
 
 /*..........................................................................*/
 /* UTIL METHODS */

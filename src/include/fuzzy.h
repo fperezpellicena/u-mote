@@ -27,6 +27,7 @@
 Rule* name##rules[size] = {__VA_ARGS__};\
 RuleEngine name = {name##rules, size}
 
+
 /*..........................................................................*/
 /* Rules class */
 typedef struct RuleEngine RuleEngine;

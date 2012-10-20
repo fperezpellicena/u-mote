@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "gps_api.h"
-#include "util.h"
 
 /*..........................................................................*/
 void NMEAOutputConfig_create(NMEAOutputConfig* config, unsigned char nmeaGLL,
@@ -170,7 +169,7 @@ void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
         unsigned char rom* datum) {
     // Prepare data
     unsigned char data[NMEA_DATUM_LENGTH];
-    Util_str2ram(datum, data);
+    strcpypgm2ram(datum, data);
     // Create command
     NMEACommand_create(nmeaCommandFrame, (unsigned char rom*)NMEA_SET_OUTPUT,
             data, NMEA_OUTPUT_CFG_LENGTH);

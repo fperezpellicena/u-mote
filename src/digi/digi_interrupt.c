@@ -22,9 +22,9 @@
 #include "payload.h"
 #include "rtc.h"
 
-static UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0xCF, 0x56};
 static Payload payload;
 static XBeePacket packet;
+static const UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0xCF, 0x56};
 
 /*..........................................................................*/
 
@@ -78,7 +78,7 @@ static void XBee_monitoring(void);
 static void XBee_monitoring(void) {
     Payload_init(&payload);
     Rtc_addTimeToPayload(&payload);
-    SensorProxy_addSensorsToPayload(&payload);
+    SensorProxy_addSensorIdentifiersToPayload(&payload);
     SensorProxy_sense();
     SensorProxy_addMeasuresToPayload(&payload);
     XBee_createTransmitRequestPacket(&packet, 0x06, XBEE_SINK_ADDRESS,
@@ -96,7 +96,7 @@ static void XBee_fuzzyMonitoring(void) {
     // Read datetime and put into buffer
     Rtc_addTimeToPayload(&payload);
     // Put sensor ids
-    SensorProxy_addSensorsToPayload(&payload);
+    SensorProxy_addSensorIdentifiersToPayload(&payload);
     //List_add(&list, SensorProxy_getSensors());
     // Sense installed sensors
     risk = SensorProxy_fuzzy();

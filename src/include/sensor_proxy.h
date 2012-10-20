@@ -18,18 +18,10 @@
 #ifndef sensor_proxy_h
 #define sensor_proxy_h
 
-#include "sensor.h"
 #include "payload.h"
-
-#define DECLARE_SENSOR_VECTOR(name, ...)\
-Sensor* name##sensors[SENSORS] = {__VA_ARGS__};\
-SensorVector name = {SENSORS, name##sensors}
 
 /*..........................................................................*/
 void SensorProxy_init(void);
-
-/*..........................................................................*/
-void SensorProxy_add(Sensors* sensors, Sensor* sensor);
 
 /*..........................................................................*/
 void SensorProxy_sense(void);
@@ -42,7 +34,7 @@ void SensorProxy_sense(void);
 #endif
 
 /*..........................................................................*/
-void SensorProxy_addSensorsToPayload(Payload* list);
+void SensorProxy_addSensorIdentifiersToPayload(Payload* payload);
 
 /*..........................................................................*/
 void SensorProxy_addMeasuresToPayload(Payload* payload);

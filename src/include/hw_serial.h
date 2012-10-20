@@ -28,13 +28,13 @@ void Serial_send(UINT8 value);
 
 void Serial_sendArray(UINT8* values, UINT8 size);
 
-UINT8 Serial_read();
+UINT8 Serial_read(void);
 
-BOOL Serial_available();
+BOOL Serial_available(void);
 
 /** Interrupt handler functions */
-BOOL Serial_checkInterrupt();
+BOOL Serial_checkInterrupt(void);
 
-void Serial_ackInterrupt();
+void Serial_ackInterrupt(void);
 
 #endif          /* hw_serial_h */

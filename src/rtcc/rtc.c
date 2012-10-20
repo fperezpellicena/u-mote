@@ -17,8 +17,8 @@
 
 #include "rtc.h"
 #include "GenericTypeDefs.h"
-#include "payload.h"
 #include "register.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -47,10 +47,11 @@ static void Rtc_resetTimeDatePtr(void) {
 }
 
 static void Rtc_writeDefatultTimeDate(void);
+
 static void Rtc_writeDefatultTimeDate(void) {
     Register_unLockRTC();
     Rtc_resetTimeDatePtr();
-    Rtc_write(&timestamp);
+    Rtc_writeTimestamp(&timestamp);
 }
 
 /*..........................................................................*/
@@ -59,7 +60,7 @@ static void Rtc_writeDefatultTimeDate(void) {
 void Rtc_init(void) {
     Rtc_initDefaultTimeDate();
     Rtc_writeDefatultTimeDate();
-    Rtc_enable(); 
+    Rtc_enable();
 }
 
 /*..........................................................................*/
@@ -73,33 +74,18 @@ void Rtc_enable(void) {
 /*..........................................................................*/
 
 /* Read Rtc data into parameter */
-rtccTimeDate* Rtc_read(void) {
+void Rtc_readTimestamp(void) {
     // if already in the middle of SYNC, wait for next period
     while (RTCCFGbits.RTCSYNC != 1);
     // wait while RTCC registers are safe to read
     while (RTCCFGbits.RTCSYNC == 1);
     RtccReadTimeDate(&timestamp);
-    return &timestamp;
-}
-
-/*..........................................................................*/
-
-/* Read Rtc data into a list */
-void Rtc_addTimeToPayload(Payload* payload) {
-    Rtc_read();
-    Payload_addByte(payload, timestamp.f.sec);
-    Payload_addByte(payload, timestamp.f.min);
-    Payload_addByte(payload, timestamp.f.hour);
-    Payload_addByte(payload, timestamp.f.mday);
-    Payload_addByte(payload, timestamp.f.wday);
-    Payload_addByte(payload, timestamp.f.mon);
-    Payload_addByte(payload, timestamp.f.year);
 }
 
 /*..........................................................................*/
 
 /* Set Rtc data from parameter */
-void Rtc_write(rtccTimeDate* timestamp) {
+void Rtc_writeTimestamp(rtccTimeDate* timestamp) {
     RTCVALL = timestamp->b[0];
     RTCVALH = timestamp->b[1];
     RTCVALL = timestamp->b[2];
@@ -108,6 +94,30 @@ void Rtc_write(rtccTimeDate* timestamp) {
     RTCVALH = timestamp->b[5];
     RTCVALL = timestamp->b[6];
     RTCVALH = timestamp->b[7];
+}
+
+/*..........................................................................*/
+
+/* Read Rtc data into buffer */
+void Rtc_writeFormattedTimestamp(Payload* output) {
+    PAYLOAD_PUT_STRING_WITH_ARGS(output,
+            "Fecha/Hora: %2u:%2u:%2u %2u/%2u/%4u \n\r",
+            timestamp.f.hour, timestamp.f.min, timestamp.f.sec,
+            timestamp.f.mday, timestamp.f.mon, timestamp.f.year);
+}
+
+/*..........................................................................*/
+
+/* Read Rtc data into a list */
+void Rtc_addTimeToPayload(Payload* payload) {
+    Rtc_readTimestamp();
+    Payload_addByte(payload, timestamp.f.sec);
+    Payload_addByte(payload, timestamp.f.min);
+    Payload_addByte(payload, timestamp.f.hour);
+    Payload_addByte(payload, timestamp.f.mday);
+    Payload_addByte(payload, timestamp.f.wday);
+    Payload_addByte(payload, timestamp.f.mon);
+    Payload_addByte(payload, timestamp.f.year);
 }
 
 /**
@@ -128,10 +138,10 @@ void Rtc_write(rtccTimeDate* timestamp) {
  *      mon: BCD codification, 01-12
  *      year: BCD codification, 00-99
  */
-rtccTimeDate* Rtc_parse(char* usbBuffer) {
+void Rtc_readInputStream(Payload* input) {
     char* result = NULL;
     // Skip rtcc SOF(start of frame)
-    result = strtokpgmram(usbBuffer, (rom const char far*)SEPARATOR);
+    result = strtokpgmram(input->data, (rom const char far*)SEPARATOR);
     // Read mday
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.mday = atoi(result);
@@ -155,10 +165,8 @@ rtccTimeDate* Rtc_parse(char* usbBuffer) {
     timestamp.f.sec = atoi(result);
 
     // unlock the RTCC registers so that we can write to them
-    Register_unLockIO();
+    Register_unLockRTC();
     Rtc_resetTimeDatePtr();
-    Rtc_write(&timestamp);
+    Rtc_writeTimestamp(&timestamp);
     Rtc_enable(); // enable RTCC module
-
-    return &timestamp;
 }

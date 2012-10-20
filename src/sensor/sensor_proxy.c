@@ -17,7 +17,6 @@
 
 #include "bsp.h"
 #include "sensor_proxy.h"
-#include "util.h"
 #include <stdio.h>
 
 #if SHT_ENABLED
@@ -67,19 +66,15 @@ DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
 #pragma udata
 #endif
 
-#pragma udata sensors_data
-Sensors sensors;
-#pragma udata
-
 /* Declare one SHT sensor for temperature */
 #if SHT_ENABLED
-#pragma udata sht
-#if SENSING_MODE == FUZZY_DRIVEN
-DECLARE_FUZZY_SHT(SHT_ID, sht, &Sht11_measureTmp, 1, &ifHighTemp);
-#else
-DECLARE_SHT(SHT_ID, sht, &Sht11_measureTmp);
-#endif
-#pragma udata
+#   pragma udata sht
+#   if SENSING_MODE == FUZZY_DRIVEN
+        DECLARE_FUZZY_SHT(SHT_ID, sht, 1, &ifHighTemp);
+#   else
+        DECLARE_SHT(SHT_ID, sht);
+#   endif
+#   pragma udata
 #endif
 
 /* Declare one IRC-A1 gas sensor */
@@ -93,45 +88,40 @@ DECLARE_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense);
 #pragma udata
 #endif
 
-static Payload measures;
+static Payload payload;
+static UINT8 sensorIdentifiers;
 
-static UINT8 SensorProxy_composeSensorIdentifiers(void);
+static void SensorProxy_composeSensorIdentifiers(void);
 
 /*..........................................................................*/
 void SensorProxy_init(void) {
     SENSOR_BOARD_CTRL_INIT();
-    Sensors_init(&sensors);
-    Payload_init(&measures);
+    Payload_init(&payload);
 #if SHT_ENABLED
-    SensorProxy_add(&sensors, sht.sensor);
     Sht11_init();
 #endif
 #if IRCA1_ENABLED
-    SensorProxy_add(&sensors, irca.sensor);
     IrcA1Proxy_init();
 #endif
-}
-
-/*..........................................................................*/
-void SensorProxy_add(Sensors* sensors, Sensor* sensor) {
-    if (sensors->size < SENSORS) {
-        sensors->sensors[sensors->size++] = sensor;
-    }
+    SensorProxy_composeSensorIdentifiers();
 }
 
 /*..........................................................................*/
 
 /* Turns on sensor board, sense every sensor installed and turns off */
 void SensorProxy_sense(void) {
-    UINT8 i;
     // Turn on sensor board
     SENSOR_BOARD_ON();
-    // Empty previous measures
-    Payload_empty(&measures);
-    // For each sensor installed, put measures into payload
-    for (i = 0; i < sensors.size; i++) {
-        sensors.sensors[i]->sense(&measures);
-    }
+    // Sense installed sensors
+#if SHT_ENABLED
+    Sht11_measure(&sht);
+    Sht11_addMeasuresToPayload(&sht, &payload);
+#endif
+#if IRCA1_ENABLED
+    // TODO
+    Irca1Proxy_measure(&irca1);
+    Irca1Proxy_addMeasuresToPayload(&payload);
+#endif
     // Turn off sensor board
     SENSOR_BOARD_OFF();
 }
@@ -142,22 +132,16 @@ void SensorProxy_sense(void) {
 
 /* Measure sensor board and check for alert condition */
 UINT8 SensorProxy_fuzzy(void) {
-    UINT8 i;
-    UINT8 j;
-    UINT8 measure;
-    // Turn on sensor board
-    SensorProxy_powerOn();
-    // Empty previous measures
-    Payload_empty(&measures);
-    // Put measures into rule terms
-    for (i = 0; i < sensors.size; i++) {
-        measure = sensors.sensors[i]->sense(&measures);
-        for (j = 0; j < sensors.sensors[i]->ruleTermsSize; j++) {
-            sensors.sensors[i]->ruleTerms[j]->input = measure;
-        }
-    }
-    // Turn off sensor board
-    SensorProxy_powerOff();
+    // Sense
+    SensorProxy_sense();
+    // Process
+#if SHT_ENABLED
+    Sht11_prepareFuzzyInputs(&sht);
+#endif
+#if IRCA1_ENABLED
+    // TODO
+    IrcA1_prepareFuzzyInputs(&irca1);
+#endif
     // Run fuzzy engine
     return RuleEngine_run(&engine);
 }
@@ -166,10 +150,9 @@ UINT8 SensorProxy_fuzzy(void) {
 /*..........................................................................*/
 
 /* Put sensor byte identification based on sensor id attribute */
-void SensorProxy_addSensorsToPayload(Payload* payload) {
-    UINT8 sensors = SensorProxy_composeSensorIdentifiers();
+void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
     Payload_addByte(payload, 0);
-    Payload_addByte(payload, sensors);
+    Payload_addByte(payload, sensorIdentifiers);
     Payload_addByte(payload, 0);
     Payload_addByte(payload, 0);
 }
@@ -177,21 +160,20 @@ void SensorProxy_addSensorsToPayload(Payload* payload) {
 /*..........................................................................*/
 
 /* Put measures to payload */
-void SensorProxy_addMeasuresToPayload(Payload* payload) {
-    Payload_append(payload, &measures);
+void SensorProxy_addMeasuresToPayload(Payload* p) {
+    Payload_append(p, &payload);
 }
-
 
 /*..........................................................................*/
 
 /* Compose sensor identifier array by OR'ing each identifier supposed uniques */
 // FIXME Sensor vector should be statically defined because it never changes one programmed
-static UINT8 SensorProxy_composeSensorIdentifiers(void) {
-    UINT8 i;
-    UINT8 sensorIdentifiers = 0;
-    // For each sensor installed, put measures into payload
-    for (i = 0; i < sensors.size; i++) {
-        sensorIdentifiers |= sensors.sensors[i]->id;
-    }
-    return sensorIdentifiers;
+static void SensorProxy_composeSensorIdentifiers(void) {
+    sensorIdentifiers = 0;
+#if SHT_ENABLED
+    sensorIdentifiers |= sht.id;
+#endif
+#if IRCA1_ENABLED
+    sensorIdentifiers |= irca.id;
+#endif
 }

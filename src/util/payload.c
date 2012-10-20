@@ -16,6 +16,8 @@
  */
 
 #include "payload.h"
+#include <stdio.h>
+#include <string.h>
 
 /*..........................................................................*/
 
@@ -38,7 +40,7 @@ void Payload_addByte(Payload* payload, UINT8 element) {
 /* Add one word to the list(big endian) */
 void Payload_addWord(Payload* payload, UINT16 element) {
     UINT8 lsb = (UINT8)element;
-    UINT8 msb = (UINT8)element >> 8;
+    UINT8 msb = (UINT8)(element >> 8);
     if (payload->size < MAX_PAYLOAD - 2) {
         payload->data[payload->size++] = msb;
         payload->data[payload->size++] = lsb;
@@ -63,4 +65,11 @@ void Payload_append(Payload* to, Payload* from) {
     while (i < from->size) {
         Payload_addByte(to, from->data[i++]);
     }
+}
+
+/*..........................................................................*/
+/* */
+void Payload_putString(Payload* payload, UINT8* string) {
+    sprintf(payload->data, string);
+    payload->size = strlen(string);
 }

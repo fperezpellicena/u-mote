@@ -20,6 +20,9 @@
 
 #include "bsp.h"
 
+#define PAYLOAD_PUT_STRING_WITH_ARGS(payload, string, ...) \
+    sprintf(payload->data, string, __VA_ARGS__);
+
 /* Static List struct */
 typedef struct Payload Payload;
 
@@ -42,5 +45,8 @@ void Payload_empty(Payload* list);
 
 /* Append */
 void Payload_append(Payload* to, Payload* from);
+
+/* Put a formatted string with params */
+void Payload_putString(Payload* payload, UINT8* string);
 
 #endif /* list_H*/
