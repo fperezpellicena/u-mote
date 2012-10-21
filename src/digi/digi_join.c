@@ -41,10 +41,20 @@ static void XBee_setSleepMode(UINT8 mode) {
 
 /*..........................................................................*/
 
-/* Join mote */
+/* Join xbee */
 void XBee_join(void) {
     // Simulate one press commissioning button
     XBee_commissioning(COMMISSIONING_ONE_PRESS);
     // Set sleep mode 8
     XBee_setSleepMode(DEEP_SLEEP_MODE);
+}
+
+/*..........................................................................*/
+
+/* Reset xbee */
+void XBee_reset(void) {
+    static UINT8 command[3] = {'F', 'R', '\0'};
+    XBee_resetPacket(&packet);
+    XBee_createATCommandPacket(&packet, 0x01, command);
+    XBee_sendPacket(&packet);
 }
