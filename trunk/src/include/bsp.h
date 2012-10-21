@@ -186,7 +186,7 @@
 /*...........................................................................*/
 /* IRC-A1 section */
 
-#define IRCA1_ENABLED   0
+#define IRCA1_ENABLED   1
 #define IRCA1_ID        0x08
 
 #define IRC_A1_SAFE     0
@@ -200,12 +200,12 @@
 #define IRCA1_X_THR     20      // Umbral 20%
 
 #if IRCA1_ENABLED
-#   define IRCA1_REF        ANCON0bits.PCFG0    /* AN0 */
-#   define IRCA1_REF_DDR    TRISAbits.TRISA0
-#   define IRCA1_ACT        ANCON0bits.PCFG1    /* AN1 */
-#   define IRCA1_ACT_DDR    TRISAbits.TRISA1
-#   define IRCA1_TMP        ANCON0bits.PCFG2    /* AN2 */
-#   define IRCA1_TMP_DDR    TRISAbits.TRISA2
+#   define IRCA1_REF        ANCON1bits.PCFG10   /* AN10 */
+#   define IRCA1_REF_DDR    TRISBbits.TRISB1    /* RB1 */
+#   define IRCA1_ACT        ANCON0bits.PCFG4    /* AN4 */
+#   define IRCA1_ACT_DDR    TRISAbits.TRISA5    /* RA5 */
+#   define IRCA1_TMP        ANCON1bits.PCFG8    /* AN8 */
+#   define IRCA1_TMP_DDR    TRISBbits.TRISB2    /* RB2 */
 /* PWM OUTPUT CONFIGURATION FOR VPULSE */
 #   define IRCA1_CLK_DDR    TRISCbits.TRISC2    /* Vpulse */
 #   define IRCA1_RPIN       RPOR13              /* Remap-pin register */

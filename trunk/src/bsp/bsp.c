@@ -40,8 +40,6 @@ void BSP_init(void) {
     BSP_enablePLL();
     // Default all pins to digital
     BSP_defaultIO();
-    //Initialize all of the LED pins
-    BSP_initLeds();
     // Initializes mote API
     XBee_init();
     // Enable sensor board

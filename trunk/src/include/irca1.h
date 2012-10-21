@@ -20,20 +20,27 @@
 #   ifndef irca1_h
 #   define irca1_h
 
-#   include "sensor.h"
+#include "fuzzy_rule.h"
 
-#define DECLARE_IRCA(id, name, senseFn)\
-DECLARE_SENSOR(id, name##id, senseFn);\
-IrcA1Data name##data;\
-Irca1Cal name##cal;\
-IrcA1 name = {&name##id, &name##data, &name##cal}
+#define DECLARE_IRCA(id, name)\
+    IrcA1Data name##data = {0, 0, 0, 0};\
+    Irca1Cal name##cal = {0, 0};\
+    IrcA1 name = {id, &name##data, &name##cal, NULL}
 
 #define DECLARE_FUZZY_IRCA(id, name, senseFn, temsSize, ...)\
-DECLARE_FUZZY_SENSOR(id, name##id, senseFn, temsSize, __VA_ARGS__);\
-IrcA1Data name##data;\
-Irca1Cal name##cal;\
-IrcA1 name = {&name##id, &name##data, &name##cal}
+    RuleTerm* name##terms[termsSize] = {__VA_ARGS__};\
+    IrcA1Data name##data;\
+    Irca1Cal name##cal;\
+    IrcA1 name = {id, &name##data, &name##cal, NULL}
 
+
+/* Sht fuzzy terms */
+typedef struct IrcaFuzzyTerms IrcaFuzzyTerms;
+
+struct IrcaFuzzyTerms {
+    RuleTerm** rules;
+    UINT8 rulesSize;
+};
 
 /*...........................................................................*/
 /* Class IrcA1Data sensor calibration data */
@@ -63,9 +70,10 @@ struct IrcA1Data {
 typedef struct IrcA1 IrcA1;
 
 struct IrcA1 {
-    Sensor* sensor;
+    UINT8 id;
     IrcA1Data* data;
     Irca1Cal* cal;
+    IrcaFuzzyTerms* terms;
 };
 
 /*...........................................................................*/

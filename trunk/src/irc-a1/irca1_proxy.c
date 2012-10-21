@@ -28,15 +28,18 @@ void IrcA1Proxy_init(void) {
 }
 
 /*...........................................................................*/
-void IrcA1Proxy_sense(Payload* measures) {
-    IrcA1 ircA1;
-    ircA1.data->ref = Adc_convert(IRCA1_REF);
-    ircA1.data->act = Adc_convert(IRCA1_ACT);
-    ircA1.data->tmp = Adc_convert(IRCA1_TMP);
+void IrcA1Proxy_measure(IrcA1* ircA1) {
+    ircA1->data->ref = Adc_convert(IRCA1_REF);
+    ircA1->data->act = Adc_convert(IRCA1_ACT);
+    ircA1->data->tmp = Adc_convert(IRCA1_TMP);
+}
+
+/*...........................................................................*/
+void IrcA1Proxy_addMeasuresToPayload(IrcA1* ircA1, Payload* payload) {
     // Raw values
-    Payload_addByte(measures, ircA1.data->ref);
-    Payload_addByte(measures, ircA1.data->act);
-    Payload_addByte(measures, ircA1.data->tmp);
+    Payload_addByte(payload, ircA1->data->ref);
+    Payload_addByte(payload, ircA1->data->act);
+    Payload_addByte(payload, ircA1->data->tmp);
 }
 
 #endif
