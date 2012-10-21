@@ -21,7 +21,8 @@
 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
 #pragma config WDTPS = 1024         //1:1024 (4 seconds)
 #pragma config DSWDTOSC = INTOSCREF //DSWDT uses INTOSC/INTRC as clock
-#pragma config DSWDTEN = OFF        //Disabled
+#pragma config DSWDTEN = ON         //Enabled
+#pragma config DSWDTPS = K524       //9 minutes
 
 #pragma config STVREN = ON          //stack overflow/underflow reset enabled
 #pragma config XINST = OFF          //Extended instruction set disabled
@@ -108,15 +109,15 @@ void main(void) {
         }
 #else
 #if SLEEP_MODE == DEEP_SLEEP
-        Power_runPrimaryMode();
         if (XBEE_ON_SLEEP_AWAKE) {
             BSP_onWakeUp();
         } else if (ON_MCLR) {
             BSP_onMclr();
+        } else if (ON_DSWDT) {
+            BSP_onDsWdtWakeUp();
         } else {
             BSP_onPowerUp();
         }
-        //Power_runRcMode();
         BSP_deepSleep();
 #elif SLEEP_MODE == SLEEP
         // Si no está conectado el terminal USB, entra en modo de bajo consumo

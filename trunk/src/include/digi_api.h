@@ -264,6 +264,8 @@ void XBee_init(void);
 
 void XBee_join(void);
 
+void XBee_reset(void);
+
 /*..........................................................................*/
 /* UTIL METHODS */
 

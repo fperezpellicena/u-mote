@@ -22,6 +22,7 @@
 #include "digi_interrupt.h"
 #include "sensor_proxy.h"
 #include <delays.h>
+#include <limits.h>
 
 #if USB_ENABLED
 #include "usb_device.h"
@@ -96,11 +97,7 @@ static void BSP_clearMclrFlags(void) {
 /* On reset push, join xbee */
 void BSP_onMclr(void) {
     BSP_clearMclrFlags();
-    // Bugfix: Es necesario un delay tras el reset
-    Delay10KTCYx(10);
-    Power_runPrimaryMode();
     XBee_join();
-    Power_runRcMode();
 }
 
 static void BSP_clearWakeUpFlags(void);
@@ -120,6 +117,19 @@ void BSP_onWakeUp(void) {
 }
 
 /*...........................................................................*/
+/**
+ * Entering this method could mean that the transceiver is malfunctioning.
+ * Xbee may be down or may have lost sync with his neighbor.
+ * So, try to send a reset message to the transceiver and rejoin the mote.
+ * A 100 ms delay is necessary to perform a full reset before send any command.
+ */
+void BSP_onDsWdtWakeUp(void) {
+    XBee_reset();
+    Delay100TCYx(UINT_MAX);
+    XBee_join();
+}
+
+/*...........................................................................*/
 void BSP_deepSleep(void) {
     // Disable PLL
     OSCTUNEbits.PLLEN = 0;
@@ -134,3 +144,4 @@ void BSP_sleep(void) {
     Rtc_enable();
     Power_sleep();
 }
+

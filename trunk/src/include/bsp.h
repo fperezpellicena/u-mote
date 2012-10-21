@@ -91,7 +91,7 @@
 
 #define XBEE_BAUDRATE   EUSART_9600     // Xbee serial baudrate
 
-#define ON_MCLR         DSWAKELbits.DSMCLR == 1
+#define ON_MCLR         WDTCONbits.DS && DSWAKELbits.DSMCLR
 
 
 /*...........................................................................*/
@@ -112,19 +112,19 @@
 #endif
 
 #ifdef __18F46J50_H
-#define BSP_initLeds()      LATE &= 0xFC; TRISE &= 0xFC; TRISD &= 0xFC; LATD &= 0xFC;
+    #define BSP_initLeds()      TRISE &= 0xFC; TRISD &= 0xFC; LATE &= 0x00; LATD &= 0x00;
 
-#define mLED_1              LATEbits.LATE0
-#define mLED_2              LATEbits.LATE1
-#define mLED_3              LATDbits.LATD0
-#define mLED_4              LATDbits.LATD1
+    #define mLED_1              LATEbits.LATE0
+    #define mLED_2              LATEbits.LATE1
+    #define mLED_3              LATDbits.LATD0
+    #define mLED_4              LATDbits.LATD1
 #else
-#define BSP_initLeds()      LATC &= 0xFC; TRISC &= 0xFC;
+    #define BSP_initLeds()      LATC &= 0xFC; TRISC &= 0xFC;
 
-#define mLED_1              LATCbits.LATC0
-#define mLED_2              LATCbits.LATC1
-#define mLED_3
-#define mLED_4
+    #define mLED_1              LATCbits.LATC0
+    #define mLED_2              LATCbits.LATC1
+    #define mLED_3
+    #define mLED_4
 #endif
 
 #define mGetLED_1()         mLED_1
@@ -244,17 +244,21 @@
 #define MAX_PAYLOAD                 100
 #define SENSORS                     1
 #define NO_SENSORS                  0x00                  /* No sensors Id */
+#define ON_DSWDT                  WDTCONbits.DS && DSWAKELbits.DSWDT
 
 /*...........................................................................*/
 /* Prototypes */
 void BSP_init(void);
+void BSP_enablePLL(void);
 void BSP_defaultIO(void);
+
 void BSP_deepSleep(void);
 void BSP_sleep(void);
+
 void BSP_onPowerUp(void);
 void BSP_onMclr(void);
 void BSP_onWakeUp(void);
-void BSP_enablePLL(void);
+void BSP_onDsWdtWakeUp(void);
 
 
 #endif 	/* bsp_h */

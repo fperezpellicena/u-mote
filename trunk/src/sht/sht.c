@@ -158,24 +158,18 @@ UINT8 Sht11_measureAndCalculate(Sht* sht) {
 
 UINT8 Sht11_measure(Sht* sht) {
     UINT8 error = 0;
-    SHT_DATA_DDR = 0;
-    SHT_DATA = 1;
     // Get measures
     error += Sht11_measureParam(&sht->data->temperature.i, &sht->data->tempChk,
             SHT_MEASURE_TEMP);
-#ifdef __18F46J50_H
-    LATDbits.LATD1 = !LATDbits.LATD1;
-#endif
-    SHT_DATA_DDR = 0;
-    SHT_DATA = 1;
     error += Sht11_measureParam(&sht->data->humidity.i, &sht->data->humiChk,
             SHT_MEASURE_HUMI);
-
     return error;
 }
 
 UINT8 Sht11_measureParam(UINT16 *p_value, UINT8 *p_checksum, UINT8 mode) {
     UINT8 error = 0;
+    SHT_DATA_DDR = 0;
+    SHT_DATA = 1;
     Sht11_start(); //transmission start
     switch (mode) { //send command to sensor
         case SHT_MEASURE_TEMP: error += Sht11_write(SHT_MEASURE_TEMP);
