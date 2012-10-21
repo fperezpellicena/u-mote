@@ -81,7 +81,7 @@ static void XBee_monitoring(void) {
     SensorProxy_addSensorIdentifiersToPayload(&payload);
     SensorProxy_sense();
     SensorProxy_addMeasuresToPayload(&payload);
-    XBee_createTransmitRequestPacket(&packet, 0x06, XBEE_SINK_ADDRESS,
+    XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*)XBEE_SINK_ADDRESS,
             XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
     XBee_sendPacket(&packet);
 }

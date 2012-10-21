@@ -79,13 +79,13 @@ DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
 
 /* Declare one IRC-A1 gas sensor */
 #if IRCA1_ENABLED
-#pragma udata irca
-#if SENSING_MODE == FUZZY_DRIVEN
-DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense, 1, &ifHighCO2);
-#else
-DECLARE_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense);
-#endif
-#pragma udata
+#   pragma udata irca
+#   if SENSING_MODE == FUZZY_DRIVEN
+        DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense, 1, &ifHighCO2);
+#   else
+        DECLARE_IRCA(IRCA1_ID, irca1);
+#   endif
+#   pragma udata
 #endif
 
 static Payload payload;
@@ -118,9 +118,8 @@ void SensorProxy_sense(void) {
     Sht11_addMeasuresToPayload(&sht, &payload);
 #endif
 #if IRCA1_ENABLED
-    // TODO
-    Irca1Proxy_measure(&irca1);
-    Irca1Proxy_addMeasuresToPayload(&payload);
+    IrcA1Proxy_measure(&irca1);
+    IrcA1Proxy_addMeasuresToPayload(&irca1, &payload);
 #endif
     // Turn off sensor board
     SENSOR_BOARD_OFF();
@@ -174,6 +173,6 @@ static void SensorProxy_composeSensorIdentifiers(void) {
     sensorIdentifiers |= sht.id;
 #endif
 #if IRCA1_ENABLED
-    sensorIdentifiers |= irca.id;
+    sensorIdentifiers |= irca1.id;
 #endif
 }
