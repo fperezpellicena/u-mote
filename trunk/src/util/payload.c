@@ -29,7 +29,7 @@ void Payload_init(Payload* payload) {
 /*..........................................................................*/
 
 /* Add one byte to the list */
-void Payload_addByte(Payload* payload, UINT8 element) {
+void Payload_addByte(Payload* payload, const UINT8 element) {
     if (payload->size < MAX_PAYLOAD - 1) {
         payload->data[payload->size++] = element;
     }
@@ -38,7 +38,7 @@ void Payload_addByte(Payload* payload, UINT8 element) {
 /*..........................................................................*/
 
 /* Add one word to the list(big endian) */
-void Payload_addWord(Payload* payload, UINT16 element) {
+void Payload_addWord(Payload* payload, const UINT16 element) {
     UINT8 lsb = (UINT8)element;
     UINT8 msb = (UINT8)(element >> 8);
     if (payload->size < MAX_PAYLOAD - 2) {
@@ -60,7 +60,7 @@ void Payload_empty(Payload* payload) {
 /*..........................................................................*/
 
 /* Append all elements to the list */
-void Payload_append(Payload* to, Payload* from) {
+void Payload_append(Payload* to, const Payload* from) {
     UINT8 i = 0;
     while (i < from->size) {
         Payload_addByte(to, from->data[i++]);
@@ -69,7 +69,7 @@ void Payload_append(Payload* to, Payload* from) {
 
 /*..........................................................................*/
 /* */
-void Payload_putString(Payload* payload, UINT8* string) {
+void Payload_putString(Payload* payload, const UINT8* string) {
     sprintf(payload->data, string);
     payload->size = strlen(string);
 }

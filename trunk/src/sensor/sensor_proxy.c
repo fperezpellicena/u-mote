@@ -30,46 +30,13 @@
 #if SENSING_MODE == FUZZY_DRIVEN
 #include "fuzzy.h"
 
-#pragma udata tmp_mf
-DECLARE_MF(lowTemp, -40, 0, 20);
-DECLARE_MF(midTemp, 0, 20, 40);
-DECLARE_MF(highTemp, 30, 40, 255);
-DECLARE_RT(ifHighTemp, &highTemp);
-DECLARE_RT(ifMidTemp, &midTemp);
-DECLARE_RT(ifLowTemp, &lowTemp);
-#pragma udata
-
-#pragma udata risk_mf
-DECLARE_MF(lowRisk, 0, 0, 50);
-DECLARE_MF(midRisk, 0, 50, 100);
-DECLARE_MF(highRisk, 50, 100, 255);
-#pragma udata
-
-#pragma udata rp
-DECLARE_RT(thenHighRisk, &highRisk);
-DECLARE_RT(thenMidRisk, &midRisk);
-DECLARE_RT(thenLowRisk, &lowRisk);
-#pragma udata
-
-#pragma udata rules
-DECLARE_RULE(ifHighTempThenHighRisk, &thenHighRisk, 1, &ifHighTemp);
-DECLARE_RULE(ifMidTempThenMidRisk, &thenMidRisk, 1, &ifLowTemp);
-DECLARE_RULE(ifLowTempThenLowRisk, &thenLowRisk, 1, &ifMidTemp);
-//DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
-//DECLARE_RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
-#pragma udata
-
-#pragma udata ruleEngine
-DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
-        &ifMidTempThenMidRisk, &ifLowTempThenLowRisk);
-//DECLARE_ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
-#pragma udata
-#endif
-
 /* Declare one SHT sensor for temperature */
 #if SHT_ENABLED
 #   pragma udata sht
 #   if SENSING_MODE == FUZZY_DRIVEN
+        extern RuleTerm ifHighTemp;
+        extern RuleTerm ifLowTemp;
+        extern RuleTerm ifMidTemp;
         DECLARE_FUZZY_SHT(SHT_ID, sht, 1, &ifHighTemp);
 #   else
         DECLARE_SHT(SHT_ID, sht);
@@ -81,11 +48,16 @@ DECLARE_ENGINE(engine, 3, &ifHighTempThenHighRisk,
 #if IRCA1_ENABLED
 #   pragma udata irca
 #   if SENSING_MODE == FUZZY_DRIVEN
-        DECLARE_FUZZY_IRCA(IRCA1_ID, irca, &IrcA1Proxy_sense, 1, &ifHighCO2);
+        extern RuleTerm ifHighCo2;
+        DECLARE_FUZZY_IRCA(IRCA1_ID, irca, 1, &ifHighCo2);
 #   else
-        DECLARE_IRCA(IRCA1_ID, irca1);
+        DECLARE_IRCA(IRCA1_ID, irca);
 #   endif
 #   pragma udata
+#endif
+
+extern RuleEngine engine;
+
 #endif
 
 static Payload payload;
@@ -118,8 +90,8 @@ void SensorProxy_sense(void) {
     Sht11_addMeasuresToPayload(&sht, &payload);
 #endif
 #if IRCA1_ENABLED
-    IrcA1Proxy_measure(&irca1);
-    IrcA1Proxy_addMeasuresToPayload(&irca1, &payload);
+    IrcA1Proxy_measure(&irca);
+    IrcA1Proxy_addMeasuresToPayload(&irca, &payload);
 #endif
     // Turn off sensor board
     SENSOR_BOARD_OFF();
@@ -133,15 +105,12 @@ void SensorProxy_sense(void) {
 UINT8 SensorProxy_fuzzy(void) {
     // Sense
     SensorProxy_sense();
-    // Process
 #if SHT_ENABLED
     Sht11_prepareFuzzyInputs(&sht);
 #endif
 #if IRCA1_ENABLED
-    // TODO
-    IrcA1_prepareFuzzyInputs(&irca1);
+    IrcA1_prepareFuzzyInputs(&irca);
 #endif
-    // Run fuzzy engine
     return RuleEngine_run(&engine);
 }
 #endif
@@ -173,6 +142,6 @@ static void SensorProxy_composeSensorIdentifiers(void) {
     sensorIdentifiers |= sht.id;
 #endif
 #if IRCA1_ENABLED
-    sensorIdentifiers |= irca1.id;
+    sensorIdentifiers |= irca.id;
 #endif
 }

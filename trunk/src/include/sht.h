@@ -69,7 +69,7 @@ struct ShtData {
     Sht name = {id, &name##data, NULL}
 
 /* Declare fuzzy sht sensor */
-#define DECLARE_FUZZY_SHT(id, name, senseFn, termsSize, ...) \
+#define DECLARE_FUZZY_SHT(id, name, termsSize, ...) \
     RuleTerm* name##terms[termsSize] = {__VA_ARGS__};\
     ShtData name##data;\
     Sht name = {id, &name##data, NULL}
@@ -146,7 +146,9 @@ void Sht11_addMeasuresToPayload(Sht* sht, Payload* payload);
 
 void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload);
 
+#if SENSING_MODE == FUZZY_DRIVEN
 void Sht11_prepareFuzzyInputs(Sht* sht);
+#endif
 
 #endif /* sht11_h */
 #endif

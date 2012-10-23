@@ -73,6 +73,7 @@ void XBeeInterrupt_handleTopHalve(void) {
 #endif
 }
 
+#if SENSING_MODE == MONITORING
 static void XBee_monitoring(void);
 
 static void XBee_monitoring(void) {
@@ -85,6 +86,7 @@ static void XBee_monitoring(void) {
             XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
     XBee_sendPacket(&packet);
 }
+#endif
 
 #if SENSING_MODE == FUZZY_DRIVEN
 static void XBee_fuzzyMonitoring(void);
@@ -97,16 +99,15 @@ static void XBee_fuzzyMonitoring(void) {
     Rtc_addTimeToPayload(&payload);
     // Put sensor ids
     SensorProxy_addSensorIdentifiersToPayload(&payload);
-    //List_add(&list, SensorProxy_getSensors());
     // Sense installed sensors
     risk = SensorProxy_fuzzy();
     // Put sensor payload into buffer
-    Payload_append(&payload, (Payload*) SensorProxy_getMeasures());
+    SensorProxy_addMeasuresToPayload(&payload);
     // Add Risk level
     Payload_addByte(&payload, risk);
     // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
-    XBee_createTransmitRequestPacket(&packet, 0x06, XBEE_SINK_ADDRESS,
+    XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*)XBEE_SINK_ADDRESS,
             XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
     XBee_sendPacket(&packet);
 }
