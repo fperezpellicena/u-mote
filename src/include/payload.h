@@ -35,18 +35,18 @@ struct Payload {
 void Payload_init(Payload* list);
 
 /* Add one byte to the list */
-void Payload_addByte(Payload* payload, UINT8 element);
+void Payload_addByte(Payload* payload, const UINT8 element);
 
 /* Add one word to the list */
-void Payload_addWord(Payload* payload, UINT16 element);
+void Payload_addWord(Payload* payload, const UINT16 element);
 
 /* Delete all elements of the list */
 void Payload_empty(Payload* list);
 
 /* Append */
-void Payload_append(Payload* to, Payload* from);
+void Payload_append(Payload* to, const Payload* from);
 
 /* Put a formatted string with params */
-void Payload_putString(Payload* payload, UINT8* string);
+void Payload_putString(Payload* payload, const UINT8* string);
 
 #endif /* list_H*/

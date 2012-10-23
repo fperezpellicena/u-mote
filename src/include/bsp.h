@@ -229,7 +229,7 @@
 #define MONITORING                  0           /* Continuous sensing mode */
 #define THRESHOLD_DRIVEN            1           /* Alert only sensing mode */
 #define FUZZY_DRIVEN                2           /* Alert fuzzy based mode */
-#define SENSING_MODE                MONITORING
+#define SENSING_MODE                FUZZY_DRIVEN
 
 #define MAX_SENSORS                 5                       /* Max sensors */
 #define SENSOR_BOARD_CTRL           LATBbits.LATB3      /* Power on/off pin*/

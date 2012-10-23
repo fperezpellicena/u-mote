@@ -18,10 +18,10 @@
 #include "sht.h"
 
 #if SHT_ENABLED
-#include <delays.h>
-#include <stdio.h>
-#include <math.h>
-#include "payload.h"
+    #include <delays.h>
+    #include <stdio.h>
+    #include <math.h>
+    #include "payload.h"
 
 void Sht11_init() {
     SHT_DATA_CNF = 1;
@@ -234,6 +234,7 @@ void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload) {
             fabs(((sht->data->temperature.f - (int) sht->data->temperature.f)*100)));
 }
 
+#if SENSING_MODE == FUZZY_DRIVEN
 /*...........................................................................*/
 /* Put measures into rule terms */
 void Sht11_prepareFuzzyInputs(Sht* sht) {
@@ -248,5 +249,5 @@ void Sht11_prepareFuzzyInputs(Sht* sht) {
         terms->humiRules[i]->input = sht->data->humidity.i;
     }
 }
-
+#endif
 #endif
