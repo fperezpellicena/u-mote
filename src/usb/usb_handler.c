@@ -20,7 +20,6 @@
 
 #include <string.h>
 #include "GenericTypeDefs.h"
-#include "util.h"
 #include "hw_adc.h"
 #include "usb_handler.h"
 #include "usb_config.h"
@@ -50,7 +49,6 @@ Payload usbOutputBuffer;
 
 /** Procesamiento de información USB  */
 void USB_process(void) {
-    rtccTimeDate* timestamp;
     static char RTCC_CONF[] = "rtccconfig";
     static char RTCC_TEST[] = "rtcctest";
     static char XBEE_JOIN[] = "xbeejoin";
@@ -81,7 +79,8 @@ void USB_process(void) {
             Rtc_writeFormattedTimestamp(&usbInputBuffer);
         } else if (strncmp(usbOutputBuffer.data, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
             XBee_join();
-            Payload_putString(&usbInputBuffer, (const MEM_MODEL rom char*) "Join request sent");
+            Payload_putString(&usbInputBuffer,
+                    (const MEM_MODEL rom char*) "Join request sent");
         } else if (strncmp(usbOutputBuffer.data, ADC_TEST, strlen(ADC_TEST)) == 0) {
             PAYLOAD_PUT_STRING_WITH_ARGS(&usbInputBuffer,
                     "ADC channel 1: %u\n\r", Adc_testChannelOne());
@@ -94,7 +93,8 @@ void USB_process(void) {
 #endif
         } else {
             // Si el comando es erróneo, muestra un mensaje de error
-            Payload_putString(&usbInputBuffer, (const MEM_MODEL rom char*) "Comando desconocido");
+            Payload_putString(&usbInputBuffer,
+                    (const MEM_MODEL rom char*) "Comando desconocido");
         }
         // Si está preparado para enviar datos
         if (USBUSARTIsTxTrfReady() && usbInputBuffer.size != 0) {

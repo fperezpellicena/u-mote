@@ -52,7 +52,6 @@ void main(void) {
                 USB_blinkStatus();
 #endif
         } else {
-            Power_runPrimaryMode();
 #if SLEEP_MODE == DEEP_SLEEP
             if (XBEE_ON_SLEEP_AWAKE) {
                 BSP_onWakeUp();
@@ -61,7 +60,6 @@ void main(void) {
             } else {
                 BSP_onPowerUp();
             }
-            Power_runRcMode();
             // Si no está conectado el terminal USB, entra en modo de bajo consumo
             if ((USBGetDeviceState() == ATTACHED_STATE)) {
                 USBDeviceDetach();
