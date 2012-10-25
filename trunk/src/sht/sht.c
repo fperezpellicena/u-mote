@@ -18,10 +18,10 @@
 #include "sht.h"
 
 #if SHT_ENABLED
-    #include <delays.h>
-    #include <stdio.h>
-    #include <math.h>
-    #include "payload.h"
+#include <delays.h>
+#include <stdio.h>
+#include <math.h>
+#include "payload.h"
 
 void Sht11_init() {
     SHT_DATA_CNF = 1;
@@ -63,7 +63,7 @@ UINT8 Sht11_read(UINT8 ack) {
     UINT8 i, val = 0;
     SHT_DATA_DDR = 1;
     SHT_DATA = 1;
-    for (i =0x80; i > 0; i /= 2) //shift bit for masking
+    for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
         Delay10TCYx(10);
         SHT_SCK = 1; //clk for SENSI-BUS
@@ -236,17 +236,26 @@ void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload) {
 
 #if SENSING_MODE == FUZZY_DRIVEN
 /*...........................................................................*/
+
 /* Put measures into rule terms */
 void Sht11_prepareFuzzyInputs(Sht* sht) {
     UINT8 i;
+    float temperature;
+    float humidity;
     ShtFuzzyTerms* terms = sht->terms;
+    // Calculate values
+    Sht11_calculate(&sht->data->humidity.f, &sht->data->temperature.f);
+    temperature = (float) sht->data->temperature.i;
+    humidity = (float) sht->data->humidity.i;
     // Put temperature measured into rule terms
     for (i = 0; i < terms->tempRulesSize; i++) {
-        terms->tempRules[i]->input = sht->data->temperature.i;
+        // Set integer term (Intentional precision loss)
+        terms->tempRules[i]->input = (int) (temperature / 100);
     }
     // Put humidity measured into rule terms
     for (i = 0; i < terms->humiRulesSize; i++) {
-        terms->humiRules[i]->input = sht->data->humidity.i;
+        // Set integer term (Intentional precision loss)
+        terms->humiRules[i]->input = (int) (humidity / 100);
     }
 }
 #endif
