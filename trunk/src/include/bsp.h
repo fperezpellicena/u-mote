@@ -97,7 +97,7 @@
 /*...........................................................................*/
 /* USB SECTION */
 
-#define USB_ENABLED         0
+#define USB_ENABLED         1
 
 /* USB attach detector */
 #define USB_PLUG_PIN        PORTBbits.RB4
