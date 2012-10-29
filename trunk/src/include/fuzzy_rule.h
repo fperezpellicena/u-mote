@@ -22,12 +22,17 @@
 
 #define MAX_ANTECEDENTS     0x02
 
-#define DECLARE_RT(name, mf)\
-RuleTerm name = {mf, 0, 1}
+#define IF(name, left, mid, right)\
+    MembershipFunction name = {left, mid, right};\
+    RuleTerm if##name = {&name, 0, 1}
 
-#define DECLARE_RULE(name, consecuent, size, ...)\
-RuleTerm* name##ruleTerms[size] = {__VA_ARGS__};\
-Rule name = {name##ruleTerms, consecuent, size}
+#define THEN(name, left, mid, right)\
+    MembershipFunction name = {left, mid, right};\
+    RuleTerm then##name = {&name, 0, 1}
+
+#define RULE(name, consecuent, ...)\
+    RuleTerm* name##ruleTerms[] = {__VA_ARGS__};\
+    Rule name = {name##ruleTerms, consecuent}
 
 /*****************************************************************************
  *  Let R1:
@@ -60,7 +65,7 @@ struct RuleTerm {
 
 /*..........................................................................*/
 /* Evaluate term on input value */
-float_t RuleTerm_evaluate(RuleTerm* ruleTerm, UINT8 input);
+void RuleTerm_evaluate(RuleTerm* ruleTerm);
 
 
 /*****************************************************************************
@@ -81,7 +86,9 @@ float_t RuleTerm_evaluate(RuleTerm* ruleTerm, UINT8 input);
  ****************************************************************************/
 
 /* Implication rule function prototype */
-float_t RuleImplication(float_t fuzzyInputA, float_t fuzzyInputB);
+float_t RuleImplication_min(float_t fuzzyInputA, float_t fuzzyInputB);
+
+void RuleImplication(RuleTerm* antecedent, RuleTerm* consecuent);
 
 /*..........................................................................*/
 /** Rule class */
@@ -90,7 +97,6 @@ typedef struct Rule Rule;
 struct Rule {
     RuleTerm** antecedents;
     RuleTerm* consecuent;
-    UINT8 antecedentsSize;
 };
 
 /*..........................................................................*/
