@@ -27,11 +27,18 @@ float_t RuleImplication_min(float_t fuzzyInputA, float_t fuzzyInputB) {
     return fuzzyInputA < fuzzyInputB ? fuzzyInputA : fuzzyInputB;
 }
 
+
+void RuleImplication(RuleTerm* antecedent, RuleTerm* consecuent) {
+    consecuent->fuzzy = RuleImplication_min(consecuent->fuzzy, antecedent->fuzzy);
+}
+
 /*..........................................................................*/
 
 /* Evaluate term on input value */
-float_t RuleTerm_evaluate(RuleTerm* ruleTerm, UINT8 input) {
-    return triangularFuzzify(input, ruleTerm->membershipFunction);
+void RuleTerm_evaluate(RuleTerm* antecedent) {
+    antecedent->fuzzy = triangularFuzzify(
+            antecedent->input,
+            antecedent->membershipFunction);
 }
 
 
@@ -41,11 +48,11 @@ float_t RuleTerm_evaluate(RuleTerm* ruleTerm, UINT8 input) {
 void Rule_evaluate(Rule* rule) {
     UINT8 i;
     // Fuzzy crisp inputs
-    for (i = 0; i < rule->antecedentsSize; i++) {
-        rule->antecedents[i]->fuzzy = RuleTerm_evaluate(rule->antecedents[i],
-                rule->antecedents[i]->input);
-        // Apply min{u1, u2} implication rule
-        rule->consecuent->fuzzy = RuleImplication_min(rule->consecuent->fuzzy,
-                rule->antecedents[i]->fuzzy);
+    for (i = 0; i < MAX_ANTECEDENTS; i++) {
+        if (rule->antecedents[i] != NULL) {
+            RuleTerm_evaluate(rule->antecedents[i]);
+            // Apply min{u1, u2} implication rule
+            RuleImplication(rule->antecedents[i], rule->consecuent);
+        }
     }
 }

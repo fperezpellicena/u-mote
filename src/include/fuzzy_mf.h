@@ -21,9 +21,6 @@
 #include "GenericTypeDefs.h"
 #include <math.h>
 
-#define DECLARE_MF(name, left, mid, right)\
-MembershipFunction name = {left, mid, right}
-
 /*..........................................................................*/
 /* Membership function class */
 typedef struct MembershipFunction MembershipFunction;

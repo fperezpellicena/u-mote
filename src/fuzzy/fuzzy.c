@@ -24,17 +24,19 @@
 /* Run engine */
 UINT8 RuleEngine_run(RuleEngine* engine) {
     UINT8 i;
-    RuleTerm* ruleTerm;
+    RuleTerm* consecuent;
     float_t num = (float_t) 0;
     float_t den = (float_t) 0;
     // Evaluate all rules
-    for (i = 0; i < engine->size; i++) {
-        // Evaluate i rule
-        Rule_evaluate(engine->rules[i]);
-        ruleTerm = engine->rules[i]->consecuent;
-        // Apply COG
-        den += ruleTerm->fuzzy;
-        num += ruleTerm->fuzzy * (float_t)ruleTerm->membershipFunction->mid;
+    for (i = 0; i < MAX_RULES; i++) {
+        if(engine->rules[i] != NULL) {
+            // Evaluate i rule
+            Rule_evaluate(engine->rules[i]);
+            consecuent = engine->rules[i]->consecuent;
+            // Apply COG
+            den += consecuent->fuzzy;
+            num += consecuent->fuzzy * (float_t)consecuent->membershipFunction->mid;
+        }
     }
     return (UINT8)(num / den);
 }

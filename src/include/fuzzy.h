@@ -23,9 +23,9 @@
 
 #define MAX_RULES   5
 
-#define DECLARE_ENGINE(name, size, ...)\
-Rule* name##rules[size] = {__VA_ARGS__};\
-RuleEngine name = {name##rules, size}
+#define ENGINE(name, ...)\
+    Rule* name##rules[MAX_RULES] = {__VA_ARGS__};\
+    RuleEngine name = {name##rules}
 
 
 /*..........................................................................*/
@@ -33,8 +33,7 @@ RuleEngine name = {name##rules, size}
 typedef struct RuleEngine RuleEngine;
 
 struct RuleEngine {
-    Rule** rules;
-    UINT8 size;
+    Rule* rules[MAX_RULES];
 };
 
 /*..........................................................................*/
