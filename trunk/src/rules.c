@@ -40,7 +40,7 @@ THEN(LowRisk,  0, 0, 50);
 #pragma udata rules
 RULE(ifHighTempThenHighRisk, &thenHighRisk, &ifHighTemp);
 RULE(ifMidTempThenMidRisk, &thenMidRisk, &ifMidTemp);
-RULE(ifLowTempThenLowRisk, &thenLowRisk, 1, &ifLowTemp);
+RULE(ifLowTempThenLowRisk, &thenLowRisk, &ifLowTemp);
 //RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
 //RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
 #pragma udata

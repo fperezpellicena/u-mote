@@ -20,9 +20,6 @@
 
 #include "bsp.h"
 
-#define PAYLOAD_PUT_STRING_WITH_ARGS(payload, string, ...) \
-    sprintf(payload->data, string, __VA_ARGS__);
-
 /* Static List struct */
 typedef struct Payload Payload;
 
@@ -35,10 +32,10 @@ struct Payload {
 void Payload_init(Payload* list);
 
 /* Add one byte to the list */
-void Payload_addByte(Payload* payload, const UINT8 element);
+void Payload_putByte(Payload* payload, const UINT8 element);
 
 /* Add one word to the list */
-void Payload_addWord(Payload* payload, const UINT16 element);
+void Payload_putWord(Payload* payload, const UINT16 element);
 
 /* Delete all elements of the list */
 void Payload_empty(Payload* list);

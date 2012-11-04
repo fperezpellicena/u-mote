@@ -104,7 +104,7 @@ static void XBee_fuzzyMonitoring(void) {
     // Put sensor payload into buffer
     SensorProxy_addMeasuresToPayload(&payload);
     // Add Risk level
-    Payload_addByte(&payload, risk);
+    Payload_putByte(&payload, risk);
     // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
     XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*)XBEE_SINK_ADDRESS,

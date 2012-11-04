@@ -119,10 +119,10 @@ UINT8 SensorProxy_fuzzy(void) {
 
 /* Put sensor byte identification based on sensor id attribute */
 void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
-    Payload_addByte(payload, 0);
-    Payload_addByte(payload, sensorIdentifiers);
-    Payload_addByte(payload, 0);
-    Payload_addByte(payload, 0);
+    Payload_putByte(payload, 0);
+    Payload_putByte(payload, sensorIdentifiers);
+    Payload_putByte(payload, 0);
+    Payload_putByte(payload, 0);
 }
 
 /*..........................................................................*/
