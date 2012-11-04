@@ -37,9 +37,9 @@ void IrcA1Proxy_measure(IrcA1* ircA1) {
 /*...........................................................................*/
 void IrcA1Proxy_addMeasuresToPayload(IrcA1* ircA1, Payload* payload) {
     // Raw values
-    Payload_addByte(payload, ircA1->data->ref);
-    Payload_addByte(payload, ircA1->data->act);
-    Payload_addByte(payload, ircA1->data->tmp);
+    Payload_putByte(payload, ircA1->data->ref);
+    Payload_putByte(payload, ircA1->data->act);
+    Payload_putByte(payload, ircA1->data->tmp);
 }
 
 #endif

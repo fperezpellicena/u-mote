@@ -100,10 +100,12 @@ void Rtc_writeTimestamp(rtccTimeDate* timestamp) {
 
 /* Read Rtc data into buffer */
 void Rtc_writeFormattedTimestamp(Payload* output) {
-    PAYLOAD_PUT_STRING_WITH_ARGS(output,
-            "Fecha/Hora: %2u:%2u:%2u %2u/%2u/%4u \n\r",
+    char buffer[50];
+    memset(buffer, NULL, 50);
+    sprintf((char*)buffer, "Fecha/Hora: %2u:%2u:%2u %2u/%2u/%4u \n\r",
             timestamp.f.hour, timestamp.f.min, timestamp.f.sec,
             timestamp.f.mday, timestamp.f.mon, timestamp.f.year);
+    Payload_putString(output, (char*)buffer);
 }
 
 /*..........................................................................*/
@@ -111,13 +113,13 @@ void Rtc_writeFormattedTimestamp(Payload* output) {
 /* Read Rtc data into a list */
 void Rtc_addTimeToPayload(Payload* payload) {
     Rtc_readTimestamp();
-    Payload_addByte(payload, timestamp.f.sec);
-    Payload_addByte(payload, timestamp.f.min);
-    Payload_addByte(payload, timestamp.f.hour);
-    Payload_addByte(payload, timestamp.f.mday);
-    Payload_addByte(payload, timestamp.f.wday);
-    Payload_addByte(payload, timestamp.f.mon);
-    Payload_addByte(payload, timestamp.f.year);
+    Payload_putByte(payload, timestamp.f.sec);
+    Payload_putByte(payload, timestamp.f.min);
+    Payload_putByte(payload, timestamp.f.hour);
+    Payload_putByte(payload, timestamp.f.mday);
+    Payload_putByte(payload, timestamp.f.wday);
+    Payload_putByte(payload, timestamp.f.mon);
+    Payload_putByte(payload, timestamp.f.year);
 }
 
 /**

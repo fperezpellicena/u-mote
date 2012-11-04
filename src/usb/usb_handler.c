@@ -67,24 +67,22 @@ void USB_process(void) {
         return;
     }
     // Recibe un buffer de tamaño determinado
-    numBytesRead = getsUSBUSART(usbOutputBuffer.data, 64);
+    numBytesRead = getsUSBUSART((char*)usbOutputBuffer.data, 64);
 
     // Si ha leído datos
     if (numBytesRead != 0) {
-        if (strncmp(usbOutputBuffer.data, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
+        if (strncmp((char*)usbOutputBuffer.data, RTCC_CONF, strlen(RTCC_CONF)) == 0) {
             Rtc_readInputStream(&usbOutputBuffer);
             Rtc_writeFormattedTimestamp(&usbInputBuffer);
-        } else if (strncmp(usbOutputBuffer.data, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
+        } else if (strncmp((char*)usbOutputBuffer.data, RTCC_TEST, strlen(RTCC_TEST)) == 0) {
             Rtc_readTimestamp();
             Rtc_writeFormattedTimestamp(&usbInputBuffer);
-        } else if (strncmp(usbOutputBuffer.data, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
+        } else if (strncmp((char*)usbOutputBuffer.data, XBEE_JOIN, strlen(XBEE_JOIN)) == 0) {
             XBee_join();
-            Payload_putString(&usbInputBuffer,
-                    (const MEM_MODEL rom char*) "Join request sent");
-        } else if (strncmp(usbOutputBuffer.data, ADC_TEST, strlen(ADC_TEST)) == 0) {
-            PAYLOAD_PUT_STRING_WITH_ARGS(&usbInputBuffer,
-                    "ADC channel 1: %u\n\r", Adc_testChannelOne());
-        } else if (strncmp(usbOutputBuffer.data, SHT, strlen(SHT)) == 0) {
+            Payload_putString(&usbInputBuffer, (UINT8*) "Join request sent");
+        } else if (strncmp((char*)usbOutputBuffer.data, ADC_TEST, strlen(ADC_TEST)) == 0) {
+           // TODO
+        } else if (strncmp((char*)usbOutputBuffer.data, SHT, strlen(SHT)) == 0) {
 #if SHT_ENABLED
             Sht11_measure(&sht);
             Sht11_addMeasuresCalculatedToPayload(&sht, &usbInputBuffer);
@@ -93,12 +91,11 @@ void USB_process(void) {
 #endif
         } else {
             // Si el comando es erróneo, muestra un mensaje de error
-            Payload_putString(&usbInputBuffer,
-                    (const MEM_MODEL rom char*) "Comando desconocido");
+            Payload_putString(&usbInputBuffer, (UINT8*) "Comando desconocido");
         }
         // Si está preparado para enviar datos
         if (USBUSARTIsTxTrfReady() && usbInputBuffer.size != 0) {
-            putUSBUSART(usbInputBuffer.data, (BYTE) usbInputBuffer.size);
+            putUSBUSART((char*)usbInputBuffer.data, (BYTE) usbInputBuffer.size);
         }
     }
 

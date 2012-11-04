@@ -215,8 +215,8 @@ void Sht11_calculate(float *p_humidity, float *p_temperature) {
 
 /* Add temperature and humidity to payload */
 void Sht11_addMeasuresToPayload(Sht* sht, Payload* payload) {
-    Payload_addWord(payload, sht->data->temperature.i);
-    Payload_addWord(payload, sht->data->humidity.i);
+    Payload_putWord(payload, sht->data->temperature.i);
+    Payload_putWord(payload, sht->data->humidity.i);
 }
 
 /*...........................................................................*/
