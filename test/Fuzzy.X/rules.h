@@ -15,29 +15,16 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef fuzzy_h
-#define fuzzy_h
+#ifndef rules_h
+#define rules_h
 
-#include "GenericTypeDefs.h"
-#include "fuzzy_rule.h"
+#include "fuzzy.h"
 
-#define MAX_RULES   (UINT8)10
+void initRules(RuleEngine* engine);
 
-#define DECLARE_ENGINE(name)    RuleEngine name = {NULL, 0}
+void initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
+        RuleTerm* antecedent2, RuleTerm* consecuent);
 
-/*..........................................................................*/
-/* Rules class */
-typedef struct RuleEngine RuleEngine;
+void setInputs(void);
 
-struct RuleEngine {
-    Rule rules[MAX_RULES];
-    UINT8 size;
-};
-
-void RuleEngine_addRule(RuleEngine* engine, Rule* rule);
-
-/*..........................................................................*/
-/* Run engine */
-UINT8 RuleEngine_run(RuleEngine* ruleEngine);
-
-#endif /* fuzzy_h */
+#endif /* rules_h */

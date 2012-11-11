@@ -18,6 +18,24 @@
 #include "fuzzy.h"
 #include <math.h>
 
+static void RuleEngine_add(Rule* fromRule, Rule* toRule);
+
+static void RuleEngine_add(Rule* fromRule, Rule* toRule) {
+    UINT8 i;
+    // Add antecedents
+    for (i = 0; i < fromRule->antecedentsSize; i++) {
+        Rule_addAntedecent(toRule, &fromRule->antecedents[i]);
+    }
+    // Add consecuent
+    Rule_setConsecuent(toRule, &fromRule->consecuent);
+}
+
+void RuleEngine_addRule(RuleEngine* engine, Rule* rule) {
+    if (engine->size < MAX_RULES) {
+        RuleEngine_add(rule, &engine->rules[engine->size]);
+        ++engine->size;
+    }
+}
 
 /*..........................................................................*/
 
@@ -29,11 +47,11 @@ UINT8 RuleEngine_run(RuleEngine* engine) {
     // Evaluate all rules
     for (i = 0; i < engine->size; i++) {
         // Evaluate i rule
-        Rule_evaluate(engine->rules[i]);
+        Rule_evaluate(&engine->rules[i]);
         // Apply COG
-        den += engine->rules[i]->consecuent->fuzzy;
-        num += engine->rules[i]->consecuent->fuzzy
-                * (float_t)engine->rules[i]->consecuent->membershipFunction->mid;
+        den += engine->rules[i].consecuent.fuzzy;
+        num += engine->rules[i].consecuent.fuzzy
+                * (float_t) engine->rules[i].consecuent.membershipFunction.mid;
     }
-    return (UINT8)(num / den);
+    return (UINT8) (num / den);
 }
