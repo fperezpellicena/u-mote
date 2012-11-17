@@ -23,4 +23,5 @@
 void XBee_init(void) {
     XBeeSerial_init(EUSART_9600);
     XBeeInterrupt_install();
+
 }

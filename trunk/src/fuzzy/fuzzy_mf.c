@@ -19,53 +19,35 @@
 
 static float_t fuzzy;
 
-static BOOL isLeftAligned(MembershipFunction* function) {
-    return function->mid == function->left;
-}
-
-static BOOL isRightAligned(MembershipFunction* function) {
-    return function->mid == function->right;
-}
-
-static float_t calculateLeftAligned(UINT8 value, MembershipFunction* function) {
-    if (value < function->left) {
-        return (float_t) 1;
-    } else if (value > function->right) {
-        return (float_t) 0;
-    } else {
-        return (float_t) (function->right - value) / (float_t) (function->right - function->mid);
-    }
-}
-
-static float_t calculateRightAligned(UINT8 value, MembershipFunction* function) {
-    if (value > function->right) {
-        return (float_t) 1;
-    } else if (value < function->left) {
-        return (float_t) 0;
-    } else {
-        return (float_t) (value - function->left) / (float_t) (function->mid - function->left);
-    }
-}
-
-static float_t calculateCentered(UINT8 value, MembershipFunction* function) {
-    if (value > function->left && value < function->mid) {
-        return (value - function->left) / (function->mid - function->left);
-    } else if (value > function->mid && value < function->right) {
-        return (float_t) (function->right - value) / (float_t) (function->right - function->mid);
-    } else {
-        return (float_t) 1;
-    }
-}
-
 /*..........................................................................*/
 
 /* Triangular fuzzify function */
 float_t triangularFuzzify(UINT8 value, MembershipFunction* function) {
-    if (isLeftAligned(function)) {
-        return calculateLeftAligned(value, function);
-    } else if (isRightAligned(function)) {
-        return calculateRightAligned(value, function);
+    fuzzy = -1;
+    if (function->mid == function->left) {
+        if (value < function->left) {
+            fuzzy = (float_t) 1;
+        } else if (value > function->right) {
+            fuzzy = (float_t) 0;
+        } else {
+            fuzzy = (float_t)(function->right - value) / (float_t)(function->right - function->mid);
+        }
+    } else if (function->mid == function->right) {
+        if (value > function->right) {
+            fuzzy = (float_t) 1;
+        } else if (value < function->left) {
+            fuzzy = (float_t) 0;
+        } else {
+            fuzzy = (float_t)(value - function->left) / (float_t)(function->mid - function->left);
+        }
     } else {
-        return calculateCentered(value, function);
+        if (value > function->left && value < function->mid) {
+            fuzzy = (value - function->left) / (function->mid - function->left);
+        } else if (value > function->mid && value < function->right) {
+            fuzzy = (float_t)(function->right - value) / (float_t)(function->right - function->mid);
+        } else {
+            fuzzy = (float_t) 1;
+        }
     }
+    return fuzzy;
 }

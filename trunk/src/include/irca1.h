@@ -27,13 +27,6 @@
     Irca1Cal name##cal = {0, 0};\
     IrcA1 name = {id, &name##data, &name##cal, NULL}
 
-#define DECLARE_FUZZY_IRCA(id, name, termsSize, ...)\
-    RuleTerm* name##terms[termsSize] = {__VA_ARGS__};\
-    IrcA1Data name##data;\
-    Irca1Cal name##cal;\
-    IrcA1 name = {id, &name##data, &name##cal, NULL}
-
-
 /* Sht fuzzy terms */
 typedef struct IrcaFuzzyTerms IrcaFuzzyTerms;
 

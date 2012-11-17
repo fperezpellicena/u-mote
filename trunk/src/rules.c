@@ -15,40 +15,81 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "fuzzy.h"
-#include "fuzzy_rule.h"
+#include "bsp.h"
 
 #if SENSING_MODE == FUZZY_DRIVEN
-#pragma udata tmp_mf
-IF(HighTemp, 30, 40, 255);
-IF(MidTemp, 0, 20, 40);
-IF(LowTemp, -40, 0, 20);
-#pragma udata
 
-#pragma udata co2_mf
-IF(HighCo2, 50, 100, 255);
-IF(MidCo2, 0, 50, 100);
-IF(LowCo2,  0, 0, 50);
-#pragma udata
+#    include "fuzzy_rule.h"
+#    include "rules.h"
 
-#pragma udata risk_mf
-THEN(HighRisk, 50, 100, 255);
-THEN(MidRisk, 0, 50, 100);
-THEN(LowRisk,  0, 0, 50);
-#pragma udata
+DECLARE_IF(HighTemp,{30, 50, 255});
+DECLARE_IF(MidTemp,{0, 30, 50});
+DECLARE_IF(LowTemp,{0, 0, 40});
+DECLARE_IF(HighCo2,{50, 100, 100});
+DECLARE_IF(MidCo2,{0, 50, 100});
+DECLARE_IF(LowCo2,{0, 0, 50});
+DECLARE_THEN(HighRisk,{50, 100, 100});
+DECLARE_THEN(MidRisk,{0, 50, 100});
+DECLARE_THEN(LowRisk,{0, 0, 50});
 
-#pragma udata rules
-RULE(ifHighTempThenHighRisk, &thenHighRisk, &ifHighTemp);
-RULE(ifMidTempThenMidRisk, &thenMidRisk, &ifMidTemp);
-RULE(ifLowTempThenLowRisk, &thenLowRisk, &ifLowTemp);
-//RULE(ifHighTempAndHighCo2ThenHighRisk, &thenHighRisk, 2, &ifHighTemp, &andHighCo2);
-//RULE(ifHighTempAndlowCo2ThenMidRisk, &thenMidRisk, 2, &ifHighTemp, &andLowCo2);
-#pragma udata
+#    pragma idata rule_b1
+DECLARE_RULE(ifHighTempAndLowCo2ThenMidRisk);
+DECLARE_RULE(ifHighTempAndMidCo2ThenHighRisk);
+DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk);
+DECLARE_RULE(ifMidTempAndLowCo2ThenLowRisk);
+DECLARE_RULE(ifMidTempAndMidCo2ThenMidRisk);
+DECLARE_RULE(ifMidTempAndHighCo2ThenMidRisk);
+DECLARE_RULE(ifLowTempAndLowCo2ThenLowRisk);
+DECLARE_RULE(ifLowTempAndMidCo2ThenLowRisk);
+DECLARE_RULE(ifLowTempAndHighCo2ThenMidRisk);
+#    pragma idata
 
-#pragma udata ruleEngine
-ENGINE(engine, &ifHighTempThenHighRisk,
-        &ifMidTempThenMidRisk, &ifLowTempThenLowRisk);
-//ENGINE(engine, 2, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTempAndlowCo2ThenMidRisk);
-#pragma udata
+static void Fuzzy_initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
+	RuleTerm* antecedent2, RuleTerm* consecuent);
+
+static void Fuzzy_initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
+	RuleTerm* antecedent2, RuleTerm* consecuent) {
+    Rule_addAntedecent(rule, antecedent1);
+    Rule_addAntedecent(rule, antecedent2);
+    Rule_setConsecuent(rule, consecuent);
+    RuleEngine_addRule(engine, rule);
+}
+
+void Fuzzy_initRules(RuleEngine* engine) {
+    Fuzzy_initRule(engine, &ifHighTempAndLowCo2ThenMidRisk, &ifHighTemp,
+	    &ifLowCo2, &thenMidRisk);
+    Fuzzy_initRule(engine, &ifHighTempAndMidCo2ThenHighRisk, &ifHighTemp,
+	    &ifMidCo2, &thenHighRisk);
+    Fuzzy_initRule(engine, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTemp,
+	    &ifHighCo2, &thenHighRisk);
+    Fuzzy_initRule(engine, &ifMidTempAndLowCo2ThenLowRisk, &ifMidTemp,
+	    &ifLowCo2, &thenLowRisk);
+    Fuzzy_initRule(engine, &ifMidTempAndMidCo2ThenMidRisk, &ifMidTemp,
+	    &ifMidCo2, &thenMidRisk);
+    Fuzzy_initRule(engine, &ifMidTempAndHighCo2ThenMidRisk, &ifMidTemp,
+	    &ifHighCo2, &thenMidRisk);
+    Fuzzy_initRule(engine, &ifLowTempAndLowCo2ThenLowRisk, &ifLowTemp,
+	    &ifLowCo2, &thenLowRisk);
+    Fuzzy_initRule(engine, &ifLowTempAndMidCo2ThenLowRisk, &ifLowTemp,
+	    &ifMidCo2, &thenLowRisk);
+    Fuzzy_initRule(engine, &ifLowTempAndHighCo2ThenMidRisk, &ifLowTemp,
+	    &ifHighCo2, &thenMidRisk);
+}
+
+#    if SHT_ENABLED
+
+void Fuzzy_initSht(Sht* sht) {
+    Sht11_addTempTerm(sht, &ifLowTemp);
+    Sht11_addTempTerm(sht, &ifMidTemp);
+    Sht11_addTempTerm(sht, &ifHighTemp);
+}
+#    endif
+
+#    if IRCA1_ENABLED
+
+void Fuzzy_initIrca(IrcA1* irca) {
+
+}
+#    endif
 
 #endif

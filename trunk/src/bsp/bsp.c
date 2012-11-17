@@ -25,13 +25,13 @@
 #include <limits.h>
 
 #if USB_ENABLED
-#include "usb_device.h"
+#    include "usb_device.h"
 #endif
 #if RTCC_ENABLED
-#include "rtc.h"
+#    include "rtc.h"
 #endif
 #if SLEEP_MODE == SLEEP
-#include "isr.h"
+#    include "isr.h"
 #endif
 
 /*...........................................................................*/
@@ -62,9 +62,9 @@ void BSP_init(void) {
 void BSP_enablePLL(void) {
     //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
     {
-        unsigned int pll_startup_counter = 600;
-        OSCTUNEbits.PLLEN = 1;
-        while (pll_startup_counter--);
+	unsigned int pll_startup_counter = 600;
+	OSCTUNEbits.PLLEN = 1;
+	while (pll_startup_counter--);
     }
 }
 
@@ -115,6 +115,7 @@ void BSP_onWakeUp(void) {
 }
 
 /*...........................................................................*/
+
 /**
  * Entering this method could mean that the transceiver is malfunctioning.
  * Xbee may be down or may have lost sync with his neighbor.

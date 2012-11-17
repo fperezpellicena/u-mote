@@ -20,50 +20,74 @@
 #include <stdio.h>
 
 #if SHT_ENABLED
-#include "sht.h"
+#    include "sht.h"
 #endif
+
 #if IRCA1_ENABLED
-#include "irca1.h"
-#include "irca1_proxy.h"
+#    include "irca1.h"
+#    include "irca1_proxy.h"
 #endif
 
 #if SENSING_MODE == FUZZY_DRIVEN
-#include "fuzzy.h"
+#    include "fuzzy.h"
+#    include "rules.h"
+#    pragma idata engine
+DECLARE_ENGINE(engine);
+#    pragma idata
+#endif
 
 /* Declare one SHT sensor for temperature */
 #if SHT_ENABLED
-#   pragma udata sht
-#   if SENSING_MODE == FUZZY_DRIVEN
-        extern RuleTerm ifHighTemp;
-        extern RuleTerm ifLowTemp;
-        extern RuleTerm ifMidTemp;
-        DECLARE_FUZZY_SHT(SHT_ID, sht, 1, &ifHighTemp);
-#   else
-        DECLARE_SHT(SHT_ID, sht);
-#   endif
-#   pragma udata
+#    pragma idata sht
+DECLARE_SHT(SHT_ID, sht);
+#    pragma idata
 #endif
 
 /* Declare one IRC-A1 gas sensor */
 #if IRCA1_ENABLED
-#   pragma udata irca
-#   if SENSING_MODE == FUZZY_DRIVEN
-        extern RuleTerm ifHighCo2;
-        DECLARE_FUZZY_IRCA(IRCA1_ID, irca, 1, &ifHighCo2);
-#   else
-        DECLARE_IRCA(IRCA1_ID, irca);
-#   endif
-#   pragma udata
-#endif
-
-extern RuleEngine engine;
-
+#    pragma idata irca
+DECLARE_IRCA(IRCA1_ID, irca);
+#    pragma idata
 #endif
 
 static Payload payload;
 static UINT8 sensorIdentifiers;
 
 static void SensorProxy_composeSensorIdentifiers(void);
+
+#if SENSING_MODE == FUZZY_DRIVEN
+/* Risk level */
+static UINT8 risk;
+
+/* Init fuzzy rules and sensors */
+static void SensorProxy_initFuzzy(void);
+
+/* Measure sensor board and check for alert condition */
+static void SensorProxy_fuzzy(void);
+
+static void SensorProxy_initFuzzy(void) {
+    Fuzzy_initRules(&engine);
+#    if SHT_ENABLED
+    Fuzzy_initSht(&sht);
+#    endif
+#    if IRCA1_ENABLED
+    Fuzzy_initIrca(&irca);
+#    endif
+}
+
+/* Measure sensor board and check for alert condition */
+static void SensorProxy_fuzzy(void) {
+    // Sense
+    SensorProxy_sense();
+#    if SHT_ENABLED
+    Sht11_setFuzzyInputs(&sht);
+#    endif
+#    if IRCA1_ENABLED
+    IrcA1_prepareFuzzyInputs(&irca);
+#    endif
+    RuleEngine_run(&engine);
+}
+#endif
 
 /*..........................................................................*/
 void SensorProxy_init(void) {
@@ -76,6 +100,9 @@ void SensorProxy_init(void) {
     IrcA1Proxy_init();
 #endif
     SensorProxy_composeSensorIdentifiers();
+#if SENSING_MODE == FUZZY_DRIVEN
+    SensorProxy_initFuzzy();
+#endif
 }
 
 /*..........................................................................*/
@@ -95,25 +122,10 @@ void SensorProxy_sense(void) {
 #endif
     // Turn off sensor board
     SENSOR_BOARD_OFF();
-}
-
-/*..........................................................................*/
-
 #if SENSING_MODE == FUZZY_DRIVEN
-
-/* Measure sensor board and check for alert condition */
-UINT8 SensorProxy_fuzzy(void) {
-    // Sense
-    SensorProxy_sense();
-#if SHT_ENABLED
-    Sht11_prepareFuzzyInputs(&sht);
+    SensorProxy_fuzzy();
 #endif
-#if IRCA1_ENABLED
-    IrcA1_prepareFuzzyInputs(&irca);
-#endif
-    return RuleEngine_run(&engine);
 }
-#endif
 
 /*..........................................................................*/
 
@@ -130,12 +142,17 @@ void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
 /* Put measures to payload */
 void SensorProxy_addMeasuresToPayload(Payload* p) {
     Payload_append(p, &payload);
+#if SENSING_MODE == FUZZY_DRIVEN
+    // Add Risk level
+    Payload_putByte(&payload, risk);
+#endif
 }
 
 /*..........................................................................*/
 
 /* Compose sensor identifier array by OR'ing each identifier supposed uniques */
 // FIXME Sensor vector should be statically defined because it never changes one programmed
+
 static void SensorProxy_composeSensorIdentifiers(void) {
     sensorIdentifiers = 0;
 #if SHT_ENABLED

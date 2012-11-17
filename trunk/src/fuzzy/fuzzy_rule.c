@@ -19,6 +19,25 @@
 #include "fuzzy_mf.h"
 #include <stdlib.h>
 
+/*..........................................................................*/
+void Rule_addAntedecents(Rule* rule, RuleTerm* antecedents[]) {
+    UINT8 i;
+    for(i = 0; i < MAX_ANTECEDENTS; i++) {
+       Rule_addAntedecent(rule, antecedents[i]);
+    }
+}
+
+/*..........................................................................*/
+void Rule_addAntedecent(Rule* rule, RuleTerm* antecedent) {
+    if(rule->antecedentsSize < MAX_ANTECEDENTS) {
+	rule->antecedents[rule->antecedentsSize++] = antecedent;
+    }
+}
+
+/*..........................................................................*/
+void Rule_setConsecuent(Rule* rule, RuleTerm* consecuent) {
+    rule->consecuent = consecuent;
+}
 
 /*..........................................................................*/
 
@@ -27,18 +46,11 @@ float_t RuleImplication_min(float_t fuzzyInputA, float_t fuzzyInputB) {
     return fuzzyInputA < fuzzyInputB ? fuzzyInputA : fuzzyInputB;
 }
 
-
-void RuleImplication(RuleTerm* antecedent, RuleTerm* consecuent) {
-    consecuent->fuzzy = RuleImplication_min(consecuent->fuzzy, antecedent->fuzzy);
-}
-
 /*..........................................................................*/
 
 /* Evaluate term on input value */
-void RuleTerm_evaluate(RuleTerm* antecedent) {
-    antecedent->fuzzy = triangularFuzzify(
-            antecedent->input,
-            antecedent->membershipFunction);
+float_t RuleTerm_evaluate(RuleTerm* ruleTerm) {
+    return triangularFuzzify(ruleTerm->input, &ruleTerm->membershipFunction);
 }
 
 
@@ -47,12 +59,14 @@ void RuleTerm_evaluate(RuleTerm* antecedent) {
 /* Evaluates rule */
 void Rule_evaluate(Rule* rule) {
     UINT8 i;
+    float_t fuzzyInput;
+    float_t implicationResult;
     // Fuzzy crisp inputs
-    for (i = 0; i < MAX_ANTECEDENTS; i++) {
-        if (rule->antecedents[i] != NULL) {
-            RuleTerm_evaluate(rule->antecedents[i]);
-            // Apply min{u1, u2} implication rule
-            RuleImplication(rule->antecedents[i], rule->consecuent);
-        }
+    for (i = 0; i < rule->antecedentsSize; i++) {
+	// Evaluate input contained in ruleterm input
+	fuzzyInput = RuleTerm_evaluate(&rule->antecedents[i]);
+        // Apply min{u1, u2} implication rule
+	implicationResult = RuleImplication_min(rule->consecuent->fuzzy, fuzzyInput);
+        rule->consecuent->fuzzy = implicationResult;
     }
 }

@@ -15,7 +15,7 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ircA1_proxy.h"
+#include "irca1_proxy.h"
 
 #if IRCA1_ENABLED
 #   include "hw_adc.h"
