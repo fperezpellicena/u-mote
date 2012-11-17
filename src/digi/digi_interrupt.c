@@ -36,8 +36,8 @@ void XBeeInterrupt_install(void) {
     // En Deep sleep no se ejecutan las interrupciones
     // Install interrupt handler
     InterruptHandler_addHI((HandleInterrupt) & XBeeInterrupt_handleTopHalve,
-            (HandleInterrupt) & XBeeInterrupt_handleBottomHalve,
-            (CheckInterrupt) & XBeeInterrupt_check);
+	    (HandleInterrupt) & XBeeInterrupt_handleBottomHalve,
+	    (CheckInterrupt) & XBeeInterrupt_check);
 #endif
 #if XBEE_INTERRUPT == ON_SLEEP_INTERRUPT
     // If ON_SLEEP_INTERRUPT enabled, configure pin interruption
@@ -64,54 +64,14 @@ void XBeeInterrupt_handleTopHalve(void) {
     //      read full data from serial
     //  else
     //      clear ON_SLEEP flag
-#if SLEEP_STATUS_MESSAGES
+#    if SLEEP_STATUS_MESSAGES
     XBee_readPacket(&packet);
-#else
+#    else
     // ACK
     XBEE_ON_SLEEP_CLEAR_FLAG;
-#endif
+#    endif
 #endif
 }
-
-#if SENSING_MODE == MONITORING
-static void XBee_monitoring(void);
-
-static void XBee_monitoring(void) {
-    Payload_init(&payload);
-    Rtc_addTimeToPayload(&payload);
-    SensorProxy_addSensorIdentifiersToPayload(&payload);
-    SensorProxy_sense();
-    SensorProxy_addMeasuresToPayload(&payload);
-    XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*)XBEE_SINK_ADDRESS,
-            XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
-    XBee_sendPacket(&packet);
-}
-#endif
-
-#if SENSING_MODE == FUZZY_DRIVEN
-static void XBee_fuzzyMonitoring(void);
-
-static void XBee_fuzzyMonitoring(void) {
-    UINT8 risk = 0;
-    // Prepara la nueva trama
-    Payload_init(&payload);
-    // Read datetime and put into buffer
-    Rtc_addTimeToPayload(&payload);
-    // Put sensor ids
-    SensorProxy_addSensorIdentifiersToPayload(&payload);
-    // Sense installed sensors
-    risk = SensorProxy_fuzzy();
-    // Put sensor payload into buffer
-    SensorProxy_addMeasuresToPayload(&payload);
-    // Add Risk level
-    Payload_putByte(&payload, risk);
-    // Send prepared request (hay que prepararla antes para optimizar
-    // el tiempo que está despierto el sistema)
-    XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*)XBEE_SINK_ADDRESS,
-            XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
-    XBee_sendPacket(&packet);
-}
-#endif
 
 /* Bottom halve interrupt handler*/
 void XBeeInterrupt_handleBottomHalve(void) {
@@ -120,14 +80,24 @@ void XBeeInterrupt_handleBottomHalve(void) {
     // and check for valid frame
     // If valid frame received, create new data frame and send
     if (XBee_read() == TRUE) {
-        // Crea una trama y la envía
+	// Crea una trama y la envía
     }
 #else
-#   if SENSING_MODE == MONITORING
-    XBee_monitoring();
-#   else
-    XBee_fuzzyMonitoring();
-#   endif
+    // Prepara la nueva trama
+    Payload_init(&payload);
+    // Read datetime and put into buffer
+    Rtc_addTimeToPayload(&payload);
+    // Put sensor ids
+    SensorProxy_addSensorIdentifiersToPayload(&payload);
+    // Sense installed sensors
+    SensorProxy_sense();
+    // Put sensor payload into buffer
+    SensorProxy_addMeasuresToPayload(&payload);
+    // Send prepared request (hay que prepararla antes para optimizar
+    // el tiempo que está despierto el sistema)
+    XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*) XBEE_SINK_ADDRESS,
+	    XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
+    XBee_sendPacket(&packet);
 #endif
 }
 

@@ -15,23 +15,22 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef sensor_proxy_h
-#define sensor_proxy_h
+#ifndef rules_h
+#define rules_h
 
-#include "payload.h"
+#include "fuzzy.h"
+#include "bsp.h"
 
-/*..........................................................................*/
-void SensorProxy_init(void);
+void Fuzzy_initRules(RuleEngine* engine);
 
-/*..........................................................................*/
-void SensorProxy_sense(void);
+#ifdef SHT_ENABLED
+#include "sht.h"
+void Fuzzy_initSht(Sht* sht);
+#endif
 
-/*..........................................................................*/
-void SensorProxy_addSensorIdentifiersToPayload(Payload* payload);
+#ifdef IRCA1_ENABLED
+#include "irca1.h"
+void Fuzzy_initIrca(IrcA1* irca);
+#endif
 
-/*..........................................................................*/
-void SensorProxy_addMeasuresToPayload(Payload* payload);
-
-
-#endif /* sensor_proxy_h*/
-
+#endif /* rules_h */

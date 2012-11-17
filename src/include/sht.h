@@ -18,43 +18,48 @@
 #include "bsp.h"
 
 #if SHT_ENABLED
-#   ifndef sht11_h
-#   define sht11_h
+#ifndef sht11_h
+#define sht11_h
 
-#   include "GenericTypeDefs.h"
-#   include "sensor_proxy.h"
-#   include "fuzzy_rule.h"
+#include "GenericTypeDefs.h"
+#include "sensor_proxy.h"
+#include "fuzzy_rule.h"
+#include "payload.h"
 
-#   define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
-#   define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
-#   define SHT_STAT_REG_R      0x07    		/* Read status register command */
-#   define SHT_STAT_REG_W      0x06    		/* Write status register command */
-#   define SHT_RESET           0x1E    		/* Reset */
+#define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
+#define SHT_MEASURE_HUMI    0x05    		/* Measure humidity command */
+#define SHT_STAT_REG_R      0x07    		/* Read status register command */
+#define SHT_STAT_REG_W      0x06    		/* Write status register command */
+#define SHT_RESET           0x1E    		/* Reset */
 
-#   define SHT_LOW_POWER       0x01                /* 8bit RH / 12 bit TMP */
+#define SHT_LOW_POWER       0x01                /* 8bit RH / 12 bit TMP */
 
-#   define SHT_ACK             1			/* Send ACK */
-#   define SHT_NACK            0                   /* Not send ACK */
+#define SHT_ACK             1			/* Send ACK */
+#define SHT_NACK            0                   /* Not send ACK */
 
-
+#if SENSING_MODE == FUZZY_DRIVEN
+#define MAX_TERMS   (UINT8)3
 /* Sht fuzzy terms */
 typedef struct ShtFuzzyTerms ShtFuzzyTerms;
 
 struct ShtFuzzyTerms {
-    RuleTerm** tempRules;
-    RuleTerm** humiRules;
-    UINT8 tempRulesSize;
-    UINT8 humiRulesSize;
+    RuleTerm * tempTerms[MAX_TERMS];
+    RuleTerm * humiTerms[MAX_TERMS];
+    UINT8 tempTermsSize;
+    UINT8 humiTermsSize;
 };
 
+#endif
 /* Sht data class */
 typedef struct ShtData ShtData;
 
 struct ShtData {
+
     union {
         UINT16 i;
         float f;
     } temperature;
+
     union {
         UINT16 i;
         float f;
@@ -65,22 +70,15 @@ struct ShtData {
 
 /* Declare sht sensor */
 #define DECLARE_SHT(id, name) \
-    ShtData name##data = {0,0,0,0};\
-    Sht name = {id, &name##data, NULL}
-
-/* Declare fuzzy sht sensor */
-#define DECLARE_FUZZY_SHT(id, name, termsSize, ...) \
-    RuleTerm* name##terms[termsSize] = {__VA_ARGS__};\
-    ShtData name##data;\
-    Sht name = {id, &name##data, NULL}
+    Sht name = {id, {0,0,0,0}, NULL}
 
 /* Sht11 class */
 typedef struct Sht Sht;
 
 struct Sht {
     UINT8 id;
-    ShtData* data;
-    ShtFuzzyTerms* terms;
+    ShtData data;
+    ShtFuzzyTerms terms;
 };
 
 /* Init pins and registers*/
@@ -147,7 +145,9 @@ void Sht11_addMeasuresToPayload(Sht* sht, Payload* payload);
 void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload);
 
 #if SENSING_MODE == FUZZY_DRIVEN
-void Sht11_prepareFuzzyInputs(Sht* sht);
+void Sht11_setFuzzyInputs(Sht* sht);
+void Sht11_addTempTerm(Sht* sht, RuleTerm* term);
+void Sht11_addHumiTerm(Sht* sht, RuleTerm* term);
 #endif
 
 #endif /* sht11_h */

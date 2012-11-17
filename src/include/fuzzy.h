@@ -21,20 +21,20 @@
 #include "GenericTypeDefs.h"
 #include "fuzzy_rule.h"
 
-#define MAX_RULES   5
+#define MAX_RULES   (UINT8)10
 
-#define ENGINE(name, ...)\
-    Rule* name##rules[MAX_RULES] = {__VA_ARGS__};\
-    RuleEngine name = {name##rules}
-
+#define DECLARE_ENGINE(name)    RuleEngine name = {NULL, 0}
 
 /*..........................................................................*/
 /* Rules class */
 typedef struct RuleEngine RuleEngine;
 
 struct RuleEngine {
-    Rule* rules[MAX_RULES];
+    Rule rules[MAX_RULES];
+    UINT8 size;
 };
+
+void RuleEngine_addRule(RuleEngine* engine, Rule* rule);
 
 /*..........................................................................*/
 /* Run engine */

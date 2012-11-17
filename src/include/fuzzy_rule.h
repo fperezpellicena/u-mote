@@ -20,19 +20,13 @@
 
 #include "fuzzy_mf.h"
 
-#define MAX_ANTECEDENTS     0x02
+#define MAX_ANTECEDENTS     (UINT8)0x02
 
-#define IF(name, left, mid, right)\
-    MembershipFunction name = {left, mid, right};\
-    RuleTerm if##name = {&name, 0, 1}
+#define DECLARE_IF(name, mf)\
+RuleTerm if##name = {mf, 0, 1}
 
-#define THEN(name, left, mid, right)\
-    MembershipFunction name = {left, mid, right};\
-    RuleTerm then##name = {&name, 0, 1}
-
-#define RULE(name, consecuent, ...)\
-    RuleTerm* name##ruleTerms[] = {__VA_ARGS__};\
-    Rule name = {name##ruleTerms, consecuent}
+#define DECLARE_THEN(name, mf)\
+RuleTerm then##name = {mf, 0, 1}
 
 /*****************************************************************************
  *  Let R1:
@@ -58,14 +52,14 @@
 typedef struct RuleTerm RuleTerm;
 
 struct RuleTerm {
-    MembershipFunction* membershipFunction;
+    MembershipFunction membershipFunction;
     UINT8 input;
     float_t fuzzy;
 };
 
 /*..........................................................................*/
 /* Evaluate term on input value */
-void RuleTerm_evaluate(RuleTerm* ruleTerm);
+float_t RuleTerm_evaluate(RuleTerm* ruleTerm);
 
 
 /*****************************************************************************
@@ -86,18 +80,26 @@ void RuleTerm_evaluate(RuleTerm* ruleTerm);
  ****************************************************************************/
 
 /* Implication rule function prototype */
-float_t RuleImplication_min(float_t fuzzyInputA, float_t fuzzyInputB);
+float_t RuleImplication(float_t fuzzyInputA, float_t fuzzyInputB);
 
-void RuleImplication(RuleTerm* antecedent, RuleTerm* consecuent);
+
+#define DECLARE_RULE(name)  Rule name = {NULL, NULL, 0}
 
 /*..........................................................................*/
 /** Rule class */
 typedef struct Rule Rule;
 
 struct Rule {
-    RuleTerm** antecedents;
+    RuleTerm* antecedents[MAX_ANTECEDENTS];
     RuleTerm* consecuent;
+    UINT8 antecedentsSize;
 };
+
+void Rule_addAntedecent(Rule* rule, RuleTerm* antecedent);
+
+void Rule_addAntedecents(Rule* rule, RuleTerm* antecedents[]);
+
+void Rule_setConsecuent(Rule* rule, RuleTerm* consecuent);
 
 /*..........................................................................*/
 /* Evaluates rule */
