@@ -18,13 +18,16 @@
 #include "fuzzy.h"
 #include <math.h>
 
+static UINT8 num;
+static UINT8 den;
+
 static void RuleEngine_add(Rule* fromRule, Rule* toRule);
 
 static void RuleEngine_add(Rule* fromRule, Rule* toRule) {
     UINT8 i;
     // Add antecedents
     for (i = 0; i < fromRule->antecedentsSize; i++) {
-        Rule_addAntedecent(toRule, fromRule->antecedents[i]);
+	Rule_addAntedecent(toRule, fromRule->antecedents[i]);
     }
     // Add consecuent
     Rule_setConsecuent(toRule, fromRule->consecuent);
@@ -32,9 +35,16 @@ static void RuleEngine_add(Rule* fromRule, Rule* toRule) {
 
 void RuleEngine_addRule(RuleEngine* engine, Rule* rule) {
     if (engine->size < MAX_RULES) {
-        RuleEngine_add(rule, &engine->rules[engine->size]);
-        ++engine->size;
+	RuleEngine_add(rule, &engine->rules[engine->size]);
+	++engine->size;
     }
+}
+
+static void RuleEngine_defuzzyfyRule(Rule* rule);
+
+static void RuleEngine_defuzzyfyRule(Rule* rule) {
+    den += rule->consecuent->fuzzy;
+    num += rule->consecuent->fuzzy * rule->consecuent->membershipFunction.mid;
 }
 
 /*..........................................................................*/
@@ -42,16 +52,13 @@ void RuleEngine_addRule(RuleEngine* engine, Rule* rule) {
 /* Run engine */
 UINT8 RuleEngine_run(RuleEngine* engine) {
     UINT8 i;
-    float_t num = (float_t) 0;
-    float_t den = (float_t) 0;
-    // Evaluate all rules
+    num = 0;
+    den = 1;
     for (i = 0; i < engine->size; i++) {
-        // Evaluate i rule
-        Rule_evaluate(&engine->rules[i]);
-        // Apply COG
-        den += engine->rules[i].consecuent->fuzzy;
-        num += engine->rules[i].consecuent->fuzzy
-                * (float_t) engine->rules[i].consecuent->membershipFunction.mid;
+	// Evaluate i rule
+	Rule_evaluate(&engine->rules[i]);
+	// Apply COG
+	RuleEngine_defuzzyfyRule(&engine->rules[i]);
     }
-    return (UINT8) (num / den);
+    return num / den;
 }
