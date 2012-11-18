@@ -42,14 +42,14 @@ void Rule_setConsecuent(Rule* rule, RuleTerm* consecuent) {
 /*..........................................................................*/
 
 /* MIN rule implication */
-float_t RuleImplication_min(float_t fuzzyInputA, float_t fuzzyInputB) {
+UINT8 RuleImplication_min(UINT8 fuzzyInputA, UINT8 fuzzyInputB) {
     return fuzzyInputA < fuzzyInputB ? fuzzyInputA : fuzzyInputB;
 }
 
 /*..........................................................................*/
 
 /* Evaluate term on input value */
-float_t RuleTerm_evaluate(RuleTerm* ruleTerm) {
+UINT8 RuleTerm_evaluate(RuleTerm* ruleTerm) {
     return triangularFuzzify(ruleTerm->input, &ruleTerm->membershipFunction);
 }
 
@@ -59,12 +59,12 @@ float_t RuleTerm_evaluate(RuleTerm* ruleTerm) {
 /* Evaluates rule */
 void Rule_evaluate(Rule* rule) {
     UINT8 i;
-    float_t fuzzyInput;
-    float_t implicationResult;
+    UINT8 fuzzyInput;
+    UINT8 implicationResult;
     // Fuzzy crisp inputs
     for (i = 0; i < rule->antecedentsSize; i++) {
 	// Evaluate input contained in ruleterm input
-	fuzzyInput = RuleTerm_evaluate(&rule->antecedents[i]);
+	fuzzyInput = RuleTerm_evaluate(rule->antecedents[i]);
         // Apply min{u1, u2} implication rule
 	implicationResult = RuleImplication_min(rule->consecuent->fuzzy, fuzzyInput);
         rule->consecuent->fuzzy = implicationResult;

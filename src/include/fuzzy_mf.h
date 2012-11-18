@@ -36,7 +36,7 @@ struct MembershipFunction {
 
 /*..........................................................................*/
 /* Triangular fuzzy membership function */
-float_t triangularFuzzify(UINT8 value, MembershipFunction* function);
+UINT8 triangularFuzzify(UINT8 value, MembershipFunction* function);
 
 
 

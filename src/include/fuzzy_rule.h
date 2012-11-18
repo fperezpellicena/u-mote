@@ -54,12 +54,12 @@ typedef struct RuleTerm RuleTerm;
 struct RuleTerm {
     MembershipFunction membershipFunction;
     UINT8 input;
-    float_t fuzzy;
+    UINT8 fuzzy;
 };
 
 /*..........................................................................*/
 /* Evaluate term on input value */
-float_t RuleTerm_evaluate(RuleTerm* ruleTerm);
+UINT8 RuleTerm_evaluate(RuleTerm* ruleTerm);
 
 
 /*****************************************************************************
@@ -80,7 +80,7 @@ float_t RuleTerm_evaluate(RuleTerm* ruleTerm);
  ****************************************************************************/
 
 /* Implication rule function prototype */
-float_t RuleImplication(float_t fuzzyInputA, float_t fuzzyInputB);
+UINT8 RuleImplication(UINT8 fuzzyInputA, UINT8 fuzzyInputB);
 
 
 #define DECLARE_RULE(name)  Rule name = {NULL, NULL, 0}
