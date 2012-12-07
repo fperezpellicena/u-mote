@@ -21,7 +21,7 @@
 #include "fuzzy.h"
 #include "bsp.h"
 
-void Fuzzy_initRules(RuleEngine* engine);
+void Fuzzy_initRules(void);
 
 #ifdef SHT_ENABLED
 #include "sht.h"
@@ -34,3 +34,4 @@ void Fuzzy_initIrca(IrcA1* irca);
 #endif
 
 #endif /* rules_h */
+

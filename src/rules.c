@@ -22,59 +22,55 @@
 #    include "fuzzy_rule.h"
 #    include "rules.h"
 
-DECLARE_IF(HighTemp,{30, 50, 255});
-DECLARE_IF(MidTemp,{0, 30, 50});
-DECLARE_IF(LowTemp,{0, 0, 40});
-DECLARE_IF(HighCo2,{50, 100, 100});
-DECLARE_IF(MidCo2,{0, 50, 100});
-DECLARE_IF(LowCo2,{0, 0, 50});
-DECLARE_THEN(HighRisk,{50, 100, 100});
-DECLARE_THEN(MidRisk,{0, 50, 100});
-DECLARE_THEN(LowRisk,{0, 0, 50});
 
-#    pragma idata rule_b1
-DECLARE_RULE(ifHighTempAndLowCo2ThenMidRisk);
-DECLARE_RULE(ifHighTempAndMidCo2ThenHighRisk);
-DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk);
-DECLARE_RULE(ifMidTempAndLowCo2ThenLowRisk);
-DECLARE_RULE(ifMidTempAndMidCo2ThenMidRisk);
-DECLARE_RULE(ifMidTempAndHighCo2ThenMidRisk);
-DECLARE_RULE(ifLowTempAndLowCo2ThenLowRisk);
-DECLARE_RULE(ifLowTempAndMidCo2ThenLowRisk);
-DECLARE_RULE(ifLowTempAndHighCo2ThenMidRisk);
-#    pragma idata
+#include "fuzzy_rule.h"
+#include "rules.h"
 
-static void Fuzzy_initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
+IF(HighTemp,{30, 50, 255});
+IF(MidTemp,{0, 30, 50});
+IF(LowTemp,{0, 0, 40});
+
+IF(HighCo2,{50, 100, 100});
+IF(MidCo2,{0, 50, 100});
+IF(LowCo2,{0, 0, 50});
+
+THEN(HighRisk,{50, 100, 100});
+THEN(MidRisk,{0, 50, 100});
+THEN(LowRisk,{0, 0, 50});
+
+RULE(ifHighTempAndLowCo2ThenMidRisk);
+RULE(ifHighTempAndMidCo2ThenHighRisk);
+RULE(ifHighTempAndHighCo2ThenHighRisk);
+RULE(ifMidTempAndLowCo2ThenLowRisk);
+RULE(ifMidTempAndMidCo2ThenMidRisk);
+RULE(ifMidTempAndHighCo2ThenMidRisk);
+RULE(ifLowTempAndLowCo2ThenLowRisk);
+RULE(ifLowTempAndMidCo2ThenLowRisk);
+RULE(ifLowTempAndHighCo2ThenMidRisk);
+
+static void Fuzzy_initRule(Rule* rule, RuleTerm* antecedent1,
 	RuleTerm* antecedent2, RuleTerm* consecuent);
 
-static void Fuzzy_initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
+static void Fuzzy_initRule(Rule* rule, RuleTerm* antecedent1,
 	RuleTerm* antecedent2, RuleTerm* consecuent) {
     Rule_addAntedecent(rule, antecedent1);
     Rule_addAntedecent(rule, antecedent2);
     Rule_setConsecuent(rule, consecuent);
-    RuleEngine_addRule(engine, rule);
+    RuleEngine_addRule(rule);
 }
 
-void Fuzzy_initRules(RuleEngine* engine) {
-    Fuzzy_initRule(engine, &ifHighTempAndLowCo2ThenMidRisk, &ifHighTemp,
-	    &ifLowCo2, &thenMidRisk);
-    Fuzzy_initRule(engine, &ifHighTempAndMidCo2ThenHighRisk, &ifHighTemp,
-	    &ifMidCo2, &thenHighRisk);
-    Fuzzy_initRule(engine, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTemp,
-	    &ifHighCo2, &thenHighRisk);
-    Fuzzy_initRule(engine, &ifMidTempAndLowCo2ThenLowRisk, &ifMidTemp,
-	    &ifLowCo2, &thenLowRisk);
-    Fuzzy_initRule(engine, &ifMidTempAndMidCo2ThenMidRisk, &ifMidTemp,
-	    &ifMidCo2, &thenMidRisk);
-    Fuzzy_initRule(engine, &ifMidTempAndHighCo2ThenMidRisk, &ifMidTemp,
-	    &ifHighCo2, &thenMidRisk);
-    Fuzzy_initRule(engine, &ifLowTempAndLowCo2ThenLowRisk, &ifLowTemp,
-	    &ifLowCo2, &thenLowRisk);
-    Fuzzy_initRule(engine, &ifLowTempAndMidCo2ThenLowRisk, &ifLowTemp,
-	    &ifMidCo2, &thenLowRisk);
-    Fuzzy_initRule(engine, &ifLowTempAndHighCo2ThenMidRisk, &ifLowTemp,
-	    &ifHighCo2, &thenMidRisk);
+void Fuzzy_initRules(void) {
+    Fuzzy_initRule(&ifHighTempAndLowCo2ThenMidRisk, &ifHighTemp, &ifLowCo2, &thenMidRisk);
+    Fuzzy_initRule(&ifHighTempAndMidCo2ThenHighRisk, &ifHighTemp, &ifMidCo2, &thenHighRisk);
+    Fuzzy_initRule(&ifHighTempAndHighCo2ThenHighRisk, &ifHighTemp, &ifHighCo2, &thenHighRisk);
+    Fuzzy_initRule(&ifMidTempAndLowCo2ThenLowRisk, &ifMidTemp, &ifLowCo2, &thenLowRisk);
+    Fuzzy_initRule(&ifMidTempAndMidCo2ThenMidRisk, &ifMidTemp, &ifMidCo2, &thenMidRisk);
+    Fuzzy_initRule(&ifMidTempAndHighCo2ThenMidRisk, &ifMidTemp, &ifHighCo2, &thenMidRisk);
+    Fuzzy_initRule(&ifLowTempAndLowCo2ThenLowRisk, &ifLowTemp, &ifLowCo2, &thenLowRisk);
+    Fuzzy_initRule(&ifLowTempAndMidCo2ThenLowRisk, &ifLowTemp, &ifMidCo2, &thenLowRisk);
+    Fuzzy_initRule(&ifLowTempAndHighCo2ThenMidRisk, &ifLowTemp, &ifHighCo2, &thenMidRisk);
 }
+
 
 #    if SHT_ENABLED
 
@@ -88,7 +84,9 @@ void Fuzzy_initSht(Sht* sht) {
 #    if IRCA1_ENABLED
 
 void Fuzzy_initIrca(IrcA1* irca) {
-
+    IrcA1_addCO2Term(irca, &ifLowCo2);
+    IrcA1_addCO2Term(irca, &ifMidCo2);
+    IrcA1_addCO2Term(irca, &ifHighCo2);
 }
 #    endif
 

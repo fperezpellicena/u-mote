@@ -262,7 +262,6 @@ void Sht11_setFuzzyInputs(Sht* sht) {
 void Sht11_addTempTerm(Sht* sht, RuleTerm* term) {
     if (sht->terms.tempTermsSize < MAX_TERMS) {
 	sht->terms.tempTerms[sht->terms.tempTermsSize] = term;
-	//RuleTerm_init(&sht->terms.tempTerms[sht->terms.tempTermsSize], &term->membershipFunction);
 	++sht->terms.tempTermsSize;
     }
 }
@@ -270,7 +269,6 @@ void Sht11_addTempTerm(Sht* sht, RuleTerm* term) {
 void Sht11_addHumiTerm(Sht* sht, RuleTerm* term) {
     if (sht->terms.humiTermsSize < MAX_TERMS) {
 	sht->terms.humiTerms[sht->terms.humiTermsSize] = term;
-	//RuleTerm_init(&sht->terms.humiTerms[sht->terms.humiTermsSize], &term->membershipFunction);
 	++sht->terms.humiTermsSize;
     }
 }

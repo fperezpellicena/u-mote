@@ -19,14 +19,13 @@
 #define fuzzy_rule_h
 
 #include "fuzzy_mf.h"
+#include <limits.h>
 
 #define MAX_ANTECEDENTS     (UINT8)0x02
 
-#define DECLARE_IF(name, mf)\
-RuleTerm if##name = {mf, 0, 1}
+#define IF(name, mf)	RuleTerm if##name = {mf, 0, UCHAR_MAX}
 
-#define DECLARE_THEN(name, mf)\
-RuleTerm then##name = {mf, 0, 1}
+#define THEN(name, mf)	RuleTerm then##name = {mf, 0, UCHAR_MAX}
 
 /*****************************************************************************
  *  Let R1:
@@ -52,15 +51,14 @@ RuleTerm then##name = {mf, 0, 1}
 typedef struct RuleTerm RuleTerm;
 
 struct RuleTerm {
-    MembershipFunction membershipFunction;
+    MembershipFunction function;
     UINT8 input;
     UINT8 fuzzy;
 };
 
 /*..........................................................................*/
-/* Evaluate term on input value */
-UINT8 RuleTerm_evaluate(RuleTerm* ruleTerm);
 
+UINT8 RuleTerm_evaluate(UINT8 input, MembershipFunction* mf);
 
 /*****************************************************************************
  *  Let R1:
@@ -80,10 +78,10 @@ UINT8 RuleTerm_evaluate(RuleTerm* ruleTerm);
  ****************************************************************************/
 
 /* Implication rule function prototype */
-UINT8 RuleImplication(UINT8 fuzzyInputA, UINT8 fuzzyInputB);
+UINT8 RuleImplication_min(UINT8 fuzzyInputA, UINT8 fuzzyInputB);
 
 
-#define DECLARE_RULE(name)  Rule name = {NULL, NULL, 0}
+#define RULE(name)  Rule name = {{((void*)0), ((void*)0)}, NULL, 0}
 
 /*..........................................................................*/
 /** Rule class */
@@ -101,8 +99,5 @@ void Rule_addAntedecents(Rule* rule, RuleTerm* antecedents[]);
 
 void Rule_setConsecuent(Rule* rule, RuleTerm* consecuent);
 
-/*..........................................................................*/
-/* Evaluates rule */
-void Rule_evaluate(Rule* rule);
 
 #endif /* fuzzy_rule_h */

@@ -23,7 +23,6 @@
 
 #include "GenericTypeDefs.h"
 #include "sensor_proxy.h"
-#include "fuzzy_rule.h"
 #include "payload.h"
 
 #define SHT_MEASURE_TEMP    0x03    		/* Measure temperature command */
@@ -37,7 +36,30 @@
 #define SHT_ACK             1			/* Send ACK */
 #define SHT_NACK            0                   /* Not send ACK */
 
+
+/* Sht data class */
+typedef struct ShtData ShtData;
+
+struct ShtData {
+
+    union {
+	UINT16 i;
+	float f;
+    } temperature;
+
+    union {
+	UINT16 i;
+	float f;
+    } humidity;
+    UINT8 tempChk;
+    UINT8 humiChk;
+};
+
+/* Sht11 class */
+typedef struct Sht Sht;
+
 #if SENSING_MODE == FUZZY_DRIVEN
+#include "fuzzy_rule.h"
 #define MAX_TERMS   (UINT8)3
 /* Sht fuzzy terms */
 typedef struct ShtFuzzyTerms ShtFuzzyTerms;
@@ -49,37 +71,31 @@ struct ShtFuzzyTerms {
     UINT8 humiTermsSize;
 };
 
-#endif
-/* Sht data class */
-typedef struct ShtData ShtData;
-
-struct ShtData {
-
-    union {
-        UINT16 i;
-        float f;
-    } temperature;
-
-    union {
-        UINT16 i;
-        float f;
-    } humidity;
-    UINT8 tempChk;
-    UINT8 humiChk;
-};
-
-/* Declare sht sensor */
-#define DECLARE_SHT(id, name) \
-    Sht name = {id, {0,0,0,0}, NULL}
-
-/* Sht11 class */
-typedef struct Sht Sht;
-
 struct Sht {
     UINT8 id;
     ShtData data;
     ShtFuzzyTerms terms;
 };
+
+/* Declare sht sensor */
+#define DECLARE_SHT(id, name)   Sht name = {id, {0,0,0,0}, NULL}
+
+void Sht11_setFuzzyInputs(Sht* sht);
+void Sht11_addTempTerm(Sht* sht, RuleTerm* term);
+void Sht11_addHumiTerm(Sht* sht, RuleTerm* term);
+
+#else
+
+struct Sht {
+    UINT8 id;
+    ShtData data;
+};
+
+/* Declare sht sensor */
+#define DECLARE_SHT(id, name)   Sht name = {id, NULL}
+
+#endif
+
 
 /* Init pins and registers*/
 void Sht11_init(void);
@@ -143,12 +159,6 @@ void Sht11_calculateTemperature(float* p_temp);
 void Sht11_addMeasuresToPayload(Sht* sht, Payload* payload);
 
 void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload);
-
-#if SENSING_MODE == FUZZY_DRIVEN
-void Sht11_setFuzzyInputs(Sht* sht);
-void Sht11_addTempTerm(Sht* sht, RuleTerm* term);
-void Sht11_addHumiTerm(Sht* sht, RuleTerm* term);
-#endif
 
 #endif /* sht11_h */
 #endif

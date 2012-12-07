@@ -21,33 +21,13 @@
 
 #if SHT_ENABLED
 #    include "sht.h"
+DECLARE_SHT(SHT_ID, sht);
 #endif
 
 #if IRCA1_ENABLED
 #    include "irca1.h"
 #    include "irca1_proxy.h"
-#endif
-
-#if SENSING_MODE == FUZZY_DRIVEN
-#    include "fuzzy.h"
-#    include "rules.h"
-#    pragma idata engine
-DECLARE_ENGINE(engine);
-#    pragma idata
-#endif
-
-/* Declare one SHT sensor for temperature */
-#if SHT_ENABLED
-#    pragma idata sht
-DECLARE_SHT(SHT_ID, sht);
-#    pragma idata
-#endif
-
-/* Declare one IRC-A1 gas sensor */
-#if IRCA1_ENABLED
-#    pragma idata irca
 DECLARE_IRCA(IRCA1_ID, irca);
-#    pragma idata
 #endif
 
 static Payload payload;
@@ -56,6 +36,9 @@ static UINT8 sensorIdentifiers;
 static void SensorProxy_composeSensorIdentifiers(void);
 
 #if SENSING_MODE == FUZZY_DRIVEN
+#    include "fuzzy.h"
+#    include "rules.h"
+
 /* Risk level */
 static UINT8 risk;
 
@@ -66,7 +49,7 @@ static void SensorProxy_initFuzzy(void);
 static void SensorProxy_fuzzy(void);
 
 static void SensorProxy_initFuzzy(void) {
-    Fuzzy_initRules(&engine);
+    Fuzzy_initRules();
 #    if SHT_ENABLED
     Fuzzy_initSht(&sht);
 #    endif
@@ -83,9 +66,9 @@ static void SensorProxy_fuzzy(void) {
     Sht11_setFuzzyInputs(&sht);
 #    endif
 #    if IRCA1_ENABLED
-    IrcA1_prepareFuzzyInputs(&irca);
+    IrcA1_setFuzzyInputs(&irca);
 #    endif
-    RuleEngine_run(&engine);
+    risk = RuleEngine_run();
 }
 #endif
 
@@ -143,15 +126,14 @@ void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
 void SensorProxy_addMeasuresToPayload(Payload* p) {
     Payload_append(p, &payload);
 #if SENSING_MODE == FUZZY_DRIVEN
-    // Add Risk level
-    Payload_putByte(&payload, risk);
+    Payload_putByte(&payload, risk);	// Add Risk level
 #endif
 }
 
 /*..........................................................................*/
 
 /* Compose sensor identifier array by OR'ing each identifier supposed uniques */
-// FIXME Sensor vector should be statically defined because it never changes one programmed
+// FIXME Sensor vector should be statically defined because it never changes once programmed
 
 static void SensorProxy_composeSensorIdentifiers(void) {
     sensorIdentifiers = 0;
