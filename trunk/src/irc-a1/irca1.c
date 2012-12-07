@@ -87,8 +87,10 @@ void IrcA1_calculate(IrcA1* ircA1) {
     ircA1->data->x = IrcA1_calculateConcentration(abs, ircA1);
 }
 
-/* Prepare rule terms with measures */
-void IrcA1_prepareFuzzyInputs(IrcA1* irca) {
+#if SENSING_MODE == FUZZY_DRIVEN
+/*...........................................................................*/
+/* Put measures into rule terms */
+void IrcA1_setFuzzyInputs(IrcA1* irca) {
     UINT8 i;
     IrcaFuzzyTerms* terms = irca->terms;
     // Calculate CO2
@@ -98,5 +100,14 @@ void IrcA1_prepareFuzzyInputs(IrcA1* irca) {
         terms->rules[i]->input = (UINT8)irca->data->x;
     }
 }
+
+/* Add rule term */
+void IrcA1_addCO2Term(IrcA1* irca, RuleTerm* term) {
+    if (irca->terms.rulesSize < MAX_TERMS) {
+	irca->terms.rules[irca->terms.rulesSize] = term;
+	++->irca.terms.rulesSize;
+    }
+}
+#endif
 
 #endif

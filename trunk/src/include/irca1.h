@@ -16,24 +16,11 @@
  */
 
 #include "bsp.h"
+
 #if IRCA1_ENABLED
-#   ifndef irca1_h
-#   define irca1_h
+#ifndef irca1_h
+#define irca1_h
 
-#include "fuzzy_rule.h"
-
-#define DECLARE_IRCA(id, name)\
-    IrcA1Data name##data = {0, 0, 0, 0};\
-    Irca1Cal name##cal = {0, 0};\
-    IrcA1 name = {id, &name##data, &name##cal, NULL}
-
-/* Sht fuzzy terms */
-typedef struct IrcaFuzzyTerms IrcaFuzzyTerms;
-
-struct IrcaFuzzyTerms {
-    RuleTerm** rules;
-    UINT8 rulesSize;
-};
 
 /*...........................................................................*/
 /* Class IrcA1Data sensor calibration data */
@@ -58,10 +45,21 @@ struct IrcA1Data {
     float x;
 };
 
-/*...........................................................................*/
-/* Class IrcA1 sensor */
 typedef struct IrcA1 IrcA1;
 
+#if SENSING_MODE == FUZZY_DRIVEN
+#include "fuzzy_rule.h"
+#define MAX_TERMS   (UINT8)3
+
+/* Sht fuzzy terms */
+typedef struct IrcaFuzzyTerms IrcaFuzzyTerms;
+
+struct IrcaFuzzyTerms {
+    RuleTerm** rules;
+    UINT8 rulesSize;
+};
+
+/* Class IrcA1 sensor */
 struct IrcA1 {
     UINT8 id;
     IrcA1Data* data;
@@ -69,17 +67,37 @@ struct IrcA1 {
     IrcaFuzzyTerms* terms;
 };
 
+#define DECLARE_IRCA(id, name)\
+    IrcA1Data name##data = {0, 0, 0, 0};\
+    Irca1Cal name##cal = {0, 0};\
+    IrcA1 name = {id, &name##data, &name##cal, NULL}
+
+void IrcA1_setFuzzyInputs(IrcA1* irca1);
+void IrcA1_addCO2Term(Sht* sht, RuleTerm* term);
+
+#else
+
+struct IrcA1 {
+    UINT8 id;
+    IrcA1Data* data;
+    Irca1Cal* cal;
+};
+
+#define DECLARE_IRCA(id, name)\
+    IrcA1Data name##data = {0, 0, 0, 0};\
+    Irca1Cal name##cal = {0, 0};\
+    IrcA1 name = {id, &name##data, &name##cal}
+
+#endif
+
+
 /*...........................................................................*/
 /* Init sensor struct and hw associated */
 void IrcA1_init(void);
 
 /*...........................................................................*/
 /* IrcA1 calculate CO2 */
-void IrcA1_calculate(IrcA1* irca1) ;
+void IrcA1_calculate(IrcA1* irca1);
 
-/*...........................................................................*/
-/* Prepare fuzzy inputs */
-void IrcA1_prepareFuzzyInputs(IrcA1* irca1) ;
-
-#   endif /* irca1_h */
+#endif /* irca1_h */
 #endif

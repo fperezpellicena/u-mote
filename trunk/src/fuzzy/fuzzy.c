@@ -16,7 +16,10 @@
  */
 
 #include "fuzzy.h"
+#include "fuzzy_rule.h"
 #include <math.h>
+
+ENGINE(engine);
 
 static UINT8 num;
 static UINT8 den;
@@ -33,32 +36,53 @@ static void RuleEngine_add(Rule* fromRule, Rule* toRule) {
     Rule_setConsecuent(toRule, fromRule->consecuent);
 }
 
-void RuleEngine_addRule(RuleEngine* engine, Rule* rule) {
-    if (engine->size < MAX_RULES) {
-	RuleEngine_add(rule, &engine->rules[engine->size]);
-	++engine->size;
+void RuleEngine_addRule(Rule* rule) {
+    if (engine.size < MAX_RULES) {
+	RuleEngine_add(rule, &engine.rules[engine.size]);
+	++engine.size;
     }
 }
 
-static void RuleEngine_defuzzyfyRule(Rule* rule);
+void RuleEngine_defuzzyfyRule(Rule* rule);
 
-static void RuleEngine_defuzzyfyRule(Rule* rule) {
+void RuleEngine_defuzzyfyRule(Rule* rule) {
     den += rule->consecuent->fuzzy;
-    num += rule->consecuent->fuzzy * rule->consecuent->membershipFunction.mid;
+    num += rule->consecuent->fuzzy * rule->consecuent->function.mid;
 }
 
 /*..........................................................................*/
 
 /* Run engine */
-UINT8 RuleEngine_run(RuleEngine* engine) {
+UINT8 RuleEngine_run(void) {
     UINT8 i;
+    UINT8 j;
+    UINT8 antecedentsSize;
+    UINT8 input;
+    MembershipFunction* mf;
+    UINT8 fuzzyInput;
+    UINT8 fuzzyOutput;
+    float_t fout;
+    UINT8 iout;
     num = 0;
     den = 1;
-    for (i = 0; i < engine->size; i++) {
+    for (i = 0; i < engine.size; i++) {
+	antecedentsSize = engine.rules[i].antecedentsSize;
+	fuzzyOutput = UCHAR_MAX;
 	// Evaluate i rule
-	Rule_evaluate(&engine->rules[i]);
+	for (j = 0; j < antecedentsSize; j++) {
+	    input = engine.rules[i].antecedents[j]->input;
+	    mf = &engine.rules[i].antecedents[j]->function;
+	    // Evaluate input contained in ruleterm input
+	    fuzzyInput = RuleTerm_evaluate(input, mf);
+	    // Apply min{u1, u2} implication rule
+	    fuzzyOutput = RuleImplication_min(fuzzyOutput, fuzzyInput);
+	}
 	// Apply COG
-	RuleEngine_defuzzyfyRule(&engine->rules[i]);
+	den += fuzzyOutput;
+	mf = &engine.rules[i].consecuent->function;
+	num += fuzzyOutput * mf->mid;
     }
-    return num / den;
+    fout = (float_t)((float_t)num / (float_t)den);
+    iout = (UINT8)((float_t)(fout * 100));
+    return iout;
 }
