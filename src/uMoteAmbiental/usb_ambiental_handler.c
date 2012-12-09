@@ -87,7 +87,7 @@ void USB_process(void) {
             Sht11_measure(&sht);
             Sht11_addMeasuresCalculatedToPayload(&sht, &usbInputBuffer);
 #else
-            Payload_putString(&usbInputBuffer, (const MEM_MODEL rom char*) "SHT11 not installed");
+            Payload_putString(&usbInputBuffer, (UINT8*) "SHT11 not installed");
 #endif
         } else {
             // Si el comando es erróneo, muestra un mensaje de error

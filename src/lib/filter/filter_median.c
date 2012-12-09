@@ -31,7 +31,7 @@ static void Filter_extendInputSymmetrically(Filter* filter);
 static void Filter_extendInputSymmetrically(Filter* filter) {
     UINT8 i;
     // Create signal extension
-    memcpy(filter->extended + 2, filter->input, SIGNAL_LENGTH * sizeof (UINT8));
+    memcpy((void*)filter->extended + 2, (void*)filter->input, (size_t)SIGNAL_LENGTH * sizeof (UINT8));
     for (i = 0; i < EXTENDED_SIGNAL_DELTA; ++i) {
         filter->extended[i] = filter->input[1 - i];
         filter->extended[SIGNAL_LENGTH + 2 + i] = filter->input[SIGNAL_LENGTH - 1 - i];

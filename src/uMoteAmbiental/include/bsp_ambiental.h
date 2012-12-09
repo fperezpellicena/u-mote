@@ -20,6 +20,8 @@
 
 #include "bsp.h"
 
+#define SENSING_MODE                FUZZY_DRIVEN
+
 /*..........................................................................*/
 /* SHT11 section */
 

@@ -72,22 +72,16 @@ void Fuzzy_initRules(void) {
 }
 
 
-#    if SHT_ENABLED
-
 void Fuzzy_initSht(Sht* sht) {
     Sht11_addTempTerm(sht, &ifLowTemp);
     Sht11_addTempTerm(sht, &ifMidTemp);
     Sht11_addTempTerm(sht, &ifHighTemp);
 }
-#    endif
-
-#    if IRCA1_ENABLED
 
 void Fuzzy_initIrca(IrcA1* irca) {
     IrcA1_addCO2Term(irca, &ifLowCo2);
     IrcA1_addCO2Term(irca, &ifMidCo2);
     IrcA1_addCO2Term(irca, &ifHighCo2);
 }
-#    endif
 
 #endif

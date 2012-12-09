@@ -16,9 +16,12 @@
  */
 
 #include "sensor_proxy.h"
+#include "gps_proxy.h"
 
 /*..........................................................................*/
-void SensorProxy_init(void) {}
+void SensorProxy_init(void) {
+    GpsProxy_init();
+}
 
 /*..........................................................................*/
 void SensorProxy_sense(void) {}

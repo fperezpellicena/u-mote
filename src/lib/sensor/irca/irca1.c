@@ -49,7 +49,7 @@ static void IrcA1_initPWM(void) {
 /* Init sensor struct and hw associated */
 void IrcA1_init(void) {
     IrcA1_initIO();
-    Register_remap(&IRCA1_RPIN, IRCA1_TIMER);
+    Register_remap((UINT8*)&IRCA1_RPIN, IRCA1_TIMER);
     IrcA1_initPWM();
 }
 
@@ -91,7 +91,7 @@ void IrcA1_calculate(IrcA1* ircA1) {
 /* Put measures into rule terms */
 void IrcA1_setFuzzyInputs(IrcA1* irca) {
     UINT8 i;
-    IrcaFuzzyTerms* terms = irca->terms;
+    IrcaFuzzyTerms* terms = &irca->terms;
     // Calculate CO2
     IrcA1_calculate(irca);  // FIXME Evaluate if this is necessary
     // Put CO2 measured into rule terms

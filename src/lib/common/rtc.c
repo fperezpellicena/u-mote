@@ -102,10 +102,10 @@ void Rtc_writeTimestamp(rtccTimeDate* timestamp) {
 void Rtc_writeFormattedTimestamp(Payload* output) {
     char buffer[50];
     memset(buffer, NULL, 50);
-    sprintf((char*)buffer, "Fecha/Hora: %2u:%2u:%2u %2u/%2u/%4u \n\r",
+    sprintf((char*)buffer, (MOTE_MEM_MODEL rom char*)"Fecha/Hora: %2u:%2u:%2u %2u/%2u/%4u \n\r",
             timestamp.f.hour, timestamp.f.min, timestamp.f.sec,
             timestamp.f.mday, timestamp.f.mon, timestamp.f.year);
-    Payload_putString(output, (char*)buffer);
+    Payload_putString(output, (UINT8*)buffer);
 }
 
 /*..........................................................................*/
@@ -143,7 +143,7 @@ void Rtc_addTimeToPayload(Payload* payload) {
 void Rtc_readInputStream(Payload* input) {
     char* result = NULL;
     // Skip rtcc SOF(start of frame)
-    result = strtokpgmram(input->data, (rom const char far*)SEPARATOR);
+    result = strtokpgmram((char*)input->data, (rom const char far*)SEPARATOR);
     // Read mday
     result = strtokpgmram(NULL, (rom const char far*)SEPARATOR);
     timestamp.f.mday = atoi(result);

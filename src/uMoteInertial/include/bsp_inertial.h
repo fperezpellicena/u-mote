@@ -20,6 +20,8 @@
 
 #include "bsp.h"
 
+#define SENSING_MODE	    MONITORING
+
 /*..........................................................................*/
 /* ADXL section */
 

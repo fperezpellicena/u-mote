@@ -20,6 +20,13 @@
 
 #include <p18cxxx.h>
 #include "GenericTypeDefs.h"
+#include <stdio.h>
+
+#ifdef MEM_MODEL
+#   define MOTE_MEM_MODEL far
+#else
+#   define MOTE_MEM_MODEL
+#endif
 
 /*..........................................................................*/
 /* Operating mode */
@@ -70,23 +77,23 @@
 
 // Defines based on previous selection
 #if XBEE_INTERRUPT == SERIAL_INTERRUPT
-#	if XBEE_SERIAL == EUSART1 
-#		define EUSART1_INTERRUPT
-#	else
-#		define EUSART2_INTERRUPT
-#	endif
+#if XBEE_SERIAL == EUSART1 
+#define EUSART1_INTERRUPT
 #else
-#	define XBEE_ON_SLEEP_PIN	TRISBbits.TRISB0 = 1
-#	define XBEE_ON_SLEEP_INT	INTCONbits.INT0IE = 1
-#	define XBEE_ON_SLEEP_EDGE	INTCON2bits.INTEDG0 = 1
-#	define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
-#	define XBEE_ON_SLEEP_CLEAR_FLAG	INTCONbits.INT0IF = 0
-#       define XBEE_ON_SLEEP_AWAKE      WDTCONbits.DS && DSWAKEHbits.DSINT0
-#	if XBEE_SERIAL == EUSART1 
-#		define EUSART1_POLL
-#	else
-#		define EUSART2_POLL
-#	endif
+#define EUSART2_INTERRUPT
+#endif
+#else
+#define XBEE_ON_SLEEP_PIN	TRISBbits.TRISB0 = 1
+#define XBEE_ON_SLEEP_INT	INTCONbits.INT0IE = 1
+#define XBEE_ON_SLEEP_EDGE	INTCON2bits.INTEDG0 = 1
+#define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
+#define XBEE_ON_SLEEP_CLEAR_FLAG	INTCONbits.INT0IF = 0
+#define XBEE_ON_SLEEP_AWAKE      WDTCONbits.DS && DSWAKEHbits.DSINT0
+#if XBEE_SERIAL == EUSART1 
+#define EUSART1_POLL
+#else
+#define EUSART2_POLL
+#endif
 #endif
 
 #define XBEE_BAUDRATE   EUSART_9600     // Xbee serial baudrate
@@ -104,28 +111,28 @@
 #define USB_PLUG_PIN        PORTBbits.RB4
 
 #if USB_ENABLED
-#   ifdef USB_PLUG_PIN
-#       define USB_PLUGGED          USB_PLUG_PIN == 1
-#       define ENABLE_USB_ATTACH    TRISBbits.TRISB4 = 1
-#   else
-#       error "USB_PLUG_PIN not defined"
-#   endif
+#ifdef USB_PLUG_PIN
+#define USB_PLUGGED          USB_PLUG_PIN == 1
+#define ENABLE_USB_ATTACH    TRISBbits.TRISB4 = 1
+#else
+#error "USB_PLUG_PIN not defined"
+#endif
 #endif
 
 #ifdef __18F46J50_H
-    #define BSP_initLeds()      TRISE &= 0xFC; TRISD &= 0xFC; LATE &= 0x00; LATD &= 0x00;
+#define BSP_initLeds()      TRISE &= 0xFC; TRISD &= 0xFC; LATE &= 0x00; LATD &= 0x00;
 
-    #define mLED_1              LATEbits.LATE0
-    #define mLED_2              LATEbits.LATE1
-    #define mLED_3              LATDbits.LATD0
-    #define mLED_4              LATDbits.LATD1
+#define mLED_1              LATEbits.LATE0
+#define mLED_2              LATEbits.LATE1
+#define mLED_3              LATDbits.LATD0
+#define mLED_4              LATDbits.LATD1
 #else
-    #define BSP_initLeds()      LATC &= 0xFC; TRISC &= 0xFC;
+#define BSP_initLeds()      LATC &= 0xFC; TRISC &= 0xFC;
 
-    #define mLED_1              LATCbits.LATC0
-    #define mLED_2              LATCbits.LATC1
-    #define mLED_3
-    #define mLED_4
+#define mLED_1              LATCbits.LATC0
+#define mLED_2              LATCbits.LATC1
+#define mLED_3
+#define mLED_4
 #endif
 
 #define mGetLED_1()         mLED_1
@@ -173,7 +180,6 @@
 /* MODES */
 #define MONITORING                  0           /* Continuous sensing mode */
 #define FUZZY_DRIVEN                1           /* Alert fuzzy based mode */
-#define SENSING_MODE                FUZZY_DRIVEN
 
 /*..........................................................................*/
 /* SENSOR BOARD CONTROL */
@@ -181,7 +187,7 @@
     SENSOR_BOARD_CTRL_DDR = OUTPUT_PIN; \
     SENSOR_BOARD_OFF()
 
-	
+
 #define MAX_SENSORS                 5                       /* Max sensors */
 #define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
 #define MAX_PAYLOAD                 100
