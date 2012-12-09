@@ -71,6 +71,6 @@ void Payload_append(Payload* to, const Payload* from) {
 /* */
 void Payload_putString(Payload* payload, const UINT8* string) {
     char* buffer = (char*) payload->data;
-    sprintf(buffer, (char*) string);
+    sprintf(buffer, (MOTE_MEM_MODEL rom char*) string);
     payload->size = strlen((char*)string);
 }

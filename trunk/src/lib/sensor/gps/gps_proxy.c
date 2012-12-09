@@ -20,10 +20,20 @@
 #include "hw_serial.h"
 #include "bsp_inertial.h"
 
-void GpsProxy_init() {
+/* NMEA frame */
+static NMEACommandPacket packet;
+
+/** Enable RMC output, all other disabled */
+static NMEAOutputConfig defaultNMEAOutput = {'0','1','0','0','0','0','0','0','0','0','0','0','0','0'};
+
+/*...........................................................................*/
+void GpsProxy_init(void) {
     Serial_init(EUSART_9600);
+    NMEACommand_createSetOutput(&packet, &defaultNMEAOutput);
+    GpsProxy_sendCommand();
 }
 
+/*...........................................................................*/
 BOOL GpsProxy_readOutput(NMEAOutput* packet) {
      UINT8 data;
     while (Serial_available()) {
@@ -59,7 +69,24 @@ BOOL GpsProxy_readOutput(NMEAOutput* packet) {
     }
 }
 
-void GpsProxy_sendCommand(NMEACommandPacket* packet) {
-
+/*...........................................................................*/
+void GpsProxy_sendCommand(void) {
+    UINT8 i;
+    // Send $
+    Serial_send(NMEA_PREAMBLE);
+    // Send NMEA id
+    Serial_sendROMArray((UINT8 rom*)NMEA_ID, NMEA_ID_LENGTH);
+    // Send command number
+    Serial_sendArray(packet.commandNumber, NMEA_COMMAND_LENGTH);
+    //Generalizando para cualquier paquete
+    for(i = 0; i < packet.length; i++) {
+        Serial_send(packet.data[i]);
+    }
+    // Send checksum
+    Serial_send(NMEA_CHK_CHAR);
+    Serial_sendArray(packet.checksumString, NMEA_CHECKUM_LENGTH);
+    // Send CR and LF
+    Serial_send(NMEA_CR);
+    Serial_send(NMEA_LF);
 }
 

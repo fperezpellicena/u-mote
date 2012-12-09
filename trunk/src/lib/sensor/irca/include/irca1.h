@@ -15,7 +15,7 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bsp.h"
+#include "bsp_ambiental.h"
 
 #ifndef irca1_h
 #define irca1_h
@@ -54,7 +54,7 @@ typedef struct IrcA1 IrcA1;
 typedef struct IrcaFuzzyTerms IrcaFuzzyTerms;
 
 struct IrcaFuzzyTerms {
-    RuleTerm** rules;
+    RuleTerm* rules[MAX_TERMS];
     UINT8 rulesSize;
 };
 
@@ -63,7 +63,7 @@ struct IrcA1 {
     UINT8 id;
     IrcA1Data* data;
     Irca1Cal* cal;
-    IrcaFuzzyTerms* terms;
+    IrcaFuzzyTerms terms;
 };
 
 #define DECLARE_IRCA(id, name)\

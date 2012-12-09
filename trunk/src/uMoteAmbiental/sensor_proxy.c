@@ -19,16 +19,12 @@
 #include "sensor_proxy.h"
 #include <stdio.h>
 
-#if SHT_ENABLED
-#    include "sht.h"
+#include "sht.h"
 DECLARE_SHT(SHT_ID, sht);
-#endif
 
-#if IRCA1_ENABLED
-#    include "irca1.h"
-#    include "irca1_proxy.h"
+#include "irca1.h"
+#include "irca1_proxy.h"
 DECLARE_IRCA(IRCA1_ID, irca);
-#endif
 
 static Payload payload;
 static UINT8 sensorIdentifiers;
@@ -50,24 +46,16 @@ static void SensorProxy_fuzzy(void);
 
 static void SensorProxy_initFuzzy(void) {
     Fuzzy_initRules();
-#    if SHT_ENABLED
     Fuzzy_initSht(&sht);
-#    endif
-#    if IRCA1_ENABLED
     Fuzzy_initIrca(&irca);
-#    endif
 }
 
 /* Measure sensor board and check for alert condition */
 static void SensorProxy_fuzzy(void) {
     // Sense
     SensorProxy_sense();
-#    if SHT_ENABLED
     Sht11_setFuzzyInputs(&sht);
-#    endif
-#    if IRCA1_ENABLED
     IrcA1_setFuzzyInputs(&irca);
-#    endif
     risk = RuleEngine_run();
 }
 #endif
@@ -76,12 +64,8 @@ static void SensorProxy_fuzzy(void) {
 void SensorProxy_init(void) {
     SENSOR_BOARD_CTRL_INIT();
     Payload_init(&payload);
-#if SHT_ENABLED
     Sht11_init();
-#endif
-#if IRCA1_ENABLED
     IrcA1Proxy_init();
-#endif
     SensorProxy_composeSensorIdentifiers();
 #if SENSING_MODE == FUZZY_DRIVEN
     SensorProxy_initFuzzy();
@@ -95,14 +79,10 @@ void SensorProxy_sense(void) {
     // Turn on sensor board
     SENSOR_BOARD_ON();
     // Sense installed sensors
-#if SHT_ENABLED
     Sht11_measure(&sht);
     Sht11_addMeasuresToPayload(&sht, &payload);
-#endif
-#if IRCA1_ENABLED
     IrcA1Proxy_measure(&irca);
     IrcA1Proxy_addMeasuresToPayload(&irca, &payload);
-#endif
     // Turn off sensor board
     SENSOR_BOARD_OFF();
 #if SENSING_MODE == FUZZY_DRIVEN
@@ -126,7 +106,7 @@ void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
 void SensorProxy_addMeasuresToPayload(Payload* p) {
     Payload_append(p, &payload);
 #if SENSING_MODE == FUZZY_DRIVEN
-    Payload_putByte(&payload, risk);	// Add Risk level
+    Payload_putByte(&payload, risk); // Add Risk level
 #endif
 }
 

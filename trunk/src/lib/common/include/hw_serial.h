@@ -28,6 +28,8 @@ void Serial_send(UINT8 value);
 
 void Serial_sendArray(UINT8* values, UINT8 size);
 
+void Serial_sendROMArray(UINT8 rom* values, UINT8 size);
+
 UINT8 Serial_read(void);
 
 BOOL Serial_available(void);

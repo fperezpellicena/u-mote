@@ -22,11 +22,11 @@
 #include "hw_serial.h"
 #include "GenericTypeDefs.h"
 
-void GpsProxy_init();
+void GpsProxy_init(void);
 
 BOOL GpsProxy_readOutput(NMEAOutput* packet);
 
-void GpsProxy_sendCommand(NMEACommandPacket* packet);
+void GpsProxy_sendCommand(void);
 
 
 #endif /* gps_proxy_h */

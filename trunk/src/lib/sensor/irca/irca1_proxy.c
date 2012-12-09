@@ -16,11 +16,11 @@
  */
 
 #include "irca1_proxy.h"
-
-#if IRCA1_ENABLED
-#   include "hw_adc.h"
+#include "bsp_ambiental.h"
+#include "hw_adc.h"
 
 /*...........................................................................*/
+
 /* Init ADC and I/O */
 void IrcA1Proxy_init(void) {
     Adc_init();
@@ -42,4 +42,3 @@ void IrcA1Proxy_addMeasuresToPayload(IrcA1* ircA1, Payload* payload) {
     Payload_putByte(payload, ircA1->data->tmp);
 }
 
-#endif

@@ -225,10 +225,10 @@ void Sht11_addMeasuresCalculatedToPayload(Sht* sht, Payload* payload) {
     // Calculate
     Sht11_calculate(&sht->data.humidity.f, &sht->data.temperature.f);
     // Build strings and append to payload
-    sprintf(payload->data, (const MEM_MODEL rom char*) "Humedad relativa: %d.%2u % \n\r",
+    sprintf((char*)payload->data, (const MEM_MODEL rom char*) "Humedad relativa: %d.%2u % \n\r",
 	    (int) sht->data.humidity.f / 100,
 	    fabs(((sht->data.humidity.f - (int) sht->data.humidity.f)*100)));
-    sprintf(payload->data, (const MEM_MODEL rom char*) "Temperatura: %d.%2u % \n\r",
+    sprintf((char*)payload->data, (const MEM_MODEL rom char*) "Temperatura: %d.%2u % \n\r",
 	    (UINT16) sht->data.temperature.f,
 	    fabs(((sht->data.temperature.f - (int) sht->data.temperature.f)*100)));
 }

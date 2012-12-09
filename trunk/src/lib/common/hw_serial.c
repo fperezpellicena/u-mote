@@ -17,16 +17,20 @@
 
 #include "bsp.h"
 #include "hw_serial.h"
+#include "register.h"
+#include <string.h>
 
 /** Interrupt driven uart */
 void Serial_init(UINT8 baudrate) {
-    // PPS - Configure RX2 RA5 (RP2)
-    RPINR16 = 4;
+    Register_unLockIO();
+    // PPS - Configure RX2 RA0 (RP0)
+    RPINR16 = 1;
     // PPS - Configure TX2 RA1 (RP1)
     RPOR1 = 5;
-
-    TRISAbits.TRISA1 = 1;
-    TRISAbits.TRISA5 = 0;
+    Register_lockIO();
+    
+    TRISAbits.TRISA0 = 1;
+    TRISAbits.TRISA1 = 0;
 
     TXSTA2bits.SYNC = 0;
     TXSTA2bits.TXEN = 1;
@@ -55,7 +59,14 @@ void Serial_sendArray(UINT8* values, UINT8 size) {
     while (i < size) {
         Serial_send(values[i++]);
     }
-    Serial_send(NULL);
+    //Serial_send(NULL);
+}
+
+void Serial_sendROMArray(UINT8 rom* values, UINT8 size) {
+    UINT8 i = 0;
+    while (i < size) {
+        Serial_send(values[i++]);
+    }
 }
 
 UINT8 Serial_read(void) {

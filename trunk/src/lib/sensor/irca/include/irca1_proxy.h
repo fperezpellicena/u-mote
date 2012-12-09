@@ -17,9 +17,8 @@
 
 #include "irca1.h"
 
-#if IRCA1_ENABLED
-#   ifndef ircA1_proxy_h
-#   define ircA1_proxy_h
+#ifndef ircA1_proxy_h
+#define ircA1_proxy_h
 
 #include "payload.h"
 
@@ -32,5 +31,4 @@ void IrcA1Proxy_measure(IrcA1* ircA1);
 /*..........................................................................*/
 void IrcA1Proxy_addMeasuresToPayload(IrcA1* ircA1, Payload* measures);
 
-#   endif /* ircA1_proxy_h */
-#endif
+#endif /* ircA1_proxy_h */
