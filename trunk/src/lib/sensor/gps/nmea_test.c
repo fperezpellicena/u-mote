@@ -14,19 +14,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef gps_proxy_h
-#define gps_proxy_h
-
-#include "gps_api.h"
-#include "hw_serial.h"
-#include "GenericTypeDefs.h"
-
-void GpsProxy_init(void);
-
-BOOL GpsProxy_readOutput(NMEAOutput* packet);
-
-void GpsProxy_sendCommand(void);
-
-
-#endif /* gps_proxy_h */
+ 
+ #include "nmea_command.h"
+ 
+/*..........................................................................*/
+void NMEACommand_createTest(NMEACommandPacket* nmeaCommandFrame) {
+    NMEACommand_create(nmeaCommandFrame, (UINT8 rom*)NMEA_TEST, NULL, 0);
+}
