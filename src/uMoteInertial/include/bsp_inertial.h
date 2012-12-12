@@ -15,8 +15,8 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-#ifndef umote_inertial_bsp_h
-#define umote_inertial_bsp_h
+#ifndef bsp_inertial_h
+#define bsp_inertial_h
 
 #include "bsp.h"
 

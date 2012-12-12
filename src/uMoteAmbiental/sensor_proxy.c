@@ -117,10 +117,6 @@ void SensorProxy_addMeasuresToPayload(Payload* p) {
 
 static void SensorProxy_composeSensorIdentifiers(void) {
     sensorIdentifiers = 0;
-#if SHT_ENABLED
     sensorIdentifiers |= sht.id;
-#endif
-#if IRCA1_ENABLED
     sensorIdentifiers |= irca.id;
-#endif
 }

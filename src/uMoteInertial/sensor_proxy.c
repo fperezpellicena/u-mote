@@ -16,19 +16,52 @@
  */
 
 #include "sensor_proxy.h"
-#include "gps_proxy.h"
+#include "bsp_inertial.h"
+#include "gps.h"
+#include "nmea_command.h"
+
+DECLARE_GPS(GPS_ID, gps);
+
+static NMEACommandPacket packet;
+
+/** Enable RMC output, all other disabled */
+static NMEAOutputConfig defaultNMEAOutput
+	= {'0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
+
+static UINT8 sensorIdentifiers;
+
+static void SensorProxy_composeSensorIdentifiers(void);
 
 /*..........................................................................*/
 void SensorProxy_init(void) {
-    GpsProxy_init();
+    Gps_init();
+    NMEACommand_createSetOutput(&packet, &defaultNMEAOutput);
+    Gps_sendPacket(&packet);
 }
 
 /*..........................................................................*/
-void SensorProxy_sense(void) {}
+void SensorProxy_sense(void) {
+    // Read packet
+    Gps_readPacket(&packet);
+    // Extract location
+    Gps_readLocation(&gps, &packet);
+    
+}
 
 /*..........................................................................*/
-void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {}
+void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
+    Payload_putByte(payload, 0);
+    Payload_putByte(payload, sensorIdentifiers);
+    Payload_putByte(payload, 0);
+    Payload_putByte(payload, 0);
+}
 
 /*..........................................................................*/
-void SensorProxy_addMeasuresToPayload(Payload* payload) {}
+void SensorProxy_addMeasuresToPayload(Payload* payload) {
+}
+
+static void SensorProxy_composeSensorIdentifiers(void) {
+    sensorIdentifiers = 0;
+    sensorIdentifiers |= gps.id;
+}
 
