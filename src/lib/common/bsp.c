@@ -18,11 +18,6 @@
 
 #include "bsp.h"
 #include "power.h"
-#include "digi_api.h"
-#include "digi_interrupt.h"
-#include "sensor_proxy.h"
-#include <delays.h>
-#include <limits.h>
 
 #if USB_ENABLED
 #    include "usb_device.h"
@@ -36,19 +31,14 @@
 
 /*...........................................................................*/
 void BSP_init(void) {
-    // TODO Probar si funciona activar el PLL cuando se conecta el terminal USB
-    BSP_enablePLL();
     // Default all pins to digital
     BSP_defaultIO();
-    // Initializes mote API
-    XBee_init();
-    // Enable sensor board
-    SensorProxy_init();
 #if SLEEP_MODE == SLEEP
     // Init interrupt vectors
     InterruptHandler_initVectors();
 #endif
 #if USB_ENABLED
+    BSP_enablePLL();
     ENABLE_USB_ATTACH;
     // Initializes USB module SFRs and firmware variables to known states
     USBDeviceInit();
@@ -76,63 +66,24 @@ void BSP_defaultIO(void) {
 }
 
 /*...........................................................................*/
-void BSP_onPowerUp(void) {
-#if RTCC_ENABLED
-    // Enable RTCC
-    Rtc_init();
-#endif
-}
-
-static void BSP_clearMclrFlags(void);
-
-static void BSP_clearMclrFlags(void) {
+void BSP_clearMclrFlags(void) {
     DSWAKELbits.DSMCLR = 0;
     DSCONLbits.RELEASE = 0;
 }
 
-/*...........................................................................*/
-
-/* On reset push, join xbee */
-void BSP_onMclr(void) {
-    BSP_clearMclrFlags();
-    XBee_join();
-}
-
-static void BSP_clearWakeUpFlags(void);
-
-static void BSP_clearWakeUpFlags(void) {
+void BSP_clearWakeUpFlags(void) {
     WDTCONbits.DS = 0;
     DSWAKEHbits.DSINT0 = 0;
     DSCONLbits.RELEASE = 0;
 }
 
 /*...........................................................................*/
-void BSP_onWakeUp(void) {
-    // Clear wake up flags
-    BSP_clearWakeUpFlags();
-    // Ejecuta la interrupción que ha despertado al sistema
-    XBeeInterrupt_handleBottomHalve();
-}
-
-/*...........................................................................*/
-
-/**
- * Entering this method could mean that the transceiver is malfunctioning.
- * Xbee may be down or may have lost sync with his neighbor.
- * So, try to send a reset message to the transceiver and rejoin the mote.
- * A 100 ms delay is necessary to perform a full reset before send any command.
- */
-void BSP_onDsWdtWakeUp(void) {
-    XBee_reset();
-    Delay100TCYx(UINT_MAX);
-    XBee_join();
-}
-
-/*...........................................................................*/
 void BSP_deepSleep(void) {
     // Disable PLL
     OSCTUNEbits.PLLEN = 0;
+#if RTCC_ENABLED
     Rtc_enable();
+#endif
     Power_deepSleep();
 }
 
@@ -140,7 +91,10 @@ void BSP_deepSleep(void) {
 void BSP_sleep(void) {
     // Disable PLL
     OSCTUNEbits.PLLEN = 0;
+#if RTCC_ENABLED
     Rtc_enable();
+#endif
+    INTCONbits.GIEH = 1;
     Power_sleep();
 }
 

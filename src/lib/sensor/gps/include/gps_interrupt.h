@@ -15,30 +15,15 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef hw_serial_h
-#define hw_serial_h
+#ifndef gps_interrupt_h
+#define gps_interrupt_h
 
-#include "GenericTypeDefs.h"
+void GpsInterrupt_install(void);
 
-void Serial_init(UINT8 baudrate);
+void GpsInterrupt_handleTopHalve(void);
 
-void Serial_initInterrupt(UINT8 baudrate);
+void GpsInterrupt_handleBottomHalve(void);
 
-void Serial_close();
+void GpsInterrupt_check(void);
 
-void Serial_send(UINT8 value);
-
-void Serial_sendArray(UINT8* values, UINT8 size);
-
-void Serial_sendROMArray(UINT8 rom* values, UINT8 size);
-
-UINT8 Serial_read(void);
-
-BOOL Serial_available(void);
-
-/** Interrupt handler functions */
-BOOL Serial_checkInterrupt(void);
-
-void Serial_ackInterrupt(void);
-
-#endif          /* hw_serial_h */
+#endif

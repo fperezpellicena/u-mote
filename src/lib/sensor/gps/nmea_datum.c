@@ -17,7 +17,7 @@
 
 #include "nmea_command.h"
 #include <string.h>
-#include "bsp_inertial.h"
+#include "bsp.h"
 
 /*..........................................................................*/
 void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,

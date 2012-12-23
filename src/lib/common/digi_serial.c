@@ -31,14 +31,6 @@ void XBeeSerial_init(UINT8 baudrate) {
     RCSTA1bits.CREN = 1;
     // Baudrate
     SPBRG1 = baudrate; // 9600bps -> 12
-    // Interrupts
-#ifdef  EUSART1_INTERRUPT
-    PIE1bits.RC1IE = 1;
-    PIE1bits.TX1IE = 0;
-    PIR1bits.RC1IF = 0;
-
-    IPR1bits.RC1IP = 1; // High priority defatult
-#endif
 }
 
 void XBeeSerial_send(UINT8 value) {

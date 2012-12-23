@@ -97,6 +97,7 @@ void Rtc_writeTimestamp(rtccTimeDate* timestamp) {
 }
 
 /*..........................................................................*/
+// FIXME Eliminate payload dependency
 
 /* Read Rtc data into buffer */
 void Rtc_writeFormattedTimestamp(Payload* output) {
