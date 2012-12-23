@@ -18,7 +18,6 @@
 #ifndef isr_h
 #define isr_h
 
-#include "GenericTypeDefs.h"
 #include "bsp.h"
 
 /*..........................................................................*/

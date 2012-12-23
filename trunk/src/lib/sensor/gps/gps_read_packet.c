@@ -19,37 +19,49 @@
 #include "nmea_command.h"
 #include "hw_serial.h"
 
-BOOL Gps_readPacket(NMEAOutputPacket* packet) {
-    UINT8 data;
-    while (Serial_available()) {
-	data = Serial_read();
-	switch (packet->rxState) {
-	    case NMEA_PACKET_PREAMBLE: //$
-		if (data == NMEA_PREAMBLE) {
-		    packet->rxState = NMEA_PACKET_DATA;
-		}
-		break;
-	    case NMEA_PACKET_DATA:
-		packet->data[packet->length] = data;
-		packet->length += 1;
-		// Checksum is x'or-ed
-		packet->chkCalculated ^= data;
-		if (data == NMEA_CHK_CHAR) {
-		    packet->rxState = NMEA_PACKET_CRC_1;
-		}
-		break;
-	    case NMEA_PACKET_CRC_1:
-		// High chk byte
-		packet->chkRead = (data << 8);
-		break;
-	    case NMEA_PACKET_CRC_2:
-		// Low chk byte
-		packet->chkRead += data;
-		if (packet->chkRead == packet->chkCalculated) {
-		    return TRUE;
-		}
-		return FALSE;
-		break;
-	}
+static void Gps_processData(NMEAOutputPacket* packet, UINT8 data);
+
+static void Gps_processData(NMEAOutputPacket* packet, UINT8 data) {
+    switch (packet->rxState) {
+	case NMEA_PACKET_PREAMBLE: //$
+	    if (data == NMEA_PREAMBLE) {
+		packet->rxState = NMEA_PACKET_DATA;
+	    }
+	    break;
+	case NMEA_PACKET_DATA:
+	    packet->data[packet->length++] = data;
+	    // Checksum is x'or-ed
+	    packet->chkCalculated ^= data;
+	    if (data == NMEA_CHK_CHAR) {
+		packet->rxState = NMEA_PACKET_CRC_1;
+	    }
+	    break;
+	case NMEA_PACKET_CRC_1:
+	    // High chk byte
+	    packet->chkRead = (data << 8);
+	    packet->rxState = NMEA_PACKET_CRC_2;
+	    break;
+	case NMEA_PACKET_CRC_2:
+	    // Low chk byte
+	    packet->chkRead += data;
+	    if (packet->chkRead == packet->chkCalculated) {
+		packet->rxState = NMEA_PACKET_OK;
+	    }
+	    packet->rxState = NMEA_PACKET_OK;
+	    break;
     }
+}
+
+void Gps_readPacket(NMEAOutputPacket* packet) {
+    NMEAOutput_resetPacket(packet);
+    while (Serial_available()) {
+	// FIXME This call is suposed to be faster than uart receiving next byte
+	Gps_processData(packet, Serial_read());
+    }
+}
+
+void Gps_readByte(NMEAOutputPacket* packet) {
+    UINT8 data = Serial_read();
+    Gps_processData(packet, data);
+    Serial_ackInterrupt();
 }

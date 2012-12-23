@@ -15,8 +15,8 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
  
-#ifndef umote_ambiental_bsp_h
-#define umote_ambiental_bsp_h
+#ifndef bsp_ambiental_h
+#define bsp_ambiental_h
 
 #include "bsp.h"
 
@@ -81,5 +81,7 @@
 #define SENSOR_BOARD_CTRL_DDR       TRISBbits.TRISB3      /* Power on/off pin*/
 #define SENSOR_BOARD_ON()           SENSOR_BOARD_CTRL = 1   /* Power on */
 #define SENSOR_BOARD_OFF()          SENSOR_BOARD_CTRL = 0   /* Power off */
+
+void BSP_ambientalInit(void);
 
 #endif /* umote_ambiental_bsp_h */

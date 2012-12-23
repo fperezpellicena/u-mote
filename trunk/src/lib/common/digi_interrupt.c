@@ -50,7 +50,7 @@ void XBeeInterrupt_install(void) {
 
 /* Top halve interrupt handler */
 void XBeeInterrupt_handleTopHalve(void) {
-#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+#if XBEE_INTERRUPT == EUSART_SERIAL_INTERRUPT
     // If serial interrupt is configured, read last received byte
     // and store it in lastByte field
     UINT8 byte = XBeeSerial_read();
@@ -73,9 +73,10 @@ void XBeeInterrupt_handleTopHalve(void) {
 #endif
 }
 
+// TODO Move out to a custom handler
 /* Bottom halve interrupt handler*/
 void XBeeInterrupt_handleBottomHalve(void) {
-#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+#if XBEE_INTERRUPT == EUSART_SERIAL_INTERRUPT
     // If serial interrupt is configured, process last received byte
     // and check for valid frame
     // If valid frame received, create new data frame and send
@@ -102,7 +103,7 @@ void XBeeInterrupt_handleBottomHalve(void) {
 }
 
 BOOL XBeeInterrupt_check(void) {
-#if XBEE_INTERRUPT == SERIAL_INTERRUPT
+#if XBEE_INTERRUPT == EUSART_SERIAL_INTERRUPT
     // If serial interrupt is configured, check serial
     return XBeeSerial_checkInterrupt();
 #else

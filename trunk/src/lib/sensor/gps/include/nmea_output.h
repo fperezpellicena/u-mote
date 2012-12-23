@@ -90,7 +90,7 @@ struct NMEAOutputPacket {
 /*...........................................................................*/
 enum NMEAReadStatus {
     NMEA_PACKET_PREAMBLE, NMEA_PACKET_DATA, NMEA_PACKET_CRC_1,
-    NMEA_PACKET_CRC_2
+    NMEA_PACKET_CRC_2, NMEA_PACKET_OK, NMEA_PACKET_ERROR
 };
 
 /*...........................................................................*/
@@ -104,6 +104,7 @@ struct NMEAOutputRMC {
     BOOL valid;
 };
 
+void NMEAOutput_resetPacket(NMEAOutputPacket * const packet);
 
 void NMEAOutput_readRMC(NMEAOutputPacket* output, NMEAOutputRMC* rmc);
 

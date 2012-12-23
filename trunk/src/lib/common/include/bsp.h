@@ -19,8 +19,10 @@
 #define bsp_h
 
 #include <p18cxxx.h>
-#include "GenericTypeDefs.h"
 #include <stdio.h>
+#include "GenericTypeDefs.h"
+
+#include "bsp_config.h"
 
 #ifdef MEM_MODEL
 #   define MOTE_MEM_MODEL far
@@ -30,90 +32,54 @@
 
 /*..........................................................................*/
 /* Operating mode */
-#define DEBUG   0
-#define NORMAL  1
-#define MODE    DEBUG
+#define DEBUG		1
+#define NORMAL		2
+#define MODE		DEBUG
 
 /*..........................................................................*/
 /* Sleep mode */
-#define SLEEP           0
-#define DEEP_SLEEP      1
-#define SLEEP_MODE      DEEP_SLEEP
+#define SLEEP           1
+#define DEEP_SLEEP      2
 
 /*..........................................................................*/
 /* IO PIN STATUS */
 
-#define INPUT_PIN 1
-#define OUTPUT_PIN 0
+#define INPUT_PIN	1
+#define OUTPUT_PIN	0
+
+#define ON_MCLR		WDTCONbits.DS && DSWAKELbits.DSMCLR
+#define ON_DSWDT	WDTCONbits.DS && DSWAKELbits.DSWDT
 
 
+#define EUSART_SERIAL_INTERRUPT	    1
 /*..........................................................................*/
 /* UART SECTION */
 
-#define EUSART_9600			12	// EUSART 9600 baudrate
-
-/* EUSART1 */
-#define EUSART1    			0	// EUSART 1
-
-/* EUSART2 */
-#define EUSART2    			1	// EUSART 2
-
+#define EUSART_9600		    12	// TODO Depends on Fosc
 
 /*..........................................................................*/
 /* XBEE SECTION */
 
-#define XBEE_RADIOUS                            0x00
-#define XBEE_OPTIONS                            0x00
-
-#define ON_SLEEP_INTERRUPT			2		// Xbee on_sleep interrupt 
-
-// if xbee interrupt mcu via serial, uncomment this define
-// #define XBEE_INTERRUPT			SERIAL_INTERRUPT
-
-// else if xbee interrupt mcu via I/O pin, uncomment this define
-#define XBEE_INTERRUPT				ON_SLEEP_INTERRUPT
+#define XBEE_RADIOUS                0x00
+#define XBEE_OPTIONS                0x00
 
 #define SLEEP_STATUS_MESSAGES       0	// If xbee uart send sleep status messages on wake/sleep
 
 // Defines based on previous selection
-#if XBEE_INTERRUPT == SERIAL_INTERRUPT
-#if XBEE_SERIAL == EUSART1 
-#define EUSART1_INTERRUPT
-#else
-#define EUSART2_INTERRUPT
-#endif
-#else
-#define XBEE_ON_SLEEP_PIN	TRISBbits.TRISB0 = 1
-#define XBEE_ON_SLEEP_INT	INTCONbits.INT0IE = 1
-#define XBEE_ON_SLEEP_EDGE	INTCON2bits.INTEDG0 = 1
-#define XBEE_ON_SLEEP_FLAG	INTCONbits.INT0IF
-#define XBEE_ON_SLEEP_CLEAR_FLAG	INTCONbits.INT0IF = 0
-#define XBEE_ON_SLEEP_AWAKE      WDTCONbits.DS && DSWAKEHbits.DSINT0
-#if XBEE_SERIAL == EUSART1 
-#define EUSART1_POLL
-#else
-#define EUSART2_POLL
-#endif
-#endif
-
-#define XBEE_BAUDRATE   EUSART_9600     // Xbee serial baudrate
-
-#define ON_MCLR         WDTCONbits.DS && DSWAKELbits.DSMCLR
-#define ON_DSWDT                  WDTCONbits.DS && DSWAKELbits.DSWDT
-
+#define XBEE_ON_SLEEP_PIN	    TRISBbits.TRISB0 = 1
+#define XBEE_ON_SLEEP_INT	    INTCONbits.INT0IE = 1
+#define XBEE_ON_SLEEP_EDGE	    INTCON2bits.INTEDG0 = 1
+#define XBEE_ON_SLEEP_FLAG	    INTCONbits.INT0IF
+#define XBEE_ON_SLEEP_CLEAR_FLAG    INTCONbits.INT0IF = 0
+#define XBEE_ON_SLEEP_AWAKE	    WDTCONbits.DS && DSWAKEHbits.DSINT0
 
 /*...........................................................................*/
 /* USB SECTION */
 
-#define USB_ENABLED         1
-
-/* USB attach detector */
-#define USB_PLUG_PIN        PORTBbits.RB4
-
 #if USB_ENABLED
 #ifdef USB_PLUG_PIN
-#define USB_PLUGGED          USB_PLUG_PIN == 1
-#define ENABLE_USB_ATTACH    TRISBbits.TRISB4 = 1
+#define USB_PLUGGED          USB_PLUG_POR == 1
+#define ENABLE_USB_ATTACH    USB_PLUG_TRI = 1
 #else
 #error "USB_PLUG_PIN not defined"
 #endif
@@ -161,26 +127,6 @@
 #define mLED_Only_2_On()        {mLED_1_Off();mLED_2_On();}
 
 
-/*...........................................................................*/
-/* RTCC SECTION */
-
-#define RTCC_ENABLED        1
-
-
-/*...........................................................................*/
-/* ADC SECTION */
-
-#define ADC_INT_ENABLED     0
-
-#define AVERAGE_FACTOR  16
-#define DIV_AVERAGE     4
-
-
-/*..........................................................................*/
-/* MODES */
-#define MONITORING                  0           /* Continuous sensing mode */
-#define FUZZY_DRIVEN                1           /* Alert fuzzy based mode */
-
 /*..........................................................................*/
 /* SENSOR BOARD CONTROL */
 #define SENSOR_BOARD_CTRL_INIT() \
@@ -188,21 +134,29 @@
     SENSOR_BOARD_OFF()
 
 
+/*..........................................................................*/
+/* MODES */
+#define MONITORING          1           /* Continuous sensing mode */
+#define FUZZY_DRIVEN        2           /* Alert fuzzy based mode */
+
+/*...........................................................................*/
+/* GENERAL */
 #define MAX_SENSORS                 5                       /* Max sensors */
 #define MAX_INTERRUPT_HANDLERS      5            /* Max interrupt handlers */
 #define MAX_PAYLOAD                 100
-#define SENSORS                     1
-#define NO_SENSORS                  0x00                  /* No sensors Id */
 
 /*...........................................................................*/
 /* Prototypes */
 void BSP_init(void);
 void BSP_enablePLL(void);
 void BSP_defaultIO(void);
-
+/* Sleep modes */
 void BSP_deepSleep(void);
 void BSP_sleep(void);
-
+/* Awake flag control */
+void BSP_clearMclrFlags(void);
+void BSP_clearWakeUpFlags(void);    // TODO Refactor function name
+/* Awake functions implemented by custom BSP */
 void BSP_onPowerUp(void);
 void BSP_onMclr(void);
 void BSP_onWakeUp(void);

@@ -15,11 +15,30 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "hw_serial.h"
-#include "bsp.h"
+#ifndef bsp_config_h
+#define	bsp_config_h
+
+#include <p18cxxx.h>
+
+#define SLEEP_MODE      DEEP_SLEEP
 
 /*...........................................................................*/
-void Gps_init(void) {
-    // Init uart in interrupt mode
-    Serial_initInterrupt(EUSART_9600);
-}
+#define RTCC_ENABLED        1
+#define USB_ENABLED         0
+#define ADC_INT_ENABLED     0
+
+/*...........................................................................*/
+/* XBEE SECTION */
+#define XBEE_BAUDRATE	    EUSART_9600     // Xbee serial baudrate
+
+/*...........................................................................*/
+/* USB attach detector */
+#define USB_PLUG_POR        PORTBbits.RB4
+#define USB_PLUG_TRI        TRISBbits.TRISB4
+
+/*...........................................................................*/
+/* ADC SECTION */
+#define AVERAGE_FACTOR	    16
+#define DIV_AVERAGE	    4
+
+#endif

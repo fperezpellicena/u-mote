@@ -20,6 +20,9 @@
 
 #include "bsp.h"
 
+
+#define EUSART2_MODE		    EUSART_POLL
+
 #define SENSING_MODE	    MONITORING
 
 /*..........................................................................*/
@@ -48,5 +51,7 @@
 #define SENSOR_BOARD_CTRL_DDR       TRISBbits.TRISB3      /* Power on/off pin*/
 #define SENSOR_BOARD_ON()           SENSOR_BOARD_CTRL = 1   /* Power on */
 #define SENSOR_BOARD_OFF()          SENSOR_BOARD_CTRL = 0   /* Power off */
+
+void BSP_inertialInit(void);
 
 #endif /* umote_inertial_bsp_h */

@@ -34,7 +34,7 @@
 
 void main(void) {
     // Init basic system
-    BSP_init();
+    BSP_inertialInit();
     while (1) {
         //Wdt_enable();
 #if USB_ENABLED
@@ -76,16 +76,16 @@ void main(void) {
         }
 #else
 #if SLEEP_MODE == DEEP_SLEEP
-        if (XBEE_ON_SLEEP_AWAKE) {
-            BSP_onWakeUp();
-        } else if (ON_MCLR) {
-            BSP_onMclr();
-        } else if (ON_DSWDT) {
-            BSP_onDsWdtWakeUp();
-        } else {
-            BSP_onPowerUp();
-        }
-        BSP_deepSleep();
+//        if (XBEE_ON_SLEEP_AWAKE) {
+//            BSP_onWakeUp();
+//        } else if (ON_MCLR) {
+//            BSP_onMclr();
+//        } else if (ON_DSWDT) {
+//            BSP_onDsWdtWakeUp();
+//        } else {
+//            BSP_onPowerUp();
+//        }
+//        BSP_deepSleep();
 #elif SLEEP_MODE == SLEEP
         // Si no está conectado el terminal USB, entra en modo de bajo consumo
         if ((USBGetDeviceState() == ATTACHED_STATE)) {

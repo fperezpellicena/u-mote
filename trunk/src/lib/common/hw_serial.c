@@ -20,7 +20,7 @@
 #include "register.h"
 #include <string.h>
 
-/** Interrupt driven uart */
+/** Init uart in non-interrupt mode */
 void Serial_init(UINT8 baudrate) {
     Register_unLockIO();
     // PPS - Configure RX2 RA0 (RP0)
@@ -40,13 +40,17 @@ void Serial_init(UINT8 baudrate) {
     RCSTA2bits.CREN2 = 1;
 
     SPBRG2 = baudrate; // 9600bps -> 12
-#ifdef EUSART2_INTERRUPT
+}
+
+/** Interrupt driven uart */
+void Serial_initInterrupt(UINT8 baudrate) {
+    Serial_init(baudrate);
+    // Interrupt config
     PIE3bits.RC2IE = 1;
     PIE3bits.TX2IE = 0;
     PIR3bits.RC2IF = 0;
-
-    IPR3bits.RC2IP = 1; // High priority defatult
-#endif
+    // High priority defatult
+    IPR3bits.RC2IP = 1; 
 }
 
 void Serial_send(UINT8 value) {

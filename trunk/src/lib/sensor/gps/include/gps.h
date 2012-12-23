@@ -65,6 +65,8 @@ void Gps_sendPacket(NMEACommandPacket* packet);
 
 BOOL Gps_readPacket(NMEAOutputPacket* packet);
 
+BOOL Gps_readByte(NMEAOutputPacket* packet);
+
 void Gps_readLocation(Gps* gps, NMEAOutputPacket* packet);
 
 #endif
