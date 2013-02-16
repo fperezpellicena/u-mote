@@ -14,14 +14,34 @@
  *  You should have received a copy of the GNU General Public License
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <p18f46j50.h>
+#include <p18cxxx.h>
 #include <usart.h>
 #include <stdio.h>
 #include <delays.h>
 #include <math.h>
 #include <stdlib.h>
 
-#pragma config WDTEN = OFF
+#pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
+#pragma config STVREN = ON          //stack overflow/underflow reset enabled
+#pragma config XINST = OFF          //Extended instruction set disabled
+#pragma config CPUDIV = OSC4_PLL6   //CPU system clock divide 6
+#pragma config CP0 = OFF            //Program memory is not code-protected
+#pragma config OSC = INTOSCPLL      //Internal OSC(8mhz), PLL enabled by soft
+#pragma config PLLDIV = 2           //Divide By 2(4 Mhz) to generate 96Mhz
+#pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
+#pragma config IESO = OFF           //Two-Speed Start-up disabled
+#pragma config WDTPS = 32768        //1:32768
+#pragma config DSWDTOSC = INTOSCREF //DSWDT uses INTOSC/INTRC as clock
+#pragma config RTCOSC = INTOSCREF   //RTCC uses INTRC
+#pragma config DSBOREN = OFF        //Zero-Power BOR disabled in Deep Sleep
+#pragma config DSWDTEN = OFF        //Disabled
+#pragma config DSWDTPS = 8192       //1:8,192 (8.5 seconds)
+#pragma config IOL1WAY = OFF        //IOLOCK bit can be set and cleared
+#pragma config MSSP7B_EN = MSK7     //7 Bit address masking
+#pragma config WPFP = PAGE_1        //Write Protect Program Flash Page 0
+#pragma config WPEND = PAGE_0       //Start protection at page 0
+#pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
+#pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored
 
 #define MEASURE_TEMP    0x03    /* Measure temperature command */
 #define MEASURE_HUMI    0x05    /* Measure humidity command */
@@ -32,10 +52,11 @@
 #define ACK 1
 #define NACK 0
 
-#define DATA        TRISBbits.TRISB1
-#define DATA_DDR    LATBbits.LATB1
-#define SCK         LATBbits.LATB2
-#define SCK_DDR     TRISBbits.TRISB2
+#define DATA        TRISAbits.TRISA0
+#define DATA_DDR    LATAbits.LATA0
+#define SCK         LATAbits.LATA1
+#define SCK_DDR     TRISAbits.TRISA1
+#define DATA_PIN    PORTAbits.RA0
 
 enum Modes {
     TEMP, HUMI
@@ -52,20 +73,20 @@ static char write(unsigned char value) {
         } else {
             DATA = 0;
         }
-        Delay1KTCYx(1); //observe setup time
+        Delay1TCY(); //observe setup time
         SCK = 1; //clk for SENSI-BUS
-        Delay1KTCYx(3); //pulswith approx. 5 us
+        Delay1TCY(); //pulswith approx. 5 us
         SCK = 0;
-        Delay1KTCYx(1); //observe hold time
+        Delay1TCY(); //observe hold time
     }
     DATA = 1; //release DATA-line
-    Delay1KTCYx(1); //observe setup time
+    Delay1TCY(); //observe setup time
     SCK = 1; //clk #9 for ack
-    Delay1KTCYx(2);
+    Delay1TCY();
     // To read SHT ack(low), change pin direction
     DATA_DDR = 1;
     // Read pin
-    error = PORTBbits.RB1; //check ack (DATA will be pulled down by SHT11)
+    error = DATA_PIN; //check ack (DATA will be pulled down by SHT11)
     SCK = 0;
     return error; //error=1 in case of no acknowledge
 }
@@ -83,15 +104,15 @@ static unsigned char read(unsigned char ack)
     //Write1USART('X');
     for (i = 0x80; i > 0; i /= 2) //shift bit for masking
     {
-        Delay1KTCYx(3);
+        Delay1TCY();
         SCK = 1; //clk for SENSI-BUS
-        if (PORTBbits.RB1) {
+        if (DATA_PIN) {
             val = (val | i); //read bit
-            //      Write1USART('1');
+            //Write1USART('1');
         } else {
-            //    Write1USART('0');
+            //Write1USART('0');
         }
-        Delay1KTCYx(3);
+        Delay1TCY();
         SCK = 0;
     }
     //Write1USART('Y');
@@ -101,11 +122,11 @@ static unsigned char read(unsigned char ack)
         DATA_DDR = 0;
         DATA = 0; //in case of "ack==1" pull down DATA-Line
     }
-    Delay1KTCYx(2); //observe setup time
+    Delay1TCY(); //observe setup time
     SCK = 1; //clk #9 for ack
-    Delay1KTCYx(3); //pulswith approx. 5 us
+    Delay1TCY(); //pulswith approx. 5 us
     SCK = 0;
-    Delay1KTCYx(1); //observe hold time
+    Delay1TCY(); //observe hold time
     //printf("\r\nValor leído: %u \r\n", val);
     return val;
 }
@@ -122,17 +143,17 @@ void start(void)
 {
     DATA = 1;
     SCK = 0; //Initial state
-    Delay1KTCYx(1);
+    Delay1TCY();
     SCK = 1;
-    Delay1KTCYx(1);
+    Delay1TCY();
     DATA = 0;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SCK = 0;
-    Delay1KTCYx(3);
+    Delay1TCY();
     SCK = 1;
-    Delay1KTCYx(1);
+    Delay1TCY();
     DATA = 1;
-    Delay1KTCYx(1);
+    Delay1TCY();
     SCK = 0;
 }
 //----------------------------------------------------------------------------------
@@ -151,7 +172,7 @@ void reset(void)
     for (i = 0; i < 9; i++) //9 SCK cycles
     {
         SCK = 1;
-        Delay1KTCYx(1);
+        Delay1TCY();
         SCK = 0;
     }
     start(); //transmission start
@@ -184,14 +205,14 @@ char readStatusRegister(unsigned char *p_value, unsigned char *p_checksum)
 }
 //----------------------------------------------------------------------------------
 
-char writeStatusRegister(unsigned char *p_value)
+char writeStatusRegister(unsigned char p_value)
 //----------------------------------------------------------------------------------
 // writes the status register with checksum (8-bit)
 {
     unsigned char error = 0;
     start(); //transmission start
     error += write(STAT_REG_W); //send command to sensor
-    error += write(*p_value); //send value of status register
+    error += write(p_value); //send value of status register
     return error; //error>=1 in case of no response form the sensor
 }
 
@@ -213,11 +234,17 @@ char measure(int *p_value, unsigned char *p_checksum, unsigned char
             break;
         default: break;
     }
-    Delay1KTCYx(5);
+    Delay1TCY();
     DATA_DDR = 1;
-    while (PORTBbits.RB1 == 1);
-    LATDbits.LATD1 = 1;
-    
+    while (DATA_PIN == 1);
+#ifdef __18F46J50_H
+    LATDbits.LATD1 = !LATDbits.LATD1;
+#endif
+#ifdef __18F26J50_H
+    LATBbits.LATB1 = !LATBbits.LATB1;
+#endif
+
+
     //    val = read(ACK);
     //    val = val << 8;
     //    printf("\nValor devuelto 1: %i \r\n", val);
@@ -275,8 +302,8 @@ void calculateSimpleHumi(float* p_humidity) {
 }
 
 void calculateSimpleTemp(float* p_temp) {
-    const float D1 = 39.64;
-    const float D2 = -0.01;
+    const float D1 = -39.64;
+    const float D2 = 0.01;
     float measure = *p_temp;
     *p_temp = D1 + D2 * measure;
 }
@@ -295,11 +322,25 @@ void main(void) {
     DATA = 1;
     SCK = 0;
 
+    //    ANCON0 = 0xFF;
+    //    ANCON1 = 0xFF;
+    //    ADCON0 = 0x00;
+    //    ADCON1 = 0x0F;
+    //    ODCON2 = 0xFF;
+
+    // Set low power mode
+    writeStatusRegister(0x01);
+#ifdef __18F46J50_H
     TRISDbits.TRISD1 = 0;
     LATDbits.LATD1 = 0;
+#endif
+#ifdef __18F26J50_H
+    TRISBbits.TRISB1 = 0;
+    LATBbits.LATB1 = 0;
+#endif
 
-    ANCON1bits.PCFG10 = 1;
-    ANCON1bits.PCFG8 = 1;
+    ANCON0bits.PCFG0 = 1;
+    ANCON0bits.PCFG1 = 1;
 
     Open1USART(USART_TX_INT_OFF &
             USART_RX_INT_OFF &
@@ -312,6 +353,7 @@ void main(void) {
     //softReset();
     while (1) {
         //start();
+        Write1USART('A');
         error = 0;
         DATA_DDR = 0;
         DATA = 1;
@@ -321,7 +363,7 @@ void main(void) {
         DATA = 1;
         error += measure(&temp_val.i, &checksum, TEMP); //measure temperature
         if (error != 0) {
-            Write1USART('D');
+            //Write1USART('D');
             reset(); //in case of an error: connection reset
         } else {
             humi_val.f = (float) humi_val.i; //converts integer to float
@@ -332,10 +374,10 @@ void main(void) {
                     (int) humi_val.f / 100, fabs(((humi_val.f - (int) humi_val.f)*100)));
             calculateSimpleTemp(&temp_val.f);
             printf("Temperatura: %d.%2u % \n\r",
-                    (int)temp_val.f, fabs(((temp_val.f - (int)temp_val.f)*100)));
+                    (int) temp_val.f, fabs(((temp_val.f - (int) temp_val.f)*100)));
         }
 
 
-        for (i = 0; i < 40000; i++);
+        Delay1KTCYx(1);
     }
 }

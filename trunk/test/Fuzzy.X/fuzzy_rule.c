@@ -19,14 +19,7 @@
 #include "fuzzy_mf.h"
 #include <stdlib.h>
 
-void RuleTerm_init(RuleTerm* ruleTerm, MembershipFunction* membershipFunction) {
-    ruleTerm->membershipFunction.left = membershipFunction->left;
-    ruleTerm->membershipFunction.mid = membershipFunction->mid;
-    ruleTerm->membershipFunction.right = membershipFunction->right;
-    ruleTerm->input = 0;
-    ruleTerm->fuzzy = 1;
-}
-
+/*..........................................................................*/
 void Rule_addAntedecents(Rule* rule, RuleTerm* antecedents[]) {
     UINT8 i;
     for(i = 0; i < MAX_ANTECEDENTS; i++) {
@@ -34,44 +27,28 @@ void Rule_addAntedecents(Rule* rule, RuleTerm* antecedents[]) {
     }
 }
 
+/*..........................................................................*/
 void Rule_addAntedecent(Rule* rule, RuleTerm* antecedent) {
     if(rule->antecedentsSize < MAX_ANTECEDENTS) {
-        RuleTerm_init(&rule->antecedents[rule->antecedentsSize],
-                &antecedent->membershipFunction);
-        ++rule->antecedentsSize;
+	rule->antecedents[rule->antecedentsSize++] = antecedent;
     }
 }
 
+/*..........................................................................*/
 void Rule_setConsecuent(Rule* rule, RuleTerm* consecuent) {
-    RuleTerm_init(&rule->consecuent, &consecuent->membershipFunction);
+    rule->consecuent = consecuent;
 }
 
 /*..........................................................................*/
 
 /* MIN rule implication */
-float_t RuleImplication_min(float_t fuzzyInputA, float_t fuzzyInputB) {
+UINT8 RuleImplication_min(UINT8 fuzzyInputA, UINT8 fuzzyInputB) {
     return fuzzyInputA < fuzzyInputB ? fuzzyInputA : fuzzyInputB;
 }
 
 /*..........................................................................*/
 
 /* Evaluate term on input value */
-float_t RuleTerm_evaluate(RuleTerm* ruleTerm, UINT8 input) {
-    return triangularFuzzify(input, &ruleTerm->membershipFunction);
-}
-
-
-/*..........................................................................*/
-
-/* Evaluates rule */
-void Rule_evaluate(Rule* rule) {
-    UINT8 i;
-    // Fuzzy crisp inputs
-    for (i = 0; i < rule->antecedentsSize; i++) {
-        rule->antecedents[i].fuzzy = triangularFuzzify(
-                rule->antecedents[i].input, &rule->antecedents[i].membershipFunction);
-        // Apply min{u1, u2} implication rule
-        rule->consecuent.fuzzy = RuleImplication_min(rule->consecuent.fuzzy,
-                rule->antecedents[i].fuzzy);
-    }
+UINT8 RuleTerm_evaluate(UINT8 input, MembershipFunction* mf) {
+    return triangularFuzzify(input, mf);
 }

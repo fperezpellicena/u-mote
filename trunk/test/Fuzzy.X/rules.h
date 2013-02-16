@@ -20,10 +20,10 @@
 
 #include "fuzzy.h"
 
-void initRules(RuleEngine* engine);
+void initRules(void);
 
-void initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
-        RuleTerm* antecedent2, RuleTerm* consecuent);
+void initRule(Rule* rule, RuleTerm* antecedent1, RuleTerm* antecedent2,
+        RuleTerm* consecuent);
 
 void setInputs(void);
 

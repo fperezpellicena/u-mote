@@ -17,37 +17,96 @@
 
 #include "fuzzy_mf.h"
 
-static float_t fuzzy;
+static UINT8 fuzzy;
+static UINT8 input;
+static MembershipFunction* mf;
+
+static UINT8 fuzzyfyRightBranch(void);
+
+static UINT8 fuzzyfyRightBranch(void) {
+    return ((mf->right - input) * 10) / ((mf->right - mf->mid) / 10);
+}
+
+static UINT8 fuzzyfyLeftBranch(void);
+
+static UINT8 fuzzyfyLeftBranch(void) {
+    return ((input - mf->left) * 10) / ((mf->mid - mf->left) / 10);
+}
+
+static UINT8 fuzzyfyRightDefined(void);
+
+static UINT8 fuzzyfyRightDefined(void) {
+    if (input < mf->left) {
+	fuzzy = 100;
+    } else if (input > mf->right) {
+	fuzzy = 0;
+    } else {
+	fuzzy = fuzzyfyRightBranch();
+    }
+}
+
+
+static UINT8 fuzzyfyLeftDefined(void);
+
+static UINT8 fuzzyfyLeftDefined(void) {
+    if (input > mf->right) {
+	fuzzy = 100;
+    } else if (input < mf->left) {
+	fuzzy = 0;
+    } else {
+	fuzzy = fuzzyfyLeftBranch();
+    }
+}
+
+static UINT8 isInputInLeftBranch(void);
+
+static UINT8 isInputInLeftBranch(void) {
+    return input > mf->left && input < mf->mid;
+}
+
+static UINT8 isInputInRightBranch(void);
+
+static UINT8 isInputInRightBranch(void) {
+    return input > mf->mid && input < mf->right;
+}
+
+static UINT8 fuzzyfyFullDefined(void);
+
+static UINT8 fuzzyfyFullDefined(void) {
+    if (isInputInLeftBranch()) {
+	fuzzy = fuzzyfyLeftBranch();
+    } else if (isInputInRightBranch()) {
+	fuzzy = fuzzyfyRightBranch();
+    } else {
+	fuzzy = 0;
+    }
+}
+
+static UINT8 isRightDefined(void);
+
+static UINT8 isRightDefined(void) {
+    return mf->mid == mf->left;
+}
+
+static UINT8 isLeftDefined(void);
+
+static UINT8 isLeftDefined(void) {
+    return mf->mid == mf->right;
+}
 
 /*..........................................................................*/
 
 /* Triangular fuzzify function */
-float_t triangularFuzzify(UINT8 value, MembershipFunction* function) {
-    fuzzy = -1;
-    if (function->mid == function->left) {
-        if (value < function->left) {
-            fuzzy = (float_t) 1;
-        } else if (value > function->right) {
-            fuzzy = (float_t) 0;
-        } else {
-            fuzzy = (float_t)(function->right - value) / (float_t)(function->right - function->mid);
-        }
-    } else if (function->mid == function->right) {
-        if (value > function->right) {
-            fuzzy = (float_t) 1;
-        } else if (value < function->left) {
-            fuzzy = (float_t) 0;
-        } else {
-            fuzzy = (float_t)(value - function->left) / (float_t)(function->mid - function->left);
-        }
+UINT8 triangularFuzzify(UINT8 value, MembershipFunction* function) {
+    fuzzy = 0;
+    input = value;
+    mf = function;
+    if (isRightDefined()) {
+	fuzzyfyRightDefined();
+    } else if (isLeftDefined()) {
+	fuzzyfyLeftDefined();
     } else {
-        if (value > function->left && value < function->mid) {
-            fuzzy = (value - function->left) / (function->mid - function->left);
-        } else if (value > function->mid && value < function->right) {
-            fuzzy = (float_t)(function->right - value) / (float_t)(function->right - function->mid);
-        } else {
-            fuzzy = (float_t) 1;
-        }
+	fuzzyfyFullDefined();
     }
     return fuzzy;
 }
