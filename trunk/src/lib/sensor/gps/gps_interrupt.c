@@ -21,13 +21,15 @@
 #include "hw_serial.h"
 #include "nmea_output.h"
 #include "gps.h"
+#include "rtc.h"
 
 static NMEAOutputPacket packet;
 static NMEAOutputRMC rmc;
+static Location location;
 
 void GpsInterrupt_install(void) {
     NMEAOutput_resetPacket(&packet);
-    InterruptHandler_addHI((HandleInterrupt) & GpsInterrupt_handleTopHalve,
+    InterruptHandler_addLO((HandleInterrupt) & GpsInterrupt_handleTopHalve,
 	    (HandleInterrupt) & GpsInterrupt_handleBottomHalve,
 	    (CheckInterrupt) & Serial_checkInterrupt);
 }
@@ -37,9 +39,15 @@ void GpsInterrupt_handleTopHalve(void) {
     Gps_readByte(&packet);
 }
 
-/** Check for valid nmea frame and save last valid location */
+/** Check for valid nmea frame and update last valid location and time */
 void GpsInterrupt_handleBottomHalve(void) {
     if(packet.rxState == NMEA_PACKET_OK) {
 	NMEAOutput_readRMC(&packet, &rmc);
+        Gps_readLocation(&location, &rmc);
+        // TODO Update current timestamp if valid location is given
     }
+}
+
+Location* GpsInterrupt_location(void) {
+    return &location;
 }

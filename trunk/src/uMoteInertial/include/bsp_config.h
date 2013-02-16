@@ -19,8 +19,9 @@
 #define	bsp_config_h
 
 #include <p18cxxx.h>
+#include "bsp_constants.h"
 
-#define SLEEP_MODE      DEEP_SLEEP
+#define SLEEP_MODE	    SLEEP
 
 /*...........................................................................*/
 #define RTCC_ENABLED        1
@@ -40,5 +41,15 @@
 /* ADC SECTION */
 #define AVERAGE_FACTOR	    16
 #define DIV_AVERAGE	    4
+
+/*...........................................................................*/
+/* USART2 SECTION */
+#define USART2_RX_RP        2
+#define USART2_TX_RP        5
+
+/*...........................................................................*/
+/* ADXL SECTION */
+#define ADXL_X_AXIS         1
+#define ADXL_Y_AXIS         2
 
 #endif

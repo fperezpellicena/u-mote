@@ -19,18 +19,18 @@
 #include "digi_serial.h"
 
 void XBeeSerial_init(UINT8 baudrate) {
-    // I/O config.
     TRISCbits.TRISC7 = 1;
     TRISCbits.TRISC6 = 0;
-    // Tx status
-    TXSTA1bits.SYNC = 0;
-    TXSTA1bits.TXEN = 1;
-    TXSTA1bits.BRGH = 0;
-    // Rx status
-    RCSTA1bits.SPEN = 1;
+
     RCSTA1bits.CREN = 1;
-    // Baudrate
-    SPBRG1 = baudrate; // 9600bps -> 12
+    TXSTA1bits.BRGH = 1;
+
+    TXSTA1bits.TXEN = 1;
+    RCSTA1bits.SPEN = 1;
+
+    SPBRG1 = baudrate;
+
+    BAUDCON1bits.BRG16 = 1;
 }
 
 void XBeeSerial_send(UINT8 value) {

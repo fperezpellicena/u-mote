@@ -18,6 +18,8 @@
 #ifndef gps_interrupt_h
 #define gps_interrupt_h
 
+#include "gps.h"
+
 void GpsInterrupt_install(void);
 
 void GpsInterrupt_handleTopHalve(void);
@@ -25,5 +27,7 @@ void GpsInterrupt_handleTopHalve(void);
 void GpsInterrupt_handleBottomHalve(void);
 
 void GpsInterrupt_check(void);
+
+Location* GpsInterrupt_location(void);
 
 #endif

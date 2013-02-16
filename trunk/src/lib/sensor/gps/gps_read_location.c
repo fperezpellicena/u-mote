@@ -17,4 +17,5 @@
 
 #include "gps.h"
 
-void Gps_readLocation(Gps* gps, NMEAOutputPacket* packet) {}
+void Gps_readLocation(Location* location, NMEAOutputRMC* rmc) {
+}

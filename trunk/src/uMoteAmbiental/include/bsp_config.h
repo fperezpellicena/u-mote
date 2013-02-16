@@ -19,6 +19,7 @@
 #define	bsp_config_h
 
 #include <p18cxxx.h>
+#include "bsp_constants.h"
 
 #define SLEEP_MODE      DEEP_SLEEP
 
@@ -40,5 +41,6 @@
 /* ADC SECTION */
 #define AVERAGE_FACTOR	    16
 #define DIV_AVERAGE	    4
+
 
 #endif

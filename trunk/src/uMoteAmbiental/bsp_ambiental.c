@@ -46,13 +46,14 @@ void BSP_onPowerUp(void) {
 /* On reset push, join xbee */
 void BSP_onMclr(void) {
     BSP_clearMclrFlags();
+    Delay10KTCYx(10);
     XBee_join();
 }
 
 /*...........................................................................*/
 void BSP_onWakeUp(void) {
     // Clear wake up flags
-    BSP_clearWakeUpFlags();
+    BSP_clearDSWakeUpFlags();
     // Ejecuta la interrupción que ha despertado al sistema
     XBeeInterrupt_handleBottomHalve();
 }

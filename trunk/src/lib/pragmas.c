@@ -43,4 +43,4 @@
 #pragma config WPFP = PAGE_1        //Write Protect Program Flash Page 0
 #pragma config WPEND = PAGE_0       //Start protection at page 0
 #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
-#pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored  
+#pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored

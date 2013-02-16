@@ -35,7 +35,7 @@
 
 void main(void) {
     // Init basic system
-    BSP_init();
+    BSP_ambientalInit();
     while (1) {
         //Wdt_enable();
 #if USB_ENABLED
@@ -55,7 +55,7 @@ void main(void) {
 #if SLEEP_MODE == DEEP_SLEEP
             if (XBEE_ON_SLEEP_AWAKE) {
                 BSP_onWakeUp();
-            } else if (ON_MCLR) {
+            } else if (ON_DS_MCLR) {
                 BSP_onMclr();
             } else {
                 BSP_onPowerUp();
@@ -77,11 +77,11 @@ void main(void) {
         }
 #else
 #if SLEEP_MODE == DEEP_SLEEP
-        if (XBEE_ON_SLEEP_AWAKE) {
+        if (XBEE_ON_DS_AWAKE) {
             BSP_onWakeUp();
-        } else if (ON_MCLR) {
+        } else if (ON_DS_MCLR) {
             BSP_onMclr();
-        } else if (ON_DSWDT) {
+        } else if (ON_DS_WDT) {
             BSP_onDsWdtWakeUp();
         } else {
             BSP_onPowerUp();

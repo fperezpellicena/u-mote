@@ -19,8 +19,8 @@
 
 #include "bsp.h"
 #if USB_ENABLED
-#   include "usb_config.h"
-#   include "usb_device.h"
+#    include "usb_config.h"
+#    include "usb_device.h"
 #endif
 
 /*..........................................................................*/
@@ -28,7 +28,7 @@
 static InterruptHandlerVector interruptVectorHI;
 static InterruptHandlerVector interruptVectorLO;
 /* Current active interrupt to dispatch */
-static InterruptHandler* activeInterrupt;
+static InterruptHandler* activeInterrupt = NULL;
 
 
 /*..........................................................................*/
@@ -42,27 +42,29 @@ void ISR_hi(void) {
     // Execute USB tasks only if usb is plugged
 #if USB_ENABLED
     if (USB_PLUGGED) {
-        USBDeviceTasks();
+	USBDeviceTasks();
     } else {
-        for (index = 0; index < interruptVectorHI.size; index++) {
-            // Check for active interrupt
-            if (interruptVectorHI.handlers[index].isActive()) {
-                // Set active interrupt
-                activeInterrupt = &interruptVectorHI.handlers[index];
-                // Top halve function
-                activeInterrupt->handleTopHalveInterrupt();
-                break;
-            }
-        }
+	for (index = 0; index < interruptVectorHI.size; index++) {
+	    // Check for active interrupt
+	    if (interruptVectorHI.handlers[index].isActive()) {
+		// Set active interrupt
+		activeInterrupt = &interruptVectorHI.handlers[index];
+		// Top halve function
+		activeInterrupt->handleTopHalveInterrupt();
+		break;
+	    }
+	}
     }
 #else
     for (index = 0; index < interruptVectorHI.size; index++) {
-        // Check for active interrupt
-        if (interruptVectorHI.handlers[index].isActive()) {
-            // Set active interrupt
-            activeInterrupt = &interruptVectorHI.handlers[index];
-            break;
-        }
+	// Check for active interrupt
+	if (interruptVectorHI.handlers[index].isActive()) {
+	    // Set active interrupt
+	    activeInterrupt = &interruptVectorHI.handlers[index];
+	    // Top halve function
+	    activeInterrupt->handleTopHalveInterrupt();
+	    break;
+	}
     }
 #endif
 }
@@ -76,25 +78,27 @@ void ISR_lo(void) {
     unsigned char index;
 #if USB_ENABLED
     if (!USB_PLUGGED) {
-        for (index = 0; index < interruptVectorLO.size; index++) {
-            // Check for active interrupt
-            if (interruptVectorLO.handlers[index].isActive()) {
-                // Set active interrupt
-                activeInterrupt = &interruptVectorLO.handlers[index];
-                // Top halve function
-                activeInterrupt->handleTopHalveInterrupt();
-                break;
-            }
-        }
+	for (index = 0; index < interruptVectorLO.size; index++) {
+	    // Check for active interrupt
+	    if (interruptVectorLO.handlers[index].isActive()) {
+		// Set active interrupt
+		activeInterrupt = &interruptVectorLO.handlers[index];
+		// Top halve function
+		activeInterrupt->handleTopHalveInterrupt();
+		break;
+	    }
+	}
     }
 #else
     for (index = 0; index < interruptVectorLO.size; index++) {
-        // Check for active interrupt
-        if (interruptVectorLO.handlers[index].isActive()) {
-            // Set active interrupt
-            activeInterrupt = &interruptVectorLO.handlers[index];
-            break;
-        }
+	// Check for active interrupt
+	if (interruptVectorLO.handlers[index].isActive()) {
+	    // Set active interrupt
+	    activeInterrupt = &interruptVectorLO.handlers[index];
+	    // Top halve function
+	    activeInterrupt->handleTopHalveInterrupt();
+	    break;
+	}
     }
 #endif
 }
@@ -115,8 +119,8 @@ void intVector_lo(void) {
 
 /*..........................................................................*/
 void InterruptHandler_create(InterruptHandler* handler,
-        HandleInterrupt topHandleFunction, HandleInterrupt bottomHandleFunction,
-        CheckInterrupt checkFunction) {
+	HandleInterrupt topHandleFunction, HandleInterrupt bottomHandleFunction,
+	CheckInterrupt checkFunction) {
     handler->handleTopHalveInterrupt = topHandleFunction;
     handler->handleBottomHalveInterrupt = bottomHandleFunction;
     handler->isActive = checkFunction;
@@ -135,23 +139,23 @@ void InterruptHandler_initVectors(void) {
 
 /*..........................................................................*/
 void InterruptHandler_addHI(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction, CheckInterrupt checkFunction) {
+	HandleInterrupt bottomHandleFunction, CheckInterrupt checkFunction) {
     if (interruptVectorHI.size < MAX_INTERRUPT_HANDLERS) {
-        interruptVectorHI.handlers[interruptVectorHI.size].handleTopHalveInterrupt = topHandleFunction;
-        interruptVectorHI.handlers[interruptVectorHI.size].handleBottomHalveInterrupt = bottomHandleFunction;
-        interruptVectorHI.handlers[interruptVectorHI.size].isActive = checkFunction;
-        interruptVectorHI.size++;
+	interruptVectorHI.handlers[interruptVectorHI.size].handleTopHalveInterrupt = topHandleFunction;
+	interruptVectorHI.handlers[interruptVectorHI.size].handleBottomHalveInterrupt = bottomHandleFunction;
+	interruptVectorHI.handlers[interruptVectorHI.size].isActive = checkFunction;
+	interruptVectorHI.size++;
     }
 }
 
 /*..........................................................................*/
 void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
-        HandleInterrupt bottomHandleFunction, CheckInterrupt checkFunction) {
+	HandleInterrupt bottomHandleFunction, CheckInterrupt checkFunction) {
     if (interruptVectorLO.size < MAX_INTERRUPT_HANDLERS) {
-        interruptVectorLO.handlers[interruptVectorLO.size].handleTopHalveInterrupt = topHandleFunction;
-        interruptVectorLO.handlers[interruptVectorLO.size].handleBottomHalveInterrupt = bottomHandleFunction;
-        interruptVectorLO.handlers[interruptVectorLO.size].isActive = checkFunction;
-        interruptVectorLO.size++;
+	interruptVectorLO.handlers[interruptVectorLO.size].handleTopHalveInterrupt = topHandleFunction;
+	interruptVectorLO.handlers[interruptVectorLO.size].handleBottomHalveInterrupt = bottomHandleFunction;
+	interruptVectorLO.handlers[interruptVectorLO.size].isActive = checkFunction;
+	interruptVectorLO.size++;
     }
 }
 
@@ -166,8 +170,9 @@ void InterruptHandler_addLO(HandleInterrupt topHandleFunction,
  */
 void InterruptHandler_handleActiveInterrupt(void) {
     // Check for a valid active interrupt
-    if(activeInterrupt) {
-        activeInterrupt->handleBottomHalveInterrupt();
+    if (activeInterrupt != NULL) {
+	activeInterrupt->handleBottomHalveInterrupt();
+        activeInterrupt = NULL;
     }
 }
 

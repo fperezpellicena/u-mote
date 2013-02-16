@@ -18,25 +18,23 @@
 /*...........................................................................*/
 /* Includes */
 #include "bsp_inertial.h"
-#include "Compiler.h"
 #include "isr.h"
-#include "wdt.h"
-#include "power.h"
+#include "hw_serial.h"
 
 #if USB_ENABLED
 #   include "usb_device.h"
 #   include "usb_handler.h"
 #endif
 
+UINT8 data;
+
 /*...........................................................................*/
 /* Main */
 #pragma code
 
 void main(void) {
-    // Init basic system
     BSP_inertialInit();
     while (1) {
-        //Wdt_enable();
 #if USB_ENABLED
         // Comprueba el terminal que indica la conexión USB al inicio o al reset
         if (USB_PLUGGED) {
@@ -48,53 +46,15 @@ void main(void) {
                 USB_process();
             }
 #ifdef __18F46J50_H
-                USB_blinkStatus();
-#endif
-        } else {
-#if SLEEP_MODE == DEEP_SLEEP
-            if (XBEE_ON_SLEEP_AWAKE) {
-                BSP_onWakeUp();
-            } else if (ON_MCLR) {
-                BSP_onMclr();
-            } else {
-                BSP_onPowerUp();
-            }
-            // Si no está conectado el terminal USB, entra en modo de bajo consumo
-            if ((USBGetDeviceState() == ATTACHED_STATE)) {
-                USBDeviceDetach();
-            }
-            BSP_deepSleep();
-#elif SLEEP_MODE == SLEEP
-            // Si no está conectado el terminal USB, entra en modo de bajo consumo
-            if ((USBGetDeviceState() == ATTACHED_STATE)) {
-                USBDeviceDetach();
-            }
-            BSP_sleep();
-            InterruptHandler_handleActiveInterrupt();
-
+            USB_blinkStatus();
 #endif
         }
-#else
-#if SLEEP_MODE == DEEP_SLEEP
-//        if (XBEE_ON_SLEEP_AWAKE) {
-//            BSP_onWakeUp();
-//        } else if (ON_MCLR) {
-//            BSP_onMclr();
-//        } else if (ON_DSWDT) {
-//            BSP_onDsWdtWakeUp();
-//        } else {
-//            BSP_onPowerUp();
-//        }
-//        BSP_deepSleep();
-#elif SLEEP_MODE == SLEEP
-        // Si no está conectado el terminal USB, entra en modo de bajo consumo
-        if ((USBGetDeviceState() == ATTACHED_STATE)) {
-            USBDeviceDetach();
-        }
-        BSP_deepSleep();
+#endif
+        BSP_sleep();
         InterruptHandler_handleActiveInterrupt();
-
-#endif
-#endif
+//        if(PIR3bits.RC2IF) {
+//            data = RCREG2;
+//            //Serial_init(12);
+//        }
     }
 }

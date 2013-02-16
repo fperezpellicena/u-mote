@@ -18,44 +18,33 @@
 #include "bsp.h"
 #include "hw_serial.h"
 #include "register.h"
-#include <string.h>
+#include "usb_function_cdc.h"
 
-/** Init uart in non-interrupt mode */
+/** Init uart 2 in non-interrupt mode */
 void Serial_init(UINT8 baudrate) {
-    Register_unLockIO();
-    // PPS - Configure RX2 RA0 (RP0)
-    RPINR16 = 1;
-    // PPS - Configure TX2 RA1 (RP1)
-    RPOR1 = 5;
-    Register_lockIO();
-    
-    TRISAbits.TRISA0 = 1;
-    TRISAbits.TRISA1 = 0;
+    Register_remap((UINT8*)&RPINR16, USART2_RX_RP);
+    Register_remap((UINT8*)&RPOR1, USART2_TX_RP);
 
-    TXSTA2bits.SYNC = 0;
-    TXSTA2bits.TXEN = 1;
-    TXSTA2bits.BRGH = 0;
+    TXSTA2 = 0; // Reset USART registers to POR state
+    RCSTA2 = 0;
 
-    RCSTA2bits.SPEN2 = 1;
-    RCSTA2bits.CREN2 = 1;
-
-    SPBRG2 = baudrate; // 9600bps -> 12
-}
-
-/** Interrupt driven uart */
-void Serial_initInterrupt(UINT8 baudrate) {
-    Serial_init(baudrate);
-    // Interrupt config
+    RCSTA2bits.CREN = 1;
+    TXSTA2bits.BRGH = 1;
     PIE3bits.RC2IE = 1;
-    PIE3bits.TX2IE = 0;
-    PIR3bits.RC2IF = 0;
-    // High priority defatult
-    IPR3bits.RC2IP = 1; 
+
+    SPBRG2 = baudrate;
+
+    TXSTA2bits.TXEN = 1; // Enable transmitter
+    RCSTA2bits.SPEN = 1; // Enable receiver
+
+    BAUDCON2bits.BRG16 = 1;
+    BAUDCON2bits.WUE = 1;
 }
 
 void Serial_send(UINT8 value) {
     while (!TXSTA2bits.TRMT);
     TXREG2 = value;
+    while (!TXSTA2bits.TRMT);
 }
 
 void Serial_sendArray(UINT8* values, UINT8 size) {
@@ -63,7 +52,6 @@ void Serial_sendArray(UINT8* values, UINT8 size) {
     while (i < size) {
         Serial_send(values[i++]);
     }
-    //Serial_send(NULL);
 }
 
 void Serial_sendROMArray(UINT8 rom* values, UINT8 size) {
@@ -78,10 +66,7 @@ UINT8 Serial_read(void) {
 }
 
 BOOL Serial_available(void) {
-    if (PIR3bits.RC2IF) {
-        return TRUE; // Data is available, return TRUE
-    }
-    return FALSE;
+    return (BOOL) PIR3bits.RC2IF;
 }
 
 void Serial_close(void) {
@@ -92,9 +77,11 @@ void Serial_close(void) {
 
 /** Interrupt handler functions */
 BOOL Serial_checkInterrupt(void) {
-    return Serial_available();
+    return (BOOL) PIR3bits.RC2IF;
 }
 
 void Serial_ackInterrupt(void) {
     PIR3bits.RC2IF = 0;
+    BAUDCON2bits.ABDOVF = 0;
+    BAUDCON2bits.WUE = 1;
 }
