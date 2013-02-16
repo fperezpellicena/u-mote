@@ -6,3 +6,5 @@ ProjectPath=uMote.PrjPCB
 ProjectPath=uMoteSensor.PrjPCB
 [Project3]
 ProjectPath=uMoteAdapter.PrjPCB
+[Project4]
+ProjectPath=uMoteInertial.PrjPCB
