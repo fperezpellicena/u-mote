@@ -1,1 +1,34 @@
-Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 146 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 173 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 175 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 177 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 179 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 181 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 183 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 217 : type qualifier mismatch in assignment
+Error[1105] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 253 : symbol 'LATDbits' has not been defined
+Error[1151] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 253 : struct or union object designator expected
+Error[1101] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 253 : lvalue required
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 297 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 303 : type qualifier mismatch in assignment
+Error[1105] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 304 : symbol 'LATDbits' has not been defined
+Error[1151] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 304 : struct or union object designator expected
+Error[1101] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 304 : lvalue required
+Error[1105] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 341 : symbol 'LATD' has not been defined
+Error[1101] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 341 : lvalue required
+Error[1105] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 342 : symbol 'TRISD' has not been defined
+Error[1101] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 342 : lvalue required
+Error[1105] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 344 : symbol 'LATE' has not been defined
+Error[1101] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 344 : lvalue required
+Error[1105] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 345 : symbol 'TRISE' has not been defined
+Error[1101] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 345 : lvalue required
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 486 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 495 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 512 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 521 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 555 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 601 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 603 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 605 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 608 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 609 : type qualifier mismatch in assignment
+Warning[2066] C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\rtcc\main.c 610 : type qualifier mismatch in assignment

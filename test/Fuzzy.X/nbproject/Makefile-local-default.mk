@@ -15,11 +15,11 @@
 # $ makeMP_CC="/opt/microchip/mplabc30/v3.30c/bin/pic30-gcc" ...  
 #
 SHELL=cmd.exe
-PATH_TO_IDE_BIN=C:/MPLABX/mplab_ide/mplab_ide/modules/../../bin/
+PATH_TO_IDE_BIN=C:/Archivos de programa/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/
 # Adding MPLAB X bin directory to path.
-PATH:=C:/MPLABX/mplab_ide/mplab_ide/modules/../../bin/:$(PATH)
+PATH:=C:/Archivos de programa/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/:$(PATH)
 # Path to java used to run MPLAB X when this makefile was created
-MP_JAVA_PATH="C:\MPLABX\sys\java\jre1.6.0_32-windows\java-windows/bin/"
+MP_JAVA_PATH="C:\Archivos de programa\Microchip\MPLABX\sys\java\jre1.6.0_32-windows\java-windows/bin/"
 OS_CURRENT="$(shell uname -s)"
 MP_CC="C:\Archivos de programa\Microchip\mplabc18\v3.40\bin\mcc18.exe"
 # MP_CPPC is not defined
@@ -27,7 +27,7 @@ MP_CC="C:\Archivos de programa\Microchip\mplabc18\v3.40\bin\mcc18.exe"
 MP_AS="C:\Archivos de programa\Microchip\mplabc18\v3.40\bin\..\mpasm\MPASMWIN.exe"
 MP_LD="C:\Archivos de programa\Microchip\mplabc18\v3.40\bin\mplink.exe"
 MP_AR="C:\Archivos de programa\Microchip\mplabc18\v3.40\bin\mplib.exe"
-DEP_GEN=${MP_JAVA_PATH}java -jar "C:/MPLABX/mplab_ide/mplab_ide/modules/../../bin/extractobjectdependencies.jar" 
+DEP_GEN=${MP_JAVA_PATH}java -jar "C:/Archivos de programa/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/extractobjectdependencies.jar" 
 MP_CC_DIR="C:\Archivos de programa\Microchip\mplabc18\v3.40\bin"
 # MP_CPPC_DIR is not defined
 # MP_BC_DIR is not defined

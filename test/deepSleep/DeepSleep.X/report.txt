@@ -1,24 +1,24 @@
 FILE		0x0	0	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"
 FN_START	0x0	25	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"	"_entry"	"external"	
 FN_END		0x4	27	
-FILE		0x0	0	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"
-FN_START	0x8	45	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"InterruptVectorHigh"	"external"	
-FN_END		0xc	46	
+FILE		0x0	0	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"
+FN_START	0x8	38	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"InterruptVectorHigh"	"external"	
+FN_END		0xc	39	
 FILE		0x0	0	"C:\MCC18\v3_39\src\extended\stdclib\__init.c"
 FN_START	0xe	9	"C:\MCC18\v3_39\src\extended\stdclib\__init.c"	"__init"	"external"	
 FN_END		0xe	9	
-FILE		0x0	0	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"
-FN_START	0x18	55	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"InterruptVectorLow"	"external"	
-FN_END		0x1c	56	
-FN_START	0x1e	72	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"InterruptHandlerHigh"	"external"	
-FN_END		0x1e	72	
-FN_START	0x20	85	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"InterruptHandlerLow"	"external"	
-FN_END		0x20	85	
-FN_START	0x22	95	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"PICInit"	"external"	
-FN_END		0xc0	183	
-FN_START	0xc2	190	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"main"	"external"	
-CALL		0xc4	193	"/home/microchip/Escritorio/u-mote/test/deepSleep/DeepSleep.X/main.c"	"PICInit"	0
-FN_END		0xf8	231	
+FILE		0x0	0	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"
+FN_START	0x18	47	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"InterruptVectorLow"	"external"	
+FN_END		0x1c	48	
+FN_START	0x1e	61	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"InterruptHandlerHigh"	"external"	
+FN_END		0x1e	61	
+FN_START	0x20	71	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"InterruptHandlerLow"	"external"	
+FN_END		0x20	71	
+FN_START	0x22	78	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"PICInit"	"external"	
+FN_END		0xc0	166	
+FN_START	0xc2	170	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"main"	"external"	
+CALL		0xc4	173	"C:\Documents and Settings\FRANCISCO\Escritorio\u-mote\test\deepSleep\DeepSleep.X\main.c"	"PICInit"	0
+FN_END		0xf8	211	
 FILE		0x0	0	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"
 FN_START	0xfa	81	"C:\MCC18\v3_39\src\extended\startup\c018i_e.c"	"_do_cinit"	"external"	
 FN_END		0x196	184	

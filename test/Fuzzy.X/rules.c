@@ -18,7 +18,8 @@
 #include "fuzzy_rule.h"
 #include "rules.h"
 
-#pragma idata rp
+extern RuleEngine engine;
+
 DECLARE_IF(HighTemp,{30, 50, 255});
 DECLARE_IF(MidTemp,{0, 30, 50});
 DECLARE_IF(LowTemp,{0, 0, 40});
@@ -30,54 +31,45 @@ DECLARE_IF(LowCo2,{0, 0, 50});
 DECLARE_THEN(HighRisk,{50, 100, 100});
 DECLARE_THEN(MidRisk,{0, 50, 100});
 DECLARE_THEN(LowRisk,{0, 0, 50});
-#pragma idata
 
-#pragma idata rule_b1
 DECLARE_RULE(ifHighTempAndLowCo2ThenMidRisk);
 DECLARE_RULE(ifHighTempAndMidCo2ThenHighRisk);
 DECLARE_RULE(ifHighTempAndHighCo2ThenHighRisk);
-#pragma idata
-
-#pragma idata rule_b2
 DECLARE_RULE(ifMidTempAndLowCo2ThenLowRisk);
 DECLARE_RULE(ifMidTempAndMidCo2ThenMidRisk);
 DECLARE_RULE(ifMidTempAndHighCo2ThenMidRisk);
-#pragma idata
-
-#pragma idata rule_b3
 DECLARE_RULE(ifLowTempAndLowCo2ThenLowRisk);
 DECLARE_RULE(ifLowTempAndMidCo2ThenLowRisk);
 DECLARE_RULE(ifLowTempAndHighCo2ThenMidRisk);
-#pragma idata
 
 
-void initRule(RuleEngine* engine, Rule* rule, RuleTerm* antecedent1,
-        RuleTerm* antecedent2, RuleTerm* consecuent) {
+void initRule(Rule* rule, RuleTerm* antecedent1, RuleTerm* antecedent2,
+	RuleTerm* consecuent) {
     Rule_addAntedecent(rule, antecedent1);
     Rule_addAntedecent(rule, antecedent2);
     Rule_setConsecuent(rule, consecuent);
-    RuleEngine_addRule(&engine, rule);
+    RuleEngine_addRule(rule);
 }
 
-void initRules(RuleEngine* engine) {
-    initRule(engine, &ifHighTempAndLowCo2ThenMidRisk, &ifHighTemp, &ifLowCo2, &thenMidRisk);
-    initRule(engine, &ifHighTempAndMidCo2ThenHighRisk, &ifHighTemp, &ifMidCo2, &thenHighRisk);
-    initRule(engine, &ifHighTempAndHighCo2ThenHighRisk, &ifHighTemp, &ifHighCo2, &thenHighRisk);
-    initRule(engine, &ifMidTempAndLowCo2ThenLowRisk, &ifMidTemp, &ifLowCo2, &thenLowRisk);
-    initRule(engine, &ifMidTempAndMidCo2ThenMidRisk, &ifMidTemp, &ifMidCo2, &thenMidRisk);
-    initRule(engine, &ifMidTempAndHighCo2ThenMidRisk, &ifMidTemp, &ifHighCo2, &thenMidRisk);
-    initRule(engine, &ifLowTempAndLowCo2ThenLowRisk, &ifLowTemp, &ifLowCo2, &thenLowRisk);
-    initRule(engine, &ifLowTempAndMidCo2ThenLowRisk, &ifLowTemp, &ifMidCo2, &thenLowRisk);
-    initRule(engine, &ifLowTempAndHighCo2ThenMidRisk, &ifLowTemp, &ifHighCo2, &thenMidRisk);
+void initRules(void) {
+    initRule(&ifHighTempAndLowCo2ThenMidRisk, &ifHighTemp, &ifLowCo2, &thenMidRisk);
+    initRule(&ifHighTempAndMidCo2ThenHighRisk, &ifHighTemp, &ifMidCo2, &thenHighRisk);
+    initRule(&ifHighTempAndHighCo2ThenHighRisk, &ifHighTemp, &ifHighCo2, &thenHighRisk);
+    initRule(&ifMidTempAndLowCo2ThenLowRisk, &ifMidTemp, &ifLowCo2, &thenLowRisk);
+    initRule(&ifMidTempAndMidCo2ThenMidRisk, &ifMidTemp, &ifMidCo2, &thenMidRisk);
+    initRule(&ifMidTempAndHighCo2ThenMidRisk, &ifMidTemp, &ifHighCo2, &thenMidRisk);
+    initRule(&ifLowTempAndLowCo2ThenLowRisk, &ifLowTemp, &ifLowCo2, &thenLowRisk);
+    initRule(&ifLowTempAndMidCo2ThenLowRisk, &ifLowTemp, &ifMidCo2, &thenLowRisk);
+    initRule(&ifLowTempAndHighCo2ThenMidRisk, &ifLowTemp, &ifHighCo2, &thenMidRisk);
 }
 
 
 void setInputs(void) {
-    ifHighTemp.input = 10;
-    ifMidTemp.input = 10;
-    ifLowTemp.input = 10;
+    ifHighTemp.input = 40;
+    ifMidTemp.input = 40;
+    ifLowTemp.input = 40;
 
-    ifHighCo2.input = 25;
-    ifMidCo2.input = 25;
-    ifLowCo2.input = 25;
+    ifHighCo2.input = 75;
+    ifMidCo2.input = 75;
+    ifLowCo2.input = 75;
 }

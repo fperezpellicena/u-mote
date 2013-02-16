@@ -34,10 +34,10 @@ struct RuleEngine {
     UINT8 size;
 };
 
-void RuleEngine_addRule(RuleEngine* engine, Rule* rule);
+void RuleEngine_addRule(Rule* rule);
 
 /*..........................................................................*/
 /* Run engine */
-UINT8 RuleEngine_run(RuleEngine* ruleEngine);
+UINT8 RuleEngine_run(void);
 
 #endif /* fuzzy_h */

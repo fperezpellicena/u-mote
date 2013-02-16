@@ -1,4 +1,4 @@
-#include <p18cxxx.h>
+#include <p18f26j50.h>
 
 #pragma config WDTEN = OFF          /* Disabled - Controlled by SWDTEN bit                                                       */
 #pragma config PLLDIV = 2           /* Divide by 2 (8 MHz oscillator input)                                                      */
@@ -121,12 +121,14 @@ void PICInit(void) {
     RPOR13 = 0x00;
     RPOR17 = 0x00;
     RPOR18 = 0x00;
+#ifdef __18F46J50_H
     RPOR19 = 0x00;
     RPOR20 = 0x00;
     RPOR21 = 0x00;
     RPOR22 = 0x00;
     RPOR23 = 0x00;
     RPOR24 = 0x00;
+#endif
 
     /*  Lock Registers */
     EECON2 = 0x55;
@@ -137,31 +139,44 @@ void PICInit(void) {
     TRISA = 0xFF; /*RA0-7 are digital inputs */
     TRISB = 0xFF; /*RB0-7 are digital inputs */
     TRISC = 0xFF; /*RC0-7 are digital inputs */
+#ifdef __18F46J50_H
     TRISD = 0xFF; /*RD0-7 are digital inputs */
     TRISE = 0xFF; /*RE0-2 are digital inputs */
+#endif
 
     RCONbits.IPEN = 1; /* Enable High/Low interrupt priority model. */
 
     if (WDTCONbits.DS) {
         /* handle stuff specific to wake up from deep sleep */
-
+        TRISCbits.TRISC6 = 0;
+        LATCbits.LATC6 = 0;
+#ifdef __18F46J50_H
         /* Make RA0 an out bit */
         TRISE &= ~0x01;
         LATE &= ~0x01;
+#endif
     }
     WDTCONbits.DS = 0;
 
     if (DSCONLbits.RELEASE) {
+        TRISCbits.TRISC6 = 0;
+        LATC = PORTC;
+#ifdef __18F46J50_H
         /* restore LATA state from before deep sleep wakup */
         TRISE &= ~0x01;
         LATE = PORTE;
+#endif
 
         /* clear deep sleep I/O config lock out */
         DSCONLbits.RELEASE = 0;
     } else {
+        TRISCbits.TRISC6 = 0;
+        LATCbits.LATC6 = 0;
+#ifdef __18F46J50_H
         /* Make RA0 an out bit */
         TRISE &= ~0x01;
         LATE &= ~0x01;
+#endif
     }
 }
 
@@ -173,9 +188,11 @@ void main(void) {
     PICInit();
 
     ClrWdt();
-
+    LATCbits.LATC6 = !LATCbits.LATC6;
+#ifdef __18F46J50_H
     /* toggle output bit RA0 on wake from deep sleep */
     LATE ^= 0x01;
+#endif
 
     /* prepare to enter deep sleep */
     INTCONbits.GIEH = 0; /* disable interrupts */
@@ -205,7 +222,11 @@ void main(void) {
             Nop(); /* in general it's best to do nothing for one or */
             Nop(); /* two instruction cycles after a WDT wake up    */
             /* toggle output bit RA0 on wake from sleep */
+            LATCbits.LATC6 ^= 0x01;
+#ifdef __18F46J50_H
+            /* toggle output bit RA0 on wake from sleep */
             LATE ^= 0x01;
+#endif
         }
     }
 }
