@@ -33,7 +33,7 @@
 #pragma config DSWDTOSC = INTOSCREF /* DSWDT uses INTOSC/INTRC as reference clock                                                */
 #pragma config RTCOSC = T1OSCREF    /* RTCC uses T1OSC/T1CKI as reference clock                                                  */
 #pragma config DSBOREN = OFF        /* Zero-Power BOR disabled in Deep Sleep (does not affect operation in non-Deep Sleep modes) */
-#pragma config DSWDTEN = ON         /* Deep Sleep Watchdog Timer Enabled                                                         */
+#pragma config DSWDTEN = OFF         /* Deep Sleep Watchdog Timer Enabled                                                         */
 #pragma config DSWDTPS = 8192       /* 1:8,192 (8.5 seconds)                                                                     */
 #pragma config IOL1WAY = OFF        /* The IOLOCK bit (PPSCON<0>) can be set and cleared as needed                               */
 #pragma config MSSP7B_EN = MSK7     /* 7 Bit address masking                                                                     */
@@ -56,21 +56,34 @@ void high_ISR(void) {
 #pragma interrupt toggle_light
 
 void toggle_light(void) {
-    if(INTCON3bits.INT1IF == 1) {
+    if (INTCON3bits.INT1IF == 1) {
         reg = PORTB;
         _asm nop _endasm
-        INTCON3bits.INT1IF = 0;
+                INTCON3bits.INT1IF = 0;
         /* Toggle led */
-LATEbits.LATE0 = ~LATEbits.LATE0;
-}
+        LATEbits.LATE0 = ~LATEbits.LATE0;
+    }
 }
 
 void main(void) {
     /* Output led */
     TRISEbits.TRISE0 = 0;
-    RPINR1 = 21;
+    /* Unlock PPS register*/
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    PPSCONbits.IOLOCK = ACCESS;
+    /* Modify PPS*/
+    RPINR1 = 2;
+    /* Lock PPS register */
+    EECON2 = 0x55;
+    EECON2 = 0xAA;
+    PPSCONbits.IOLOCK = BANKED;
+    /* Important: Enable pin as digital whether multiplexed with ADC */
+    ADCON1 |= 0x0F;
+    ANCON0 = 0xFF;
+    ANCON1 = 0xFF;
     /* Input switch */
-    TRISDbits.TRISD4 = 1;
+    TRISAbits.TRISA5 = 1;
     /* Falling edge */
     INTCON2bits.INTEDG1 = 0;
     /* Input interrupt enable */
