@@ -48,9 +48,6 @@
 #include "usb_device.h"
 #include "usb_function_cdc.h"
 #include "usb.h"
-
-#include "usb_rtcc_parser.h"
-
 #include "HardwareProfile.h"
 
 /** V A R I A B L E S ********************************************************/
@@ -230,7 +227,7 @@ void processUSBData(void) {
         if (numBytesRead != 0) {
             // FIXME Usar constantes
             if (strncmppgm2ram(USB_Out_Buffer, RTCC, strlen(RTCC)) == 0) {
-                parseRTCCData(USB_Out_Buffer);
+                //parseRTCCData(USB_Out_Buffer);
             }
         }
     }
