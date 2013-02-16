@@ -17,8 +17,8 @@
  * On power-up, GPS module sends out through UART:
  */
 
-#ifndef nmea_api_h
-#define nmea_api_h
+#ifndef nmea_command_h
+#define nmea_command_h
 
 #include "GenericTypeDefs.h"
 

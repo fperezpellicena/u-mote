@@ -22,6 +22,10 @@
 #include "payload.h"
 #include "rtc.h"
 
+#if SLEEP_MODE == SLEEP
+#include "isr.h"
+#endif
+
 static Payload payload;
 static XBeePacket packet;
 static const UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0xCF, 0x56};
@@ -32,58 +36,24 @@ static const UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0
 
 void XBeeInterrupt_install(void) {
     Payload_init(&payload);
+    XBEE_INTERRUPT_CONFIG();
 #if SLEEP_MODE == SLEEP
-    // En Deep sleep no se ejecutan las interrupciones
     // Install interrupt handler
     InterruptHandler_addHI((HandleInterrupt) & XBeeInterrupt_handleTopHalve,
-	    (HandleInterrupt) & XBeeInterrupt_handleBottomHalve,
-	    (CheckInterrupt) & XBeeInterrupt_check);
-#endif
-#if XBEE_INTERRUPT == ON_SLEEP_INTERRUPT
-    // If ON_SLEEP_INTERRUPT enabled, configure pin interruption
-    XBEE_ON_SLEEP_PIN;
-    XBEE_ON_SLEEP_EDGE; // Rising edge
-    XBEE_ON_SLEEP_CLEAR_FLAG; // Clear flag
-    XBEE_ON_SLEEP_INT; // Enable interrupt
+            (HandleInterrupt) & XBeeInterrupt_handleBottomHalve,
+            (CheckInterrupt) & XBeeInterrupt_check);
 #endif
 }
 
 /* Top halve interrupt handler */
 void XBeeInterrupt_handleTopHalve(void) {
-#if XBEE_INTERRUPT == EUSART_SERIAL_INTERRUPT
-    // If serial interrupt is configured, read last received byte
-    // and store it in lastByte field
-    UINT8 byte = XBeeSerial_read();
-    packet.lastByte = byte;
-    // ACK
-    XBeeSerial_ackInterrupt();
-#else
-    // Comment:
-    // if ON_SLEEP_INTERRUPT enabled
-    //  if modem status enabled
-    //      read full data from serial
-    //  else
-    //      clear ON_SLEEP flag
-#    if SLEEP_STATUS_MESSAGES
-    XBee_readPacket(&packet);
-#    else
-    // ACK
     XBEE_ON_SLEEP_CLEAR_FLAG;
-#    endif
-#endif
 }
 
 // TODO Move out to a custom handler
+
 /* Bottom halve interrupt handler*/
 void XBeeInterrupt_handleBottomHalve(void) {
-#if XBEE_INTERRUPT == EUSART_SERIAL_INTERRUPT
-    // If serial interrupt is configured, process last received byte
-    // and check for valid frame
-    // If valid frame received, create new data frame and send
-    if (XBee_read() == TRUE) {
-	// Crea una trama y la envía
-    }
-#else
     // Prepara la nueva trama
     Payload_init(&payload);
     // Read datetime and put into buffer
@@ -97,17 +67,11 @@ void XBeeInterrupt_handleBottomHalve(void) {
     // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
     XBee_createTransmitRequestPacket(&packet, 0x06, (UINT8*) XBEE_SINK_ADDRESS,
-	    XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
+            XBEE_RADIOUS, XBEE_OPTIONS, payload.data, payload.size);
     XBee_sendPacket(&packet);
-#endif
 }
 
 BOOL XBeeInterrupt_check(void) {
-#if XBEE_INTERRUPT == EUSART_SERIAL_INTERRUPT
-    // If serial interrupt is configured, check serial
-    return XBeeSerial_checkInterrupt();
-#else
     // If pin interrupt is enabled, check pin
     return XBEE_ON_SLEEP_FLAG;
-#endif
 }

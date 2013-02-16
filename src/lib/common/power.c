@@ -191,8 +191,12 @@ void Power_idleRcMode(void) {
  * If the Timer1 oscillator is enabled, it will also continue to run.
  */
 void Power_sleep(void) {
+    WDTCONbits.REGSLP = 1;
+    UCONbits.SUSPND = 1;
     OSCCONbits.IDLEN = 0;
+    DSCONHbits.DSEN = 0;
     Sleep();
+    Nop();
     Nop();
 }
 
@@ -243,7 +247,7 @@ void Power_sleep(void) {
  *  code execution will resume at the device’s Reset vector.
  */
 void Power_deepSleep(void) {
-    INTCONbits.GIEH = 0;    /* Disable interrupts*/
+    INTCONbits.GIEH = 0; /* Disable interrupts*/
     DSWAKEL = 0;
     DSWAKEH = 0;
     WDTCONbits.SWDTEN = 1; /* turn on the watch dog timer */

@@ -15,6 +15,7 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gps.h"
 #include "nmea_command.h"
 #include "hw_serial.h"
 

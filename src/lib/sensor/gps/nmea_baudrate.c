@@ -22,5 +22,5 @@
 void NMEACommand_createSetBaudrateFrame(NMEACommandPacket* nmeaCommandFrame,
 	UINT8* baudrate) {
     NMEACommand_create(nmeaCommandFrame, (UINT8 rom*)NMEA_SET_BAUDRATE, baudrate,
-	    (UINT8) strlen(baudrate));
+	    (UINT8) strlen((char*)baudrate));
 }

@@ -15,22 +15,20 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <limits.h>
-#include <delays.h>
 #include "bsp.h"
 #include "digi_api.h"
-#include "digi_interrupt.h"
 #include "sensor_proxy.h"
 #if RTCC_ENABLED
 #    include "rtc.h"
+#include "timer.h"
 #endif
 
 void BSP_inertialInit(void) {
-    BSP_init();
-    // Initializes mote API
+    BSP_init();         // Initializes mote API
     XBee_init();
-    // Enable sensor board
-    SensorProxy_init();
+    Timer0_init();
+    SensorProxy_init(); // Enable sensor board
+    BSP_onPowerUp();
 }
 
 /*...........................................................................*/
@@ -39,34 +37,20 @@ void BSP_onPowerUp(void) {
     // Enable RTCC
     Rtc_init();
 #endif
+    XBee_join();
 }
 
 /*...........................................................................*/
-
-/* On reset push, join xbee */
 void BSP_onMclr(void) {
-    BSP_clearMclrFlags();
-    XBee_join();
+    return;
 }
 
 /*...........................................................................*/
 void BSP_onWakeUp(void) {
-    // Clear wake up flags
-    BSP_clearWakeUpFlags();
-    // Ejecuta la interrupción que ha despertado al sistema
-    XBeeInterrupt_handleBottomHalve();
+    return;
 }
 
 /*...........................................................................*/
-
-/**
- * Entering this method could mean that the transceiver is malfunctioning.
- * Xbee may be down or may have lost sync with his neighbor.
- * So, try to send a reset message to the transceiver and rejoin the mote.
- * A 100 ms delay is necessary to perform a full reset before send any command.
- */
 void BSP_onDsWdtWakeUp(void) {
-    XBee_reset();
-    Delay100TCYx(UINT_MAX);
-    XBee_join();
+    return;
 }

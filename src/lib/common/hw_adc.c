@@ -83,8 +83,6 @@ void Adc_startConversion(UINT8 channel) {
 
 /**
  * Lee el valor del conversor.
- *
- * @return conversión
  */
 UINT16 Adc_readValue(void) {
     while (ADCON0bits.GO);
@@ -96,8 +94,6 @@ UINT16 Adc_readValue(void) {
  * Inicia el proceso tomando una muestra dummy para compensar el efecto del ruido
  * de las entradas.
  * A continuación, toma una muestra
- *
- * @return muestra con ruido de entrada compensado
  */
 UINT16 Adc_convert(UINT8 channel) {
     setChannel(channel);
@@ -112,8 +108,6 @@ UINT16 Adc_convert(UINT8 channel) {
  * Inicia el proceso tomando una muestra dummy para compensar el efecto del ruido
  * de las entradas.
  * A continuación, promedia tantas muestras como indica el factor de conversión.
- *
- * @return conversión promediada y compensada en ruido
  */
 UINT16 Adc_convertAveragedValue(UINT8 channel) {
     UINT32 tmp = 0;
@@ -132,4 +126,8 @@ UINT16 Adc_testChannelOne(void) {
     Adc_init();
     TRISAbits.TRISA1 = 1;
     return Adc_convert(1);
+}
+
+BOOL AdcInterrupt_check(void) {
+    return PIR1bits.ADIF;
 }

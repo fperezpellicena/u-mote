@@ -45,6 +45,7 @@ struct Location {
     UINT8 longitude;
     UINT8 latitudeCoordinate[9];
     UINT8 latitude;
+    rtccTimeDate timestamp;
 };
 
 /*...........................................................................*/
@@ -53,8 +54,6 @@ typedef struct Gps Gps;
 
 struct Gps {
     UINT8 id;
-    Location lastValidLocation;
-    rtccTimeDate lastValidTimestamp;
 };
 
 #define DECLARE_GPS(id, name) Gps name = {id}
@@ -67,6 +66,6 @@ BOOL Gps_readPacket(NMEAOutputPacket* packet);
 
 BOOL Gps_readByte(NMEAOutputPacket* packet);
 
-void Gps_readLocation(Gps* gps, NMEAOutputPacket* packet);
+void Gps_readLocation(Location* location, NMEAOutputRMC* rmc);
 
 #endif

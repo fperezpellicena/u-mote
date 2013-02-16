@@ -21,18 +21,17 @@
 #include "bsp.h"
 
 
-#define EUSART2_MODE		    EUSART_POLL
-
 #define SENSING_MODE	    MONITORING
 
 /*..........................................................................*/
 /* ADXL section */
 
 #define ADXL_ENABLED         1
-#define SHT_ID              0x04
+#define ADXL_ID              0x04
 
 #if ADXL_ENABLED
-
+#define ADXL_CH_X           1
+#define ADXL_CH_Y           2
 #endif
 
 /*...........................................................................*/

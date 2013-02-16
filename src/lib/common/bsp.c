@@ -29,10 +29,18 @@
 #    include "isr.h"
 #endif
 
+static void BSP_clearInterrupts(void);
+
+static void BPS_initOSC(void);
+
 /*...........................................................................*/
 void BSP_init(void) {
+    // Init default INTOSC
+    BPS_initOSC();
     // Default all pins to digital
-    BSP_defaultIO();
+    BSP_initIO();
+    // Disable interrupts
+    BSP_clearInterrupts();
 #if SLEEP_MODE == SLEEP
     // Init interrupt vectors
     InterruptHandler_initVectors();
@@ -45,11 +53,34 @@ void BSP_init(void) {
 #endif
 }
 
+void BPS_initOSC(void) {
+    // INTOSC drives clock directly
+    OSCCONbits.IRCF = IRCF_1MHZ;
+    // INTRC/INTOSC derived
+    OSCCONbits.SCS = SCS_INTRC;
+}
+
+void BSP_clearInterrupts(void) {
+    // Clear peripheral priorities
+    IPR1 = 0x00;
+    IPR2 = 0x00;
+    IPR3 = 0x00;
+    // Clear interrupt flags
+    PIR1 = 0x00;
+    PIR2 = 0x00;
+    PIR3 = 0x00;
+    INTCON = 0x00;
+
+    RCONbits.IPEN = 1;
+    INTCONbits.PEIE = 1;
+}
 /*...........................................................................*/
 // FIXME Corregido pero no probado:
 //      Enable PLL on USB PLUGIN (power saving)
 
 void BSP_enablePLL(void) {
+    // Enable PLL path
+    OSCCONbits.SCS = 0;
     //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
     {
 	unsigned int pll_startup_counter = 600;
@@ -59,7 +90,7 @@ void BSP_enablePLL(void) {
 }
 
 /*...........................................................................*/
-void BSP_defaultIO(void) {
+void BSP_initIO(void) {
     ADCON1 |= 0x0F;
     ANCON0 = 0xFF;
     ANCON1 = 0xFF;
@@ -71,7 +102,7 @@ void BSP_clearMclrFlags(void) {
     DSCONLbits.RELEASE = 0;
 }
 
-void BSP_clearWakeUpFlags(void) {
+void BSP_clearDSWakeUpFlags(void) {
     WDTCONbits.DS = 0;
     DSWAKEHbits.DSINT0 = 0;
     DSCONLbits.RELEASE = 0;
@@ -89,12 +120,11 @@ void BSP_deepSleep(void) {
 
 /*...........................................................................*/
 void BSP_sleep(void) {
-    // Disable PLL
-    OSCTUNEbits.PLLEN = 0;
 #if RTCC_ENABLED
     Rtc_enable();
 #endif
-    INTCONbits.GIEH = 1;
+    INTCONbits.PEIE = 1;
+    INTCONbits.GIE = 1;
     Power_sleep();
 }
 
