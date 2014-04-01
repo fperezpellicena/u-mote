@@ -22,10 +22,6 @@
 #include "payload.h"
 #include "rtc.h"
 
-#if SLEEP_MODE == SLEEP
-#include "isr.h"
-#endif
-
 static Payload payload;
 static XBeePacket packet;
 static const UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0xCF, 0x56};
@@ -35,19 +31,12 @@ static const UINT8 XBEE_SINK_ADDRESS[8] = {0x00, 0x13, 0xA2, 0x00, 0x40, 0x70, 0
 /** Interrupt handler section */
 
 void XBeeInterrupt_install(void) {
-    Payload_init(&payload);
-    XBEE_INTERRUPT_CONFIG();
-#if SLEEP_MODE == SLEEP
-    // Install interrupt handler
-    InterruptHandler_addHI((HandleInterrupt) & XBeeInterrupt_handleTopHalve,
-            (HandleInterrupt) & XBeeInterrupt_handleBottomHalve,
-            (CheckInterrupt) & XBeeInterrupt_check);
-#endif
+//    XBEE_INTERRUPT_CONFIG();
 }
 
 /* Top halve interrupt handler */
 void XBeeInterrupt_handleTopHalve(void) {
-    XBEE_ON_SLEEP_CLEAR_FLAG;
+    XBEE_ON_SLEEP_CLEAR_FLAG();
 }
 
 // TODO Move out to a custom handler
@@ -57,7 +46,7 @@ void XBeeInterrupt_handleBottomHalve(void) {
     // Prepara la nueva trama
     Payload_init(&payload);
     // Read datetime and put into buffer
-    Rtc_addTimeToPayload(&payload);
+    Rtc_addCurrentTimeToPayload(&payload);
     // Put sensor ids
     SensorProxy_addSensorIdentifiersToPayload(&payload);
     // Sense installed sensors

@@ -15,36 +15,20 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef adxl_h
-#define adxl_h
+#ifndef gps_isr_h
+#define gps_isr_h
 
-#include <float.h>
 #include "bsp.h"
+#include "gps_location.h"
 
-/*...........................................................................*/
-/* Adxl class */
-typedef struct Adxl Adxl;
+void GpsInterrupt_init(void);
 
-struct Adxl {
-    UINT8 id;
-};
+void GpsInterrupt_readByte(void);
 
-#define DECLARE_ADXL(id, name) Adxl name = {id}
+BOOL GpsInterrupt_packetReceived(void);
 
-typedef struct Acceleration Acceleration;
+void GpsInterrupt_process(void);
 
-struct Acceleration {
-    UINT8 x;
-    UINT8 y;
-};
-
-/** Init resources */
-void Adxl_init(void);
-
-/** Start conversion and read x axis acceleration */
-UINT16 Adxl_accelerationX(void) ;
-
-/** Start conversion and read y axis acceleration */
-UINT16 Adxl_accelerationY(void);
+void GpsInterrupt_addInfoToPayload(Payload* payload);
 
 #endif

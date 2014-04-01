@@ -18,9 +18,8 @@
 #include "sensor_proxy.h"
 #include "bsp_inertial.h"
 #include "gps.h"
-#include "gps_interrupt.h"
+#include "gps_api.h"
 #include "adxl.h"
-#include "nmea_command.h"
 
 DECLARE_GPS(GPS_ID, gps);
 
@@ -33,6 +32,7 @@ static void SensorProxy_composeSensorIdentifiers(void);
 /*..........................................................................*/
 void SensorProxy_init(void) {
     Gps_init();
+    Gps_setOutputConfig();
 }
 
 /*..........................................................................*/
@@ -50,7 +50,6 @@ void SensorProxy_addSensorIdentifiersToPayload(Payload* payload) {
 
 /*..........................................................................*/
 void SensorProxy_addMeasuresToPayload(Payload* payload) {
-    Location* location = GpsInterrupt_location();
 }
 
 static void SensorProxy_composeSensorIdentifiers(void) {

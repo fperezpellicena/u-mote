@@ -17,25 +17,16 @@
 
 #include "bsp.h"
 #include "hw_serial.h"
-#include "gps_interrupt.h"
+#include "gps_api.h"
 #include "nmea_output.h"
 #include "nmea_command.h"
-
-/** Enable RMC output, all other disabled */
-static NMEAOutputConfig defaultNMEAOutput
-        = {'0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
-
-static void Gps_setDefaultMode(void);
 
 /*...........................................................................*/
 void Gps_init(void) {
     Serial_init(EUSART_9600); // RS-232
-    Gps_setDefaultMode();
-    GpsInterrupt_install(); // Interrupt pin and configuration
+    Gps_setOutputConfig();
 }
 
-static void Gps_setDefaultMode(void) {
-    NMEACommandPacket packet;
-    NMEACommand_createSetOutput(&packet, &defaultNMEAOutput);
-    Gps_sendPacket(&packet);
+void Gps_disableInterrupt(void)  {
+    Serial_disableInterrupt();
 }

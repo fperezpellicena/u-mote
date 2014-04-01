@@ -23,7 +23,11 @@
 
 /* Init list, set size equals zero */
 void Payload_init(Payload* payload) {
+    UINT8 i = MAX_PAYLOAD - 1;
     payload->size = 0;
+    while (i--) {
+        payload->data[i] = NULL;
+    }
 }
 
 /*..........................................................................*/
@@ -31,7 +35,8 @@ void Payload_init(Payload* payload) {
 /* Add one byte to the list */
 void Payload_putByte(Payload* payload, const UINT8 element) {
     if (payload->size < MAX_PAYLOAD - 1) {
-        payload->data[payload->size++] = element;
+        payload->data[payload->size] = element;
+        payload->size++;
     }
 }
 
@@ -49,14 +54,6 @@ void Payload_putWord(Payload* payload, const UINT16 element) {
 
 /*..........................................................................*/
 
-/* Delete all elements of the list */
-void Payload_empty(Payload* payload) {
-    UINT8 i = MAX_PAYLOAD - 1;
-    while (i--) {
-        payload->data[i] = NULL;
-    }
-}
-
 /*..........................................................................*/
 
 /* Append all elements to the list */
@@ -72,5 +69,11 @@ void Payload_append(Payload* to, const Payload* from) {
 void Payload_putString(Payload* payload, const UINT8* string) {
     char* buffer = (char*) payload->data;
     sprintf(buffer, (MOTE_MEM_MODEL rom char*) string);
-    payload->size = strlen((char*)string);
+    payload->size += strlen((char*)string);
+}
+
+void Payload_putRAMString(Payload* payload, const UINT8* string) {
+    char* buffer = (char*) payload->data;
+    strcpy(&(buffer[payload->size]), (char*) string);
+    payload->size += strlen((char*)string);
 }

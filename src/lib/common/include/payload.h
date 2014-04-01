@@ -37,13 +37,13 @@ void Payload_putByte(Payload* payload, const UINT8 element);
 /* Add one word to the list */
 void Payload_putWord(Payload* payload, const UINT16 element);
 
-/* Delete all elements of the list */
-void Payload_empty(Payload* list);
-
 /* Append */
 void Payload_append(Payload* to, const Payload* from);
 
-/* Put a formatted string with params */
+/* Put a formatted string in ROM */
 void Payload_putString(Payload* payload, const UINT8* string);
+
+/* Put a formatted string in RAM */
+void Payload_putRAMString(Payload* payload, const UINT8* string);
 
 #endif /* list_H*/

@@ -20,33 +20,6 @@
 
 #include "GenericTypeDefs.h"
 #include "nmea_command.h"
-#include "nmea_output.h"
-#include <rtcc.h>
-
-/*...........................................................................*/
-enum Longitude {
-    NORTH = 'N', SOUTH = 'S'
-};
-
-enum Latitude {
-    EAST = 'E', WEST = 'W'
-};
-
-enum LocationStatus {
-    VALID = 'A', INVALID = 'V'
-};
-
-/*...........................................................................*/
-/* Location coordinates class */
-typedef struct Location Location;
-
-struct Location {
-    UINT8 longitudeCoordinate[9];
-    UINT8 longitude;
-    UINT8 latitudeCoordinate[9];
-    UINT8 latitude;
-    rtccTimeDate timestamp;
-};
 
 /*...........................................................................*/
 /* Gps class */
@@ -59,13 +32,5 @@ struct Gps {
 #define DECLARE_GPS(id, name) Gps name = {id}
 
 void Gps_init(void);
-
-void Gps_sendPacket(NMEACommandPacket* packet);
-
-BOOL Gps_readPacket(NMEAOutputPacket* packet);
-
-BOOL Gps_readByte(NMEAOutputPacket* packet);
-
-void Gps_readLocation(Location* location, NMEAOutputRMC* rmc);
 
 #endif

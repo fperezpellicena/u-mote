@@ -29,7 +29,7 @@ void BSP_ambientalInit(void) {
     BSP_init();
     // Initializes mote API
     XBee_init();
-    // Enable sensor board
+//    // Enable sensor board
     SensorProxy_init();
 }
 

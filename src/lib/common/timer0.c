@@ -18,11 +18,16 @@
 #include "timer.h"
 
 void Timer0_init(void) {
-    T0CONbits.T0PS = 7;
+    T0CONbits.TMR0ON = 0;
+    T0CONbits.T08BIT = 1;   // 8 bit mode
+    T0CONbits.T0CS = 0;
+    T0CONbits.PSA = 0;
+    T0CONbits.T0PS = 6;     // Prescale x128
     TMR0H = 0; 
     TMR0L = 0;
-    INTCONbits.TMR0IF = 0;
     INTCONbits.TMR0IE = 1;
+    INTCONbits.TMR0IF = 0;
+    INTCON2bits.T0IP = 0;
 }
 
 void Timer0_start(void) {
@@ -40,4 +45,12 @@ BOOL Timer0_checkInterrupt(void) {
 
 void Timer0_ackInterrupt(void) {
     INTCONbits.TMR0IF = 0;
+}
+
+void Timer0_enableInterrupt(void) {
+    INTCONbits.TMR0IE = 1;
+}
+
+void Timer0_disableInterrupt(void) {
+    INTCONbits.TMR0IE = 0;
 }

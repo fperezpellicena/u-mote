@@ -15,46 +15,25 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <limits.h>
 #include "adxl.h"
 #include "timer.h"
 #include "hw_adc.h"
 #include "bsp.h"
+#include "bsp_inertial.h"
 
 void Adxl_init(void) {
     Adc_init();
-    // FIXME Move out these sentences
-    Timer0_init();
-//    FallTimerInterrupt_install();
-}
-
-/** Start and read both x and y accelerations */
-void Adxl_convertAcceleration(Acceleration* acceleration) {
-    acceleration->x = Adxl_convertAccelerationX();
-    acceleration->y = Adxl_convertAccelerationY();
 }
 
 /** Start conversion and read x axis acceleration */
-UINT8 Adxl_convertAccelerationX(void) {
+UINT16 Adxl_accelerationX(void) {
+    ADXL_X_CHANNEL_SET();
     return Adc_convert(ADXL_X_AXIS);
 }
 
 /** Start conversion and read y axis acceleration */
-UINT8 Adxl_convertAccelerationY(void) {
+UINT16 Adxl_accelerationY(void) {
+    ADXL_Y_CHANNEL_SET();
     return Adc_convert(ADXL_Y_AXIS);
-}
-
-/** Interrupt mode */
-/** Start X axis acceleration conversion */
-void Adxl_startAccelerationX(void) {
-    Adc_startConversion(ADXL_X_AXIS);
-}
-
-/** Start Y axis acceleration conversion */
-void Adxl_startAccelerationY(void) {
-    Adc_startConversion(ADXL_Y_AXIS);
-}
-
-/** Read axis acceleration after conversion */
-UINT8 Adxl_readAcceleration(void) {
-    return Adc_readValue();
 }

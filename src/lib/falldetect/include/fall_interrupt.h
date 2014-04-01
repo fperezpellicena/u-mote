@@ -19,17 +19,16 @@
 #define fall_interrupt_h
 
 #include "bsp.h"
+#include "payload.h"
 
-/** Install timer interrupt */
-void FallTimerInterrupt_install(void);
+void FallInterrupt_init(void);
 
-/** Top halve timer interrupt handler */
-void FallTimerInterrupt_handleTopHalve(void);
+void FallInterrupt_readAccelerations(void);
 
-/** Bottom halve timer interrupt handler */
-void FallTimerInterrupt_handleBottomHalve(void);
+void FallInterrupt_HumanProcessing(void);
 
-/** Clear timer interrupt flag */
-BOOL FallTimerInterrupt_check(void);
+void FallInterrupt_EEProcessing(void);
+
+void FallInterrupt_addInfoToPayload(Payload* payload);
 
 #endif

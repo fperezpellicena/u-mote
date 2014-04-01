@@ -20,7 +20,6 @@
 
 #include "bsp.h"
 
-
 #define SENSING_MODE	    MONITORING
 
 /*..........................................................................*/
@@ -30,8 +29,12 @@
 #define ADXL_ID              0x04
 
 #if ADXL_ENABLED
-#define ADXL_CH_X           1
-#define ADXL_CH_Y           2
+
+#define ADXL_X_AXIS             0x08
+#define ADXL_X_CHANNEL_SET()    ANCON1bits.PCFG8 = 0;
+#define ADXL_Y_AXIS             0x0A
+#define ADXL_Y_CHANNEL_SET()    ANCON1bits.PCFG10 = 0;
+
 #endif
 
 /*...........................................................................*/
@@ -51,6 +54,16 @@
 #define SENSOR_BOARD_ON()           SENSOR_BOARD_CTRL = 1   /* Power on */
 #define SENSOR_BOARD_OFF()          SENSOR_BOARD_CTRL = 0   /* Power off */
 
+#define TO_INT16(x) ((INT16)((x) < 1 ? ((x) >= -1 ? (x)*0x8000 : 0x8000) : 0x7FFF))
+
+/*..........................................................................*/
+/* FOREGROUND LOOP STATES */
+enum MainState { INIT, IDLE, HUMAN_PROCESSING, GPS_PROCESSING, EE_PROCESSING, EE_FALLDETECTED };
+
 void BSP_inertialInit(void);
+
+void BSP_mainProcess(void);
+
+void BSP_sendPacket(void);
 
 #endif /* umote_inertial_bsp_h */

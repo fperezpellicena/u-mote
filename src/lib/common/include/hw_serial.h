@@ -41,4 +41,8 @@ BOOL Serial_checkInterrupt(void);
 
 void Serial_ackInterrupt(void);
 
+void Serial_disableInterrupt(void);
+
+void Serial_enableInterrupt(void);
+
 #endif          /* hw_serial_h */

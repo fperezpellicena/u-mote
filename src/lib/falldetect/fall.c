@@ -20,5 +20,4 @@
 
 /** Init interrupts */
 void Fall_init(void) {
-    FallTimerInterrupt_install();
 }

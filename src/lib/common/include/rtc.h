@@ -31,6 +31,9 @@ void Rtc_enable(void);
 void Rtc_readTimestamp(void);
 
 /*..........................................................................*/
+void Rtc_readCurrentTimestamp(rtccTimeDate* current);
+
+/*..........................................................................*/
 void Rtc_writeTimestamp(rtccTimeDate* timestamp);
 
 /*..........................................................................*/
@@ -40,6 +43,9 @@ void Rtc_writeFormattedTimestamp(Payload* output);
 void Rtc_readInputStream(Payload* input);
 
 /*..........................................................................*/
-void Rtc_addTimeToPayload(Payload* payload);
+void Rtc_addCurrentTimeToPayload(Payload* payload);
+
+/*..........................................................................*/
+void Rtc_addTimeToPayload(Payload* payload, rtccTimeDate* timestamp);
 
 #endif

@@ -27,5 +27,5 @@ void NMEACommand_createSetDatum(NMEACommandPacket* nmeaCommandFrame,
     strcpypgm2ram((char*) datum, (MOTE_MEM_MODEL rom char*) data);
     // Create command
     NMEACommand_create(nmeaCommandFrame, (UINT8 rom*)NMEA_SET_OUTPUT,
-	    data, NMEA_OUTPUT_CFG_LENGTH);
+	    data, NMEA_COMMAND_CFG_LENGTH);
 }

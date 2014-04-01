@@ -15,36 +15,12 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef adxl_h
-#define adxl_h
+#ifndef gps_read_timestamp_h
+#define gps_read_timestamp_h
 
-#include <float.h>
-#include "bsp.h"
+#include <rtcc.h>
+#include "nmea_output.h"
 
-/*...........................................................................*/
-/* Adxl class */
-typedef struct Adxl Adxl;
-
-struct Adxl {
-    UINT8 id;
-};
-
-#define DECLARE_ADXL(id, name) Adxl name = {id}
-
-typedef struct Acceleration Acceleration;
-
-struct Acceleration {
-    UINT8 x;
-    UINT8 y;
-};
-
-/** Init resources */
-void Adxl_init(void);
-
-/** Start conversion and read x axis acceleration */
-UINT16 Adxl_accelerationX(void) ;
-
-/** Start conversion and read y axis acceleration */
-UINT16 Adxl_accelerationY(void);
+void Gps_readTimestamp(NMEAOutputPacket* packet, rtccTimeDate* timestamp);
 
 #endif

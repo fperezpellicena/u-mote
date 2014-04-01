@@ -19,25 +19,6 @@
 #include "bsp.h"
 #include <adc.h>
 
-static UINT8 power(UINT8 base, UINT8 exp);
-
-static UINT8 power(UINT8 base, UINT8 exp) {
-    UINT8 res = 1;
-    UINT8 i;
-    for (i = 0; i < exp; i++) {
-        res *= base;
-    }
-    return res;
-}
-
-static void setChannel(UINT8 channel);
-
-static void setChannel(UINT8 channel) {
-    UINT8 diff = (UINT8) power(2, channel);
-    ADCON0bits.CHS = channel; /* Set channel */
-    ANCON0 = 0xFF - diff;
-}
-
 /**
  * Configura el ADC
  */
@@ -76,7 +57,7 @@ static void Adc_calibrate(void) {
  * Inicia una conversión, precedida de una dummy.
  */
 void Adc_startConversion(UINT8 channel) {
-    setChannel(channel);
+    ADCON0bits.CHS = channel;
     Adc_calibrate();
     ADCON0bits.GO = 1;
 }
@@ -96,7 +77,7 @@ UINT16 Adc_readValue(void) {
  * A continuación, toma una muestra
  */
 UINT16 Adc_convert(UINT8 channel) {
-    setChannel(channel);
+    ADCON0bits.CHS = channel;
     ADCON0bits.ADON = 1;
     Adc_calibrate();
     ADCON0bits.GO = 1;
@@ -112,7 +93,7 @@ UINT16 Adc_convert(UINT8 channel) {
 UINT16 Adc_convertAveragedValue(UINT8 channel) {
     UINT32 tmp = 0;
     UINT8 i = AVERAGE_FACTOR;
-    setChannel(channel);
+    ADCON0bits.CHS = channel;
     Adc_calibrate();
     while (i--) {
         ADCON0bits.GO = 1;

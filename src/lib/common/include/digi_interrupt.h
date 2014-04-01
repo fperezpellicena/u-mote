@@ -18,6 +18,8 @@
 #ifndef digi_interrupt_h
 #define digi_interrupt_h
 
+#include "bsp.h"
+
 void XBeeInterrupt_install(void);
 
 /* Top halve interrupt handler */

@@ -20,25 +20,23 @@
 #include "register.h"
 #include "usb_function_cdc.h"
 
-/** Init uart 2 in non-interrupt mode */
 void Serial_init(UINT8 baudrate) {
     Register_remap((UINT8*)&RPINR16, USART2_RX_RP);
     Register_remap((UINT8*)&RPOR1, USART2_TX_RP);
 
     TXSTA2 = 0; // Reset USART registers to POR state
     RCSTA2 = 0;
-
-    RCSTA2bits.CREN = 1;
-    TXSTA2bits.BRGH = 1;
-    PIE3bits.RC2IE = 1;
-
-    SPBRG2 = baudrate;
-
-    TXSTA2bits.TXEN = 1; // Enable transmitter
+    TXSTA2bits.SYNC = 0;
     RCSTA2bits.SPEN = 1; // Enable receiver
 
+    PIE3bits.RC2IE = 1;
+    IPR3bits.RC2IP = 0;  // Low priority interrupt
+    TXSTA2bits.TXEN = 1; // Enable transmitter
+    TXSTA2bits.BRGH = 1;
+    RCSTA2bits.CREN = 1;
+
     BAUDCON2bits.BRG16 = 1;
-    BAUDCON2bits.WUE = 1;
+    SPBRG2 = baudrate;
 }
 
 void Serial_send(UINT8 value) {
@@ -82,6 +80,12 @@ BOOL Serial_checkInterrupt(void) {
 
 void Serial_ackInterrupt(void) {
     PIR3bits.RC2IF = 0;
-    BAUDCON2bits.ABDOVF = 0;
-    BAUDCON2bits.WUE = 1;
+}
+
+void Serial_disableInterrupt(void) {
+    PIE3bits.RC2IE = 0;
+}
+
+void Serial_enableInterrupt(void) {
+    PIE3bits.RC2IE = 1;
 }

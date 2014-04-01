@@ -15,53 +15,58 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nmea_output.h"
+#include "gps_packet.h"
 #include "nmea_command.h"
-#include "hw_serial.h"
+#include "nmea_output.h"
+#include <stdlib.h>
+#include <string.h>
 
-static void Gps_processData(NMEAOutputPacket* packet, UINT8 data);
-
-static void Gps_processData(NMEAOutputPacket* packet, UINT8 data) {
-    switch (packet->rxState) {
-	case NMEA_PACKET_PREAMBLE: //$
-	    if (data == NMEA_PREAMBLE) {
-		packet->rxState = NMEA_PACKET_DATA;
-	    }
-	    break;
-	case NMEA_PACKET_DATA:
-	    packet->data[packet->length++] = data;
-	    // Checksum is x'or-ed
-	    packet->chkCalculated ^= data;
-	    if (data == NMEA_CHK_CHAR) {
-		packet->rxState = NMEA_PACKET_CRC_1;
-	    }
-	    break;
-	case NMEA_PACKET_CRC_1:
-	    // High chk byte
-	    packet->chkRead = (data << 8);
-	    packet->rxState = NMEA_PACKET_CRC_2;
-	    break;
-	case NMEA_PACKET_CRC_2:
-	    // Low chk byte
-	    packet->chkRead += data;
-	    if (packet->chkRead == packet->chkCalculated) {
-		packet->rxState = NMEA_PACKET_OK;
-	    }
-	    packet->rxState = NMEA_PACKET_OK;
-	    break;
-    }
+BOOL Gps_isValidPacket(NMEAOutputPacket* packet) {
+    return packet->rxState == NMEA_PACKET_OK;
 }
 
 void Gps_readPacket(NMEAOutputPacket* packet) {
-    NMEAOutput_resetPacket(packet);
-    while (Serial_available()) {
-	// FIXME This call is suposed to be faster than uart receiving next byte
-	Gps_processData(packet, Serial_read());
+    UINT8 data;
+    UINT8 chkString[3];
+    UINT8 length = 0;
+    while(length != packet->length) {
+        data = packet->data[length++];
+        switch (packet->rxState) {
+            case NMEA_PACKET_PREAMBLE: //$
+                if (data == NMEA_PREAMBLE) {
+                    packet->rxState = NMEA_PACKET_DATA;
+                }
+                break;
+            case NMEA_PACKET_DATA:
+                if (data == NMEA_CHK_CHAR) {
+                    packet->rxState = NMEA_PACKET_CRC_1;
+                } else {
+                    // Checksum is x'or-ed
+                    packet->chkCalculated ^= data;
+                }
+                break;
+            case NMEA_PACKET_CRC_1:
+                // High chk byte
+                packet->chkRead[0] = data;
+                packet->rxState = NMEA_PACKET_CRC_2;
+                break;
+            case NMEA_PACKET_CRC_2:
+                // Low chk byte
+                packet->chkRead[1] = data;
+                if (strcmp(itoa(packet->chkCalculated, (char*)chkString), (char*)packet->chkRead)) {
+                    packet->rxState = NMEA_PACKET_CR;
+                } else {
+                    packet->rxState = NMEA_PACKET_ERROR;
+                }
+                break;
+            case NMEA_PACKET_CR:
+                packet->rxState = NMEA_PACKET_LF;
+                break;
+            case NMEA_PACKET_LF:
+                packet->rxState = NMEA_PACKET_OK;
+                break;
+            default:
+                packet->rxState = NMEA_PACKET_PREAMBLE;
+        }
     }
-}
-
-void Gps_readByte(NMEAOutputPacket* packet) {
-    UINT8 data = Serial_read();
-    Gps_processData(packet, data);
-    Serial_ackInterrupt();
 }

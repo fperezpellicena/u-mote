@@ -1,117 +1,132 @@
+/**
+ * This file is part of uMote.
+ *
+ *  uMote is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *  uMote is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "median.h"
+#include <string.h>
+#include <stdio.h>
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
+/** Using register storage class to remain unchanged array */
+#define SWAP(a,b) { register UINT16 t=(a);(a)=(b);(b)=t; }
 
-static UINT16* _input;
-static UINT16* _output;
+/** Do not refactor this method (efficiency) */
+static UINT16 kth_smallest(UINT16* a, UINT8 n, UINT8 k) {
+    register UINT8 i, j, l, m;
+    register UINT16 x;
 
-static UINT16 _window[WINDOW_LENGTH];
-static UINT16 _extension[EXTENDED_LENGTH];
-
-static void Median_extendInput(void);
-static BOOL Median_checkBounds(void);
-static void Median_processSignal(void);
-static void Median_fillWindow(UINT16 signalIndex);
-static void Median_orderWindow(void);
-static void Median_putMedian(UINT16 signalIndex);
-static UINT16 Median_findMinimum(UINT16 currentWindowIndex);
-static void Median_putMinimum(UINT16 currentWindowIndex, UINT16 minElementPosition);
-
-void Median_Create(UINT16* input, UINT16* output) {
-    _input = input;
-    _output = output;
-}
-
-UINT16* Median_Extended(void) {
-    return _extension;
-}
-
-/** Main filter processing */
-void Median_Filter(void) {
-    if (Median_checkBounds()) {
-        return;
-    }
-    Median_extendInput();
-    Median_processSignal();
-}
-
-/** Check for null input and special cases */
-static BOOL Median_checkBounds(void) {
-    //   Check arguments
-    if (!_input || SIGNAL_LENGTH < 1) {
-        return TRUE;
-    }
-    //   Treat special case N = 1
-    if (SIGNAL_LENGTH == 1 && _output) {
-        _output[0] = _input[0];
-        return TRUE;
-    }
-    return FALSE;
-}
-
-/** Create signal extension */
-static void Median_extendInput(void) {
-    UINT16 extensionIndex;
-    memcpy(_extension + EXTENDED_DELTA, _input, SIGNAL_LENGTH * sizeof (UINT16));
-    for (extensionIndex = 0; extensionIndex < EXTENDED_DELTA; ++extensionIndex) {
-        _extension[extensionIndex] = _input[EXTENDED_DELTA - extensionIndex];
-        _extension[SIGNAL_LENGTH + EXTENDED_DELTA + extensionIndex] = _input[SIGNAL_LENGTH - 2 - extensionIndex];
-    }
-}
-
-/** Iterates over the input signal and processes window */
-static void Median_processSignal(void) {
-    UINT16 signalIndex;
-    for (signalIndex = WINDOW_MIDDLE; signalIndex < EXTENDED_LENGTH - WINDOW_MIDDLE; ++signalIndex) {
-        Median_fillWindow(signalIndex);
-        Median_orderWindow();
-        Median_putMedian(signalIndex);
-    }
-}
-
-/** Fill current window picking the first element in the given signal index */
-static void Median_fillWindow(UINT16 signalIndex) {
-    UINT16 windowIndex;
-    for (windowIndex = 0; windowIndex < WINDOW_LENGTH; ++windowIndex) {
-        _window[windowIndex] = _extension[signalIndex + windowIndex - 2];
-    }
-}
-
-/** Order window elements (only half of them) because we want only find the mid element */
-static void Median_orderWindow(void) {
-    UINT16 windowIndex;
-    for (windowIndex = 0; windowIndex <= WINDOW_MIDDLE; ++windowIndex) {
-        // Find position of minimum element and put found element in its place
-        Median_putMinimum(windowIndex, Median_findMinimum(windowIndex));
-    }
-}
-
-/** Put the median value found in the window into the output array */
-static void Median_putMedian(UINT16 signalIndex) {
-    _output[signalIndex - WINDOW_MIDDLE] = _window[WINDOW_MIDDLE];
-}
-
-/** Find position of minimum element for a given window iteration */
-static UINT16 Median_findMinimum(UINT16 currentWindowIndex) {
-    UINT16 minIndex;
-    UINT16 minElementPosition = currentWindowIndex;
-    for (minIndex = (UINT16) (currentWindowIndex + 1); minIndex < WINDOW_LENGTH; ++minIndex) {
-        if (_window[minIndex] < _window[minElementPosition]) {
-            minElementPosition = minIndex;
+    l = 0;
+    m = (UINT8) (n - 1);
+    while (l < m) {
+        x = a[k];
+        i = l;
+        j = m;
+        do {
+            while (a[i] < x) {
+                i++;
+            }
+            while (x < a[j]) {
+                j--;
+            }
+            if (i <= j) {
+                SWAP(a[i], a[j]);
+                i++;
+                j--;
+            }
+        } while (i <= j);
+        if (j < k) {
+            l = i;
+        }
+        if (k < i) {
+            m = j;
         }
     }
-    return minElementPosition;
+    return a[k];
 }
 
-static void Median_putMinimum(UINT16 currentWindowIndex, UINT16 minElementPosition) {
-    UINT16 tmp = _window[currentWindowIndex];
-    _window[currentWindowIndex] = _window[minElementPosition];
-    _window[minElementPosition] = tmp;
+void Median_Create(MedianBuffer* medianBuffer) {
+    // Init default values
+    medianBuffer->status = MEDIAN_BUFFER_EMPTY;
+    medianBuffer->readIndex = 0;
+    medianBuffer->writeIndex = 0;
+    medianBuffer->size = MEDIAN_BUFFER_SIZE;
+    memset(medianBuffer->contents, 0, MEDIAN_BUFFER_SIZE);
+    memset(medianBuffer->exportContents, 0, MEDIAN_BUFFER_SIZE);
 }
 
-void Median_Destroy(void) {
+void Median_Add(MedianBuffer* medianBuffer, UINT16 element) {
+    medianBuffer->status &= (UINT8) ~MEDIAN_BUFFER_EMPTY;
+    if (Median_IsFull(medianBuffer)) {
+        Median_OnBufferFull(medianBuffer);
+        return;
+    }
+    medianBuffer->contents[medianBuffer->writeIndex] = element;
+    medianBuffer->writeIndex = (UINT8) ((medianBuffer->writeIndex + 1) % medianBuffer->size);
+    if (medianBuffer->writeIndex == medianBuffer->readIndex) {
+        medianBuffer->status |= MEDIAN_BUFFER_FULL;
+
+        Median_OnBufferFull(medianBuffer);
+    }
 }
 
+UINT16 Median_Get(MedianBuffer* medianBuffer) {
+    UINT16 tmp;
+    medianBuffer->status &= (UINT8) ~MEDIAN_BUFFER_FULL;
+    if (medianBuffer->status & MEDIAN_BUFFER_EMPTY) {
+        return 0;
+    }
 
+    tmp = medianBuffer->contents[medianBuffer->readIndex];
+    medianBuffer->readIndex = (UINT8) ((medianBuffer->readIndex + 1) % medianBuffer->size);
+
+    if (medianBuffer->writeIndex == medianBuffer->readIndex) {
+        medianBuffer->status |= MEDIAN_BUFFER_EMPTY;
+    }
+    return tmp;
+}
+
+BOOL Median_IsFull(MedianBuffer* medianBuffer) {
+    return medianBuffer->status & MEDIAN_BUFFER_FULL;
+}
+
+BOOL Median_IsEmpty(MedianBuffer* medianBuffer) {
+    return medianBuffer->status & MEDIAN_BUFFER_EMPTY;
+}
+
+void Median_OnBufferFull(MedianBuffer* medianBuffer) {
+}
+
+UINT16 Median_Calculate(MedianBuffer* medianBuffer) {
+    // Find the median of the buffer elements, the k-th smallest element problem
+    return kth_smallest(medianBuffer->contents, MEDIAN_BUFFER_SIZE, MEDIAN_INDEX);
+}
+
+void Median_ReadIndexOffsetAdjust(MedianBuffer* buffer) {
+    buffer->readIndex = (UINT8) ((buffer->readIndex + 1) % buffer->size);
+}
+
+void Median_BufferExport(MedianBuffer *buffer) {
+    UINT8 counter = 0;
+    while (Median_IsEmpty(buffer) != MEDIAN_BUFFER_EMPTY) {
+        buffer->exportContents[counter] = Median_Get(buffer);
+#ifdef _DEBUG_
+        printf("%u \n", buffer->exportContents[counter]);
+#endif
+        counter++;
+    }
+#ifdef _DEBUG_
+    printf("----");
+#endif
+}
