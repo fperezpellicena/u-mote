@@ -20,7 +20,16 @@
 #include "digi_serial.h"
 #include "digi_interrupt.h"
 
+static void XBee_interruptInit(void);
+
 void XBee_init(void) {
     XBeeSerial_init(EUSART_9600);
-    XBeeInterrupt_install();
+    XBee_interruptInit();
+}
+
+static void XBee_interruptInit(void) {
+    TRISBbits.TRISB0 = 1;
+    INTCON2bits.INTEDG0 = 1;
+    INTCONbits.INT0IF = 0;
+    INTCONbits.INT0IE = 1;
 }

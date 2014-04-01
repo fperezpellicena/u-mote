@@ -82,6 +82,18 @@ void Rtc_readTimestamp(void) {
     RtccReadTimeDate(&timestamp);
 }
 
+/* Read RTC datetime and return current */
+void Rtc_readCurrentTimestamp(rtccTimeDate* current) {
+    Rtc_readTimestamp();
+    current->f.hour = timestamp.f.hour;
+    current->f.min = timestamp.f.min;
+    current->f.sec = timestamp.f.sec;
+    current->f.year = timestamp.f.year;
+    current->f.mon = timestamp.f.mon;
+    current->f.mday = timestamp.f.mday;
+    current->f.wday = timestamp.f.wday;
+}
+
 /*..........................................................................*/
 
 /* Set Rtc data from parameter */
@@ -112,16 +124,20 @@ void Rtc_writeFormattedTimestamp(Payload* output) {
 /*..........................................................................*/
 
 /* Read Rtc data into a list */
-void Rtc_addTimeToPayload(Payload* payload) {
+void Rtc_addCurrentTimeToPayload(Payload* payload) {
     Rtc_readTimestamp();
-    Payload_putByte(payload, timestamp.f.sec);
-    Payload_putByte(payload, timestamp.f.min);
-    Payload_putByte(payload, timestamp.f.hour);
-    Payload_putByte(payload, timestamp.f.mday);
-    Payload_putByte(payload, timestamp.f.wday);
-    Payload_putByte(payload, timestamp.f.mon);
-    Payload_putByte(payload, timestamp.f.year);
+    Rtc_addTimeToPayload(payload, &timestamp);
 }
+
+void Rtc_addTimeToPayload(Payload* payload, rtccTimeDate* timestamp) {
+    Payload_putByte(payload, timestamp->f.sec);
+    Payload_putByte(payload, timestamp->f.min);
+    Payload_putByte(payload, timestamp->f.hour);
+    Payload_putByte(payload, timestamp->f.mday);
+    Payload_putByte(payload, timestamp->f.mon);
+    Payload_putByte(payload, timestamp->f.year);
+}
+
 
 /**
  * Recupera la fecha/hora del buffer USB y la establece en el sistema.

@@ -19,17 +19,17 @@
  #include "nmea_output.h"
 #include <string.h>
 
-void NMEAOutput_resetPacket(NMEAOutputPacket * const packet) {
+void NMEAOutput_resetPacket(NMEAOutputPacket * packet) {
     packet->chkCalculated = 0;
-    packet->chkRead = 0;
-    packet->rxState = NMEA_PREAMBLE;
+    packet->rxState = NMEA_PACKET_PREAMBLE;
     packet->length = 0;
+    packet->chkRead[2] = '\0';  // Set null-end string
     memset(packet->data, 0, NMEA_OUTPUT_MAX_LENGTH);
 }
 
 /*..........................................................................*/
-void NMEACommand_createSetOutput(NMEACommandPacket* packet,
-	NMEAOutputConfig* config) {
+void NMEACommand_createOutputConfig(NMEACommandPacket* packet,
+	NMEACommandConfig* config) {
     // Prepare data
     UINT8 data[] = {NMEA_COMMA_CHAR,
 	config->nmeaGLL, NMEA_COMMA_CHAR, config->nmeaRMC, NMEA_COMMA_CHAR, config->nmeaVTG, NMEA_COMMA_CHAR,
@@ -41,7 +41,5 @@ void NMEACommand_createSetOutput(NMEACommandPacket* packet,
 	config->nmeaMDBG, NMEA_COMMA_CHAR, config->nmeaZDA, NMEA_COMMA_CHAR, config->nmeaMCHN};
     // Create command
     NMEACommand_create(packet, (UINT8 rom*)NMEA_SET_OUTPUT,
-	    data, NMEA_OUTPUT_CFG_LENGTH);
+	    data, NMEA_COMMAND_CFG_LENGTH);
 }
-
-void NMEAOutput_readRMC(NMEAOutputPacket* output, NMEAOutputRMC* rmc) {}

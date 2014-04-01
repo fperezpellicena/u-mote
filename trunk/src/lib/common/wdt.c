@@ -22,6 +22,10 @@ void Wdt_enable(void) {
     WDTCONbits.SWDTEN = 1;
 }
 
+void Wdt_clear(void) {
+    ClrWdt();
+}
+
 void Wdt_disable(void) {
     ClrWdt();
     WDTCONbits.SWDTEN = 0;

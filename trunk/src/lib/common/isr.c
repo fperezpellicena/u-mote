@@ -18,6 +18,7 @@
 #include "isr.h"
 
 #include "bsp.h"
+#include "hw_serial.h"
 #if USB_ENABLED
 #    include "usb_config.h"
 #    include "usb_device.h"

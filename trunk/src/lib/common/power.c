@@ -191,6 +191,9 @@ void Power_idleRcMode(void) {
  * If the Timer1 oscillator is enabled, it will also continue to run.
  */
 void Power_sleep(void) {
+    RCONbits.IPEN = 1;
+    INTCONbits.GIEH = 1; /* Enable interrupts*/
+    INTCONbits.GIEL = 1; /* Enable interrupts*/
     WDTCONbits.REGSLP = 1;
     UCONbits.SUSPND = 1;
     OSCCONbits.IDLEN = 0;

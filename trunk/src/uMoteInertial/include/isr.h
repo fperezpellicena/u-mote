@@ -15,36 +15,9 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef adxl_h
-#define adxl_h
+#ifndef isr_h
+#define isr_h
 
-#include <float.h>
-#include "bsp.h"
-
-/*...........................................................................*/
-/* Adxl class */
-typedef struct Adxl Adxl;
-
-struct Adxl {
-    UINT8 id;
-};
-
-#define DECLARE_ADXL(id, name) Adxl name = {id}
-
-typedef struct Acceleration Acceleration;
-
-struct Acceleration {
-    UINT8 x;
-    UINT8 y;
-};
-
-/** Init resources */
-void Adxl_init(void);
-
-/** Start conversion and read x axis acceleration */
-UINT16 Adxl_accelerationX(void) ;
-
-/** Start conversion and read y axis acceleration */
-UINT16 Adxl_accelerationY(void);
+void ISR_handle(void);
 
 #endif

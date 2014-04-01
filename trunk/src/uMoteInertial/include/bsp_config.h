@@ -48,8 +48,11 @@
 #define USART2_TX_RP        5
 
 /*...........................................................................*/
-/* ADXL SECTION */
-#define ADXL_X_AXIS         1
-#define ADXL_Y_AXIS         2
+/* FILTER SECTION */
+#define FILTER_SIGNAL_LENGTH           61
+#define MEDIAN_FILTER_WINDOW_LENGTH    13
+#define FIR_FILTER_ORDER               35
+
+//#define _DEBUG_
 
 #endif

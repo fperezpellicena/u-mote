@@ -21,10 +21,10 @@
 #include <p18cxxx.h>
 #include "bsp_constants.h"
 
-#define SLEEP_MODE      DEEP_SLEEP
+#define SLEEP_MODE      AWAKE
 
 /*...........................................................................*/
-#define USB_ENABLED         0
+#define USB_ENABLED         1
 #define RTCC_ENABLED        1
 #define ADC_INT_ENABLED     0
 
@@ -41,6 +41,11 @@
 /* ADC SECTION */
 #define AVERAGE_FACTOR	    16
 #define DIV_AVERAGE	    4
+
+/*...........................................................................*/
+/* USART2 SECTION */
+#define USART2_RX_RP        2
+#define USART2_TX_RP        5
 
 
 #endif

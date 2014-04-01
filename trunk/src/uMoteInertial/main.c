@@ -19,14 +19,11 @@
 /* Includes */
 #include "bsp_inertial.h"
 #include "isr.h"
-#include "hw_serial.h"
 
 #if USB_ENABLED
-#   include "usb_device.h"
-#   include "usb_handler.h"
+#include "usb_device.h"
+#include "usb_handler.h"
 #endif
-
-UINT8 data;
 
 /*...........................................................................*/
 /* Main */
@@ -50,11 +47,6 @@ void main(void) {
 #endif
         }
 #endif
-        BSP_sleep();
-        InterruptHandler_handleActiveInterrupt();
-//        if(PIR3bits.RC2IF) {
-//            data = RCREG2;
-//            //Serial_init(12);
-//        }
+        BSP_mainProcess();
     }
 }

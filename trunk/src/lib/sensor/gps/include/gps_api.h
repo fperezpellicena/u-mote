@@ -15,19 +15,17 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef gps_interrupt_h
-#define gps_interrupt_h
+#ifndef gps_api_h
+#define gps_api_h
 
-#include "gps.h"
+#include "bsp.h"
+#include "nmea_output.h"
+#include "gps_location.h"
 
-void GpsInterrupt_install(void);
+void Gps_setOutputConfig(void);
 
-void GpsInterrupt_handleTopHalve(void);
+BOOL Gps_packetReceived(NMEAOutputPacket* packet);
 
-void GpsInterrupt_handleBottomHalve(void);
-
-void GpsInterrupt_check(void);
-
-Location* GpsInterrupt_location(void);
+void Gps_processPacket(NMEAOutputPacket* packet, Location* lastValidLocation);
 
 #endif

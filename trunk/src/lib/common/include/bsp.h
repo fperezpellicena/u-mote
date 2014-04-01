@@ -32,11 +32,23 @@
 
 /*...........................................................................*/
 /* OSCILLATOR */
-#define IRCF_1MHZ       4
+#define IRCF_8MHZ       7
 #define SCS_INTRC       3
 
+
 /*...........................................................................*/
-/* INTERRUPT */
+/* INTERRUPT FLAGS */
+#define SERIAL_INT    PIR3bits.RC2IF
+#define SERIAL_OVF_CHECK() \
+            if (RCSTA2bits.OERR) {   \
+                RCSTA2bits.CREN = 0; \
+                RCSTA2bits.CREN = 1; \
+            }
+#define TIMER0_INT          INTCONbits.TMR0IF
+#define TIMER0_CLEAR_INT()  INTCONbits.TMR0IF = 0;
+
+/*...........................................................................*/
+/* DEEP SLEEP WAKE UP SOURCES */
 #define ON_MCLR         RCONbits.TO && !RCONbits.PD
 #define ON_DS_MCLR      WDTCONbits.DS && DSWAKELbits.DSMCLR
 #define ON_DS_WDT       WDTCONbits.DS && DSWAKELbits.DSWDT
@@ -48,29 +60,16 @@
 #define XBEE_OPTIONS                0x00
 
 // Defines based on previous selection
-#define XBEE_ON_SLEEP_FLAG	    INTCONbits.INT0IF
-#define XBEE_ON_SLEEP_PIN	    TRISBbits.TRISB0 = 1
-#define XBEE_ON_SLEEP_INT	    INTCONbits.INT0IE = 1
-#define XBEE_ON_SLEEP_EDGE	    INTCON2bits.INTEDG0 = 1
-#define XBEE_ON_SLEEP_CLEAR_FLAG    XBEE_ON_SLEEP_FLAG = 0
+#define XBEE_ON_SLEEP_FLAG          INTCONbits.INT0IF
+#define XBEE_ON_SLEEP_CLEAR_FLAG()  XBEE_ON_SLEEP_FLAG = 0
 #define XBEE_ON_DS_AWAKE	    WDTCONbits.DS && DSWAKEHbits.DSINT0
-
-#define XBEE_INTERRUPT_CONFIG() \
-    XBEE_ON_SLEEP_PIN; \
-    XBEE_ON_SLEEP_EDGE; \
-    XBEE_ON_SLEEP_CLEAR_FLAG; \
-    XBEE_ON_SLEEP_INT
 
 /*...........................................................................*/
 /* USB SECTION */
 
 #if USB_ENABLED
-#ifdef USB_PLUG_PIN
 #define USB_PLUGGED          USB_PLUG_POR == 1
 #define ENABLE_USB_ATTACH    USB_PLUG_TRI = 1
-#else
-#error "USB_PLUG_PIN not defined"
-#endif
 #endif
 
 #ifdef __18F46J50_H
@@ -130,6 +129,7 @@ void BSP_initIO(void);
 /* Sleep modes */
 void BSP_deepSleep(void);
 void BSP_sleep(void);
+void BSP_initInterrupts(void);
 /* Awake flag control */
 void BSP_clearMclrFlags(void);
 void BSP_clearDSWakeUpFlags(void);    // TODO Refactor function name

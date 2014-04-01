@@ -20,7 +20,7 @@
 
 static unsigned char interruptSFR;
 
-void enterCritical(void) {
+void CriticalSection_enter(void) {
     interruptSFR = INTCON;
     while (INTCONbits.GIEH || INTCONbits.GIEL){
         INTCONbits.GIEH = 0;
@@ -28,6 +28,6 @@ void enterCritical(void) {
     }
 }
 
-void exitCritical(void) {
+void CriticalSection_exit(void) {
     INTCON = interruptSFR;
 }

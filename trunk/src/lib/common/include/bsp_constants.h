@@ -26,8 +26,8 @@
 
 /*..........................................................................*/
 /* Sleep mode */
-#define SLEEP           1
-#define DEEP_SLEEP      2
+#define AWAKE           0
+#define DEEP_SLEEP      1
 
 /*..........................................................................*/
 /* IO PIN STATUS */
@@ -49,6 +49,8 @@
 /*..........................................................................*/
 /* UART SECTION */
 // 1Mhz clock source, brgh = 1, brg16 = 1, sync = 0
-#define EUSART_9600            25	// FIXME Depends on Fosc
+//#define EUSART_9600            25	// FIXME Depends on Fosc
+// 8Mhz clock source, brgh = 1, brg16 = 1, sync = 0
+#define EUSART_9600            207	// FIXME Depends on Fosc
 
 #endif

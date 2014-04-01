@@ -30,4 +30,8 @@ BOOL Timer0_checkInterrupt(void);
 
 void Timer0_ackInterrupt(void);
 
+void Timer0_enableInterrupt(void);
+
+void Timer0_disableInterrupt(void);
+
 #endif

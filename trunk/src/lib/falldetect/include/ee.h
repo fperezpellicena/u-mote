@@ -15,43 +15,46 @@
  *  along with uMote.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef median_h
-#define median_h
+#ifndef ee_h
+#define ee_h
 
 #include "GenericTypeDefs.h"
 
-#define MEDIAN_BUFFER_SIZE		13	// Window size
-#define MEDIAN_INDEX			6
+#define EE_BUFFER_SIZE		36
+//#define EE_MAXTHRESHOLD         0x00268000
+#define EE_MAXTHRESHOLD         0x01
 
-#define MEDIAN_BUFFER_EMPTY		1
-#define MEDIAN_BUFFER_FULL		2
+#define EE_BUFFER_EMPTY		1
+#define EE_BUFFER_FULL		2
+
+#define EE_FALL                 0xFD
+#define EE_NO_FALL              0xEF
 
 /** Median ring buffer struct */
 typedef struct {
-	UINT16 contents[MEDIAN_BUFFER_SIZE];
-	UINT16 exportContents[MEDIAN_BUFFER_SIZE];
+	INT16 input[EE_BUFFER_SIZE];
+	INT16 tmp[EE_BUFFER_SIZE];
 	UINT8 readIndex;
 	UINT8 writeIndex;
+	UINT8 writeIndexHistory;
 	UINT8 size;			// Buffer length, not the current size
 	UINT8 status;
-} MedianBuffer;
+} EEBuffer;
 
-void Median_Create(MedianBuffer* medianBuffer);
+void EE_Create(EEBuffer* eeBuffer);
 
-void Median_Add(MedianBuffer* medianBuffer, UINT16 element);
+void EE_Add(EEBuffer* eeBuffer, INT16 element);
 
-UINT16 Median_Get(MedianBuffer* medianBuffer);
+INT16 EE_Get(EEBuffer* eeBuffer);
 
-BOOL Median_IsFull(MedianBuffer* medianBuffer);
+BOOL EE_IsFull(EEBuffer* eeBuffer);
 
-BOOL Median_IsEmpty(MedianBuffer* medianBuffer);
+BOOL EE_IsEmpty(EEBuffer* eeBuffer);
 
-void Median_OnBufferFull(MedianBuffer* medianBuffer);
+UINT32 EE_Calculate(EEBuffer* eeBuffer);
 
-UINT16 Median_Calculate(MedianBuffer* medianBuffer);
+void EE_ReadIndexOffsetAdjust(EEBuffer* buffer);
 
-void Median_ReadIndexOffsetAdjust(MedianBuffer* buffer);
+void EE_BufferExport(EEBuffer *buffer);
 
-void Median_BufferExport(MedianBuffer *buffer);
-
-#endif  /* D_FakeMedian_H */
+#endif 

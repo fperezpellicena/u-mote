@@ -91,9 +91,9 @@
 
 /*...........................................................................*/
 // NMEA output config PMTK314
-typedef struct NMEAOutputConfig NMEAOutputConfig;
+typedef struct NMEACommandConfig NMEACommandConfig;
 
-struct NMEAOutputConfig {
+struct NMEACommandConfig {
     /* GPGLL interval - Geographic Position - Latitude longitude */
     UINT8 nmeaGLL;
     /* GPRMC interval - Recomended Minimum Specific GNSS Sentence */
@@ -124,17 +124,17 @@ struct NMEAOutputConfig {
     UINT8 nmeaMCHN;
 };
 
-#define NMEA_OUTPUT_CFG_LENGTH         38                  /* Config length */
+#define NMEA_COMMAND_CFG_LENGTH         38                  /* Config length */
 // Supported freqcuency setting
-#define NMEA_OUTPUT_DISABLED            '0'
-#define NMEA_OUTPUT_EVERY_ONE_POS_FIX   '1'
-#define NMEA_OUTPUT_EVERY_TWO_POS_FIX   '2'
-#define NMEA_OUTPUT_EVERY_THREE_POS_FIX '3'
-#define NMEA_OUTPUT_EVERY_FOUR_POS_FIX  '4'
-#define NMEA_OUTPUT_EVERY_FIVE_POS_FIX  '5'
+#define NMEA_COMMAND_CFG_DISABLED               '0'
+#define NMEA_COMMAND_CFG_EVERY_ONE_POS_FIX      '1'
+#define NMEA_COMMAND_CFG_EVERY_TWO_POS_FIX      '2'
+#define NMEA_COMMAND_CFG_EVERY_THREE_POS_FIX    '3'
+#define NMEA_COMMAND_CFG_EVERY_FOUR_POS_FIX     '4'
+#define NMEA_COMMAND_CFG_EVERY_FIVE_POS_FIX     '5'
 
 
-void NMEAOutputConfig_create(NMEAOutputConfig* config, UINT8 nmeaGLL,
+void NMEACommandConfig_create(NMEACommandConfig* config, UINT8 nmeaGLL,
 	UINT8 nmeaRMC, UINT8 nmeaVTG, UINT8 nmeaGGA,
 	UINT8 nmeaGSA, UINT8 nmeaGSV, UINT8 nmeaGRS,
 	UINT8 nmeaGST, UINT8 nmeaMALM, UINT8 nmeaMEPH,
@@ -167,6 +167,7 @@ struct NMEACommandPacket {
 };
 
 /*..........................................................................*/
+
 void NMEACommand_create(NMEACommandPacket * packet,
 	UINT8 rom* command, UINT8* data, UINT8 length);
 
@@ -194,8 +195,8 @@ void NMEACommand_createSetDgpsModeFrame(NMEACommandPacket* packet,
 void NMEACommand_createSetSbasFrame(NMEACommandPacket* packet,
 	BOOL enabled);
 
-void NMEACommand_createSetOutput(NMEACommandPacket* packet,
-	NMEAOutputConfig* config);
+void NMEACommand_createOutputConfig(NMEACommandPacket* packet,
+	NMEACommandConfig* config);
 
 void NMEACommand_createSetDatum(NMEACommandPacket* packet,
 	UINT8 rom* datum);

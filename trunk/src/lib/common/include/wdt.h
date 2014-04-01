@@ -21,6 +21,8 @@
  #include "GenericTypeDefs.h"
  
  void Wdt_enable(void);
+
+ void Wdt_clear(void);
  
  void Wdt_disable(void);
  

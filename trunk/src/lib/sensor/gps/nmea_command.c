@@ -60,7 +60,7 @@ void NMEACommand_create(NMEACommandPacket* packet,
 }
 
 /*..........................................................................*/
-void NMEAOutputConfig_create(NMEAOutputConfig* config, UINT8 nmeaGLL,
+void NMEACommandConfig_create(NMEACommandConfig* config, UINT8 nmeaGLL,
 	UINT8 nmeaRMC, UINT8 nmeaVTG, UINT8 nmeaGGA,UINT8 nmeaGSA, UINT8 nmeaGSV,
 	UINT8 nmeaGRS, UINT8 nmeaGST, UINT8 nmeaMALM, UINT8 nmeaMEPH,
 	UINT8 nmeaMDGP, UINT8 nmeaMDBG, UINT8 nmeaZDA, UINT8 nmeaMCHN) {

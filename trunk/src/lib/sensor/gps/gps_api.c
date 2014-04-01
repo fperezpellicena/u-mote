@@ -16,6 +16,17 @@
  */
 
 #include "gps.h"
+#include "gps_packet.h"
+#include "gps_api.h"
+#include "nmea_output.h"
+#include "nmea_command.h"
 
-void Gps_readLocation(Location* location, NMEAOutputRMC* rmc) {
+/** Default output frame: Enable RMC output, all other disabled */
+static NMEACommandConfig defaultNMEAOutput
+        = {'0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0'};
+
+void Gps_setOutputConfig(void) {
+    NMEACommandPacket commandPacket;
+    NMEACommand_createOutputConfig(&commandPacket, &defaultNMEAOutput);
+    Gps_sendPacket(&commandPacket);
 }

@@ -39,23 +39,23 @@ void BSP_init(void) {
     BPS_initOSC();
     // Default all pins to digital
     BSP_initIO();
-    // Disable interrupts
+    // Clear interrupts
     BSP_clearInterrupts();
-#if SLEEP_MODE == SLEEP
-    // Init interrupt vectors
-    InterruptHandler_initVectors();
-#endif
-#if USB_ENABLED
-    BSP_enablePLL();
-    ENABLE_USB_ATTACH;
-    // Initializes USB module SFRs and firmware variables to known states
-    USBDeviceInit();
-#endif
+//#if SLEEP_MODE == SLEEP
+//    // Init interrupt vectors
+//    InterruptHandler_initVectors();
+//#endif
+//#if USB_ENABLED
+//    BSP_enablePLL();
+//    ENABLE_USB_ATTACH;
+//    // Initializes USB module SFRs and firmware variables to known states
+//    USBDeviceInit();
+//#endif
 }
 
 void BPS_initOSC(void) {
     // INTOSC drives clock directly
-    OSCCONbits.IRCF = IRCF_1MHZ;
+    OSCCONbits.IRCF = IRCF_8MHZ;
     // INTRC/INTOSC derived
     OSCCONbits.SCS = SCS_INTRC;
 }

@@ -18,8 +18,8 @@
 #ifndef critical_h
 #define critical_h
 
-void enterCritical(void);
+void CriticalSection_enter(void);
 
-void exitCritical(void);
+void CriticalSection_exit(void);
 
 #endif	/* critical_h */

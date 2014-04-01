@@ -48,12 +48,12 @@ void main(void) {
                 // Si ya se ha activado, realiza las tareas USB
                 USB_process();
             }
-#ifdef __18F46J50_H
-                USB_blinkStatus();
-#endif
+    #ifdef __18F46J50_H
+                    USB_blinkStatus();
+    #endif
         } else {
 #if SLEEP_MODE == DEEP_SLEEP
-            if (XBEE_ON_SLEEP_AWAKE) {
+            if (XBEE_ON_DS_AWAKE) {
                 BSP_onWakeUp();
             } else if (ON_DS_MCLR) {
                 BSP_onMclr();
@@ -65,14 +65,8 @@ void main(void) {
                 USBDeviceDetach();
             }
             BSP_deepSleep();
-#elif SLEEP_MODE == SLEEP
-            // Si no está conectado el terminal USB, entra en modo de bajo consumo
-            if ((USBGetDeviceState() == ATTACHED_STATE)) {
-                USBDeviceDetach();
-            }
-            BSP_sleep();
-            InterruptHandler_handleActiveInterrupt();
-
+#else
+            BSP_onPowerUp();
 #endif
         }
 #else
@@ -87,14 +81,6 @@ void main(void) {
             BSP_onPowerUp();
         }
         BSP_deepSleep();
-#elif SLEEP_MODE == SLEEP
-        // Si no está conectado el terminal USB, entra en modo de bajo consumo
-        if ((USBGetDeviceState() == ATTACHED_STATE)) {
-            USBDeviceDetach();
-        }
-        BSP_deepSleep();
-        InterruptHandler_handleActiveInterrupt();
-
 #endif
 #endif
     }

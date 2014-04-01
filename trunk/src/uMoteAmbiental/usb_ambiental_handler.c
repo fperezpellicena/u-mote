@@ -82,6 +82,7 @@ void USB_process(void) {
             Payload_putString(&usbInputBuffer, (UINT8*) "Join request sent");
         } else if (strncmp((char*)usbOutputBuffer.data, ADC_TEST, strlen(ADC_TEST)) == 0) {
            // TODO
+            Payload_putString(&usbInputBuffer, (UINT8*) "Adc test received");
         } else if (strncmp((char*)usbOutputBuffer.data, SHT, strlen(SHT)) == 0) {
 #if SHT_ENABLED
             Sht11_measure(&sht);

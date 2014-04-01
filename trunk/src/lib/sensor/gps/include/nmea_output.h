@@ -40,7 +40,8 @@
  * RMC - Recommended Minimum Specific GNSS Data.
  * Time, date, position, course and speed data.
  * Example:
- *  $GPRMC,114353.000,A,6016.3245,$GPGGA,114353.000,6016.3245,N,02458.3270,E,1,10,0.81,35.2,M,19.5,M,,*50N,02458.3270,E,0.01,0.00,121009,,,A*69
+ *  $GPRMC,114353.000,A,6016.3245,$GPGGA,114353.000,6016.3245,N,02458.3270,E,1,
+ *          10,0.81,35.2,M,19.5,M,,*50N,02458.3270,E,0.01,0.00,121009,,,A*69
  * Format:
  *  $GPRMC,hhmmss.dd,S,xxmm.dddd,<N|S>,yyymm.dddd,<E|W>,s.s,h.h,ddmmyy,d.d,
  *  <E|W>,M*hh<CR><LF>
@@ -74,38 +75,26 @@
 //  sequence and can be no longer than 80 characters of visible text
 //  (plus the line terminators).
 #define NMEA_OUTPUT_MAX_LENGTH      100           /* Max NMEA message length */
-#define NMEA_COORDINATES_LENGTH	    9	          /* NMEA coordinates length */
 
 /*...........................................................................*/
 typedef struct NMEAOutputPacket NMEAOutputPacket;
 
 struct NMEAOutputPacket {
     UINT8 data[NMEA_OUTPUT_MAX_LENGTH]; /* Content */
+    UINT8 lastByte; /* Last received byte index */
     UINT8 length; /* Content length */
     UINT8 rxState; /* Read status */
-    UINT8 chkRead; /* Checksum */
+    UINT8 chkRead[3]; /* Checksum */
     UINT8 chkCalculated; /* Checksum */
 };
 
 /*...........................................................................*/
 enum NMEAReadStatus {
-    NMEA_PACKET_PREAMBLE, NMEA_PACKET_DATA, NMEA_PACKET_CRC_1,
-    NMEA_PACKET_CRC_2, NMEA_PACKET_OK, NMEA_PACKET_ERROR
+    NMEA_PACKET_PREAMBLE = 0, NMEA_PACKET_DATA, NMEA_PACKET_CRC_1,
+    NMEA_PACKET_CRC_2, NMEA_PACKET_CR, NMEA_PACKET_LF, NMEA_PACKET_OK,
+    NMEA_PACKET_ERROR
 };
 
-/*...........................................................................*/
-typedef struct NMEAOutputRMC NMEAOutputRMC;
-
-struct NMEAOutputRMC {
-    UINT8 longitudeCoordinate[NMEA_COORDINATES_LENGTH];
-    UINT8 longitude;
-    UINT8 latitudeCoordinate[NMEA_COORDINATES_LENGTH];
-    UINT8 latitude;
-    BOOL valid;
-};
-
-void NMEAOutput_resetPacket(NMEAOutputPacket * const packet);
-
-void NMEAOutput_readRMC(NMEAOutputPacket* output, NMEAOutputRMC* rmc);
+void NMEAOutput_resetPacket(NMEAOutputPacket * packet);
 
 #endif	/* gps_output_api_h */
