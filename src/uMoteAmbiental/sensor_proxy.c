@@ -63,7 +63,6 @@ static void SensorProxy_fuzzy(void) {
 /*..........................................................................*/
 void SensorProxy_init(void) {
     SENSOR_BOARD_CTRL_INIT();
-    Payload_init(&payload);
     Sht11_init();
     IrcA1Proxy_init();
     SensorProxy_composeSensorIdentifiers();
@@ -76,6 +75,7 @@ void SensorProxy_init(void) {
 
 /* Turns on sensor board, sense every sensor installed and turns off */
 void SensorProxy_sense(void) {
+    Payload_init(&payload);
     // Turn on sensor board
     SENSOR_BOARD_ON();
     // Sense installed sensors

@@ -21,10 +21,10 @@
 #include <p18cxxx.h>
 #include "bsp_constants.h"
 
-#define SLEEP_MODE      AWAKE
+#define SLEEP_MODE      DEEP_SLEEP
 
 /*...........................................................................*/
-#define USB_ENABLED         1
+#define USB_ENABLED         0
 #define RTCC_ENABLED        1
 #define ADC_INT_ENABLED     0
 

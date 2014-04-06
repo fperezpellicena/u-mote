@@ -46,12 +46,12 @@ void XBeeInterrupt_handleBottomHalve(void) {
     // Prepara la nueva trama
     Payload_init(&payload);
     // Read datetime and put into buffer
-    Rtc_addCurrentTimeToPayload(&payload);
+//    Rtc_addCurrentTimeToPayload(&payload);
     // Put sensor ids
-    SensorProxy_addSensorIdentifiersToPayload(&payload);
-    // Sense installed sensors
+//    SensorProxy_addSensorIdentifiersToPayload(&payload);
+//    // Sense installed sensors
     SensorProxy_sense();
-    // Put sensor payload into buffer
+//    // Put sensor payload into buffer
     SensorProxy_addMeasuresToPayload(&payload);
     // Send prepared request (hay que prepararla antes para optimizar
     // el tiempo que está despierto el sistema)
